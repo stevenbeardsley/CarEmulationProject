@@ -1,19 +1,21 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Window
     x:Class="SimulationPlatform.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:SimulationPlatform"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Title="SimulationPlatform">
+    Title="Simulation Platform">
 
-    <Window.SystemBackdrop>
-        <MicaBackdrop />
-    </Window.SystemBackdrop>
+    <NavigationView x:Name="NavView"
+                    PaneDisplayMode="Left"
+                    IsSettingsVisible="True"
+                    SelectionChanged="NavView_SelectionChanged">
 
-    <Grid>
+        <NavigationView.MenuItems>
+            <NavigationViewItem Content="Deploy" Icon="Upload" Tag="DeployPage"/>
+            <NavigationViewItem Content="Track"  Icon="Map"    Tag="TrackPage"/>
+            <NavigationViewItem Content="Logging" Icon="Document" Tag="LoggingPage"/>
+        </NavigationView.MenuItems>
 
-    </Grid>
+        <Frame x:Name="ContentFrame"/>
+    </NavigationView>
 </Window>

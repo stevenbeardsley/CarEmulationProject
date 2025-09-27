@@ -1,0 +1,13 @@
+<Page
+    x:Class="SimulationPlatform.Pages.DeployPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:SimulationPlatform.Pages">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <TextBlock Text="Deploy Page"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   FontSize="32"/>
+    </Grid>
+</Page>
