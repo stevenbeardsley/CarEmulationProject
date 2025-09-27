@@ -1,0 +1,91 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+# =========================
+# WinUI 3 / C# .NET Project
+# =========================
+
+# Build output
+bin/
+obj/
+[Bb]uild/
+[Bb]uildOutput/
+[Bb]uildArtifacts/
+out/
+artifacts/
+
+# Visual Studio / JetBrains Rider
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Generated files from XAML compiler
+*.g.cs
+*.g.i.cs
+*.g.vb
+*.g.h
+*.i.cs
+
+# NuGet
+*.nupkg
+*.snupkg
+*.nuspec
+project.lock.json
+project.assets.json
+packages/
+*.nuget.props
+*.nuget.targets
+
+# Publish output
+*.publish/
+publish/
+
+# Logs
+*.log
+*.tlog
+
+# Cache
+*.cache
+*.db
+*.db-shm
+*.db-wal
+
+# Backup/Temp
+*.tmp
+*.bak
+*.swp
+*.orig
+*.rej
+
+# OS-specific
+[Dd]esktop.ini
+[Tt]humbs.db
+ehthumbs.db
+*.DS_Store
+
+# Visual Studio Code
+.vscode/
+.history/
+*.code-workspace
+
+# Resharper
+_ReSharper*/
+*.DotSettings.user
+
+# Other IDE artifacts
+*.aps
+*.opendb
+*.VC.db
+*.VC.opendb
+
+# Rider
+.idea/
+
+# Misc
+*.pidb
+*.svclog
+*.scc
+/SimulationPlatform/SimulationPlatform/Properties
