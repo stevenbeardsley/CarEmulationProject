@@ -3,7 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:SimulationPlatform"
-    Title="Simulation Platform">
+    Title="Vehicle Simulation Platform">
 
     <NavigationView x:Name="NavView"
                     PaneDisplayMode="Left"
@@ -12,7 +12,7 @@
 
         <NavigationView.MenuItems>
             <NavigationViewItem Content="Deploy" Icon="Upload" Tag="DeployPage"/>
-            <NavigationViewItem Content="Track"  Icon="Map"    Tag="TrackPage"/>
+            <NavigationViewItem Content="Track"  Icon="Map" Tag="TrackPage"/>
             <NavigationViewItem Content="Logging" Icon="Document" Tag="LoggingPage"/>
         </NavigationView.MenuItems>
 
