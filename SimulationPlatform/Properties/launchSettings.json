@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SimulationPlatform (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "SimulationPlatform (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
