@@ -1,6 +1,5 @@
 #include <iostream>
-
 int main() {
-    std::cout << "TransmissionMain running!" << std::endl;
+    std::cout << "Hello from inside Docker!" << std::endl;
     return 0;
 }

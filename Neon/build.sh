@@ -34,6 +34,6 @@ fi
 
 # Build the target
 echo ">>> Running build..."
-cmake --build . --target "$TARGET_NAME" --config "$BUILD_TYPE" -j$(nproc)
+cmake --build . --target "EngineSim" --config "$BUILD_TYPE" -j$(nproc)
 
 echo ">>> Build complete for target '$TARGET_NAME'"

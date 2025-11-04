@@ -20,7 +20,7 @@
 		</StackPanel>
 
 		<StackPanel Grid.Row="1" Margin="10,0,0,0">
-			<Button Content="Deploy"/>
+			<Button Content="Deploy" Click="DeployButton_Click"/>
 		</StackPanel>
 	</Grid>
 </Page>
