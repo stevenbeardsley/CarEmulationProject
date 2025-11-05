@@ -4,17 +4,17 @@ set -e
 # 🔹 Detect OS
 OS_TYPE="$(uname)"
 if [[ "$OS_TYPE" == "Linux" ]]; then
-    EXEC_NAME="EngineSim"         # Linux executable
+    EXEC_NAME="DashboardSim"         # Linux executable
 else
-    EXEC_NAME="EngineSim.exe"     # Windows executable
+    EXEC_NAME="DashboardSim.exe"     # Windows executable
 fi
 
 # 🔹 Configuration
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_DIR="$PROJECT_ROOT/build"
-ECM_DIR="$PROJECT_ROOT/ecm"
-IMAGE_NAME="enginesim:latest"
-CONTAINER_NAME="enginesim_container"
+ECM_DIR="$PROJECT_ROOT/dashboard"
+IMAGE_NAME="dashboardsim:latest"
+CONTAINER_NAME="dashboard"
 
 echo "🔧 Building project..."
 

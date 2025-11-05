@@ -10,7 +10,7 @@ BUILD_TYPE="Release"
 
 # --- Arguments ---
 if [ $# -lt 1 ]; then
-    echo "Usage: $0 EngineSim [build_type]"
+    echo "Usage: $0 DashboardSim [build_type]"
     exit 1
 fi
 
@@ -34,6 +34,6 @@ fi
 
 # Build the target
 echo ">>> Running build..."
-cmake --build . --target "EngineSim" --config "$BUILD_TYPE" -j$(nproc)
+cmake --build . --target "DashboardSim" --config "$BUILD_TYPE" -j$(nproc)
 
 echo ">>> Build complete for target '$TARGET_NAME'"
