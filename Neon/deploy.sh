@@ -48,7 +48,11 @@ docker build -t "$IMAGE_NAME" "$PROJECT_ROOT"
 
 # 🔹 Run Docker container
 echo "🚀 Starting container: $CONTAINER_NAME"
-docker run -d --name "$CONTAINER_NAME" "$IMAGE_NAME"
+docker run -d \
+  -p 8080:8080 \
+  --name "$CONTAINER_NAME" \
+  -e LOG_LEVEL=info \
+  "$IMAGE_NAME"
 
 echo "✅ Done!"
 echo "➡️ To run interactively:"

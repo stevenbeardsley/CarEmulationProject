@@ -15,7 +15,7 @@ namespace SimulationPlatform.Controllers
 
         public async Task<(int ExitCode, string Output, string Error)> Deploy(string scriptPath)
         {
-            string arguments = $"-d {_distroName} bash -c \"{scriptPath}\"";
+            var arguments = $"-d {_distroName} bash -c \"{scriptPath}\"";
 
             var psi = new ProcessStartInfo
             {

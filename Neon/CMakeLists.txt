@@ -3,6 +3,11 @@ project(NeonProject)
 
 set(CMAKE_CXX_STANDARD 17)
 
+
+# Make Boost available for subdirectories
+find_package(Boost 1.75 REQUIRED COMPONENTS system json)
+
+
 # Add subdirectories for the executables
 add_subdirectory(ecm)          # Engine executable
 add_subdirectory(tcm)    # Transmission executable

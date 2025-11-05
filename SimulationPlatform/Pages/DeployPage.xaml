@@ -22,5 +22,32 @@
 		<StackPanel Grid.Row="1" Margin="10,0,0,0">
 			<Button Content="Deploy" Click="DeployButton_Click"/>
 		</StackPanel>
-	</Grid>
+        <StackPanel Spacing="10">
+            <TextBlock Text="WebSocket Status Monitor" FontSize="20" FontWeight="Bold"/>
+
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <TextBlock Text="Connection:" Width="100"/>
+                <TextBlock x:Name="ConnectionStatus" Text="Disconnected" Foreground="Red"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <TextBlock Text="Status:" Width="100"/>
+                <TextBlock x:Name="StatusText" Text="-" FontWeight="SemiBold"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <TextBlock Text="PID:" Width="100"/>
+                <TextBlock x:Name="PidText" Text="-" FontWeight="SemiBold"/>
+            </StackPanel>
+
+            <Button Content="Connect"
+                    Width="100"
+                    Click="ConnectButton_Click"
+                    Margin="0,20,0,0"/>
+
+            <ScrollViewer Height="100">
+                <TextBlock x:Name="LogOutput" TextWrapping="Wrap"/>
+            </ScrollViewer>
+        </StackPanel>
+    </Grid>
 </Page>
