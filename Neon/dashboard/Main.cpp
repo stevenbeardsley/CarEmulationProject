@@ -11,6 +11,9 @@ namespace websocket = beast::websocket;
 namespace net = boost::asio;
 using tcp = net::ip::tcp;
 
+
+// Task: Split up the datasource into a string parser and create another 
+// thread for networking
 // DashboardDataSource just stores a string
 class DashboardDataSource {
 public:

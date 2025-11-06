@@ -1,59 +1,125 @@
 #!/bin/bash
 set -e
 
-# 🔹 Detect OS
+# ==============================
+# 🚀 Multi-Target Build & Docker Runner
+# ==============================
+
+# --- Detect OS ---
 OS_TYPE="$(uname)"
 if [[ "$OS_TYPE" == "Linux" ]]; then
-    EXEC_NAME="DashboardSim"         # Linux executable
+    EXEC_EXT=""
 else
-    EXEC_NAME="DashboardSim.exe"     # Windows executable
+    EXEC_EXT=".exe"
 fi
 
-# 🔹 Configuration
+# --- Configuration ---
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_DIR="$PROJECT_ROOT/build"
-ECM_DIR="$PROJECT_ROOT/dashboard"
-IMAGE_NAME="dashboardsim:latest"
-CONTAINER_NAME="dashboard"
+CPU_CORES=$(nproc 2>/dev/null || echo 4)
 
-echo "🔧 Building project..."
+# ==============================
+# 🔧 Target Configuration
+# ==============================
 
-# Clean previous build
+# --- Executable names (built output names) ---
+EXEC_NAMES=(
+    "DashboardSim"
+    "Ecm"
+    "Tcm"
+)
+
+# --- Dockerfile names (relative to project root) ---
+DOCKERFILES=(
+    "Dockerfile.dashboard"
+    "Dockerfile.ecm"
+    "Dockerfile.tcm"
+)
+
+# --- Docker image names ---
+IMAGE_NAMES=(
+    "dashboardsim:latest"
+    "ecmsim:latest"
+    "tcmsim:latest"
+)
+
+# --- Validate list lengths ---
+if [[ ${#EXEC_NAMES[@]} -ne ${#DOCKERFILES[@]} || ${#EXEC_NAMES[@]} -ne ${#IMAGE_NAMES[@]} ]]; then
+    echo "❌ Error: EXEC_NAMES, DOCKERFILES, and IMAGE_NAMES must have the same length."
+    exit 1
+fi
+
+# ==============================
+# 🏗️  Build Section
+# ==============================
+
+echo "🔧 Cleaning previous build..."
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
 
-# Run cmake + make
+echo "🏗️  Running CMake and Make..."
 cmake -G "Unix Makefiles" ..
-CPU_CORES=$(nproc 2>/dev/null || echo 4)
 make -j"$CPU_CORES"
 
 cd "$PROJECT_ROOT"
 
-# 🔹 Locate executable
-EXEC_PATH=$(find "$BUILD_DIR" "$ECM_DIR" -type f -name "$EXEC_NAME" 2>/dev/null | head -n 1)
-if [ -z "$EXEC_PATH" ]; then
-    echo "❌ Executable not found!"
-    echo "Checked: $BUILD_DIR and $ECM_DIR"
-    exit 1
-fi
-echo "✅ Found executable: $EXEC_PATH"
+# ==============================
+# 🐋 Docker Build Section
+# ==============================
 
-# 🔹 Copy executable to project root for Docker build
-cp "$EXEC_PATH" "$PROJECT_ROOT/$EXEC_NAME"
+for i in "${!EXEC_NAMES[@]}"; do
+    EXEC_NAME="${EXEC_NAMES[$i]}"
+    DOCKERFILE="${DOCKERFILES[$i]}"
+    IMAGE_NAME="${IMAGE_NAMES[$i]}"
+    CONTAINER_NAME="${EXEC_NAME,,}"
 
-# 🔹 Build Docker image
-echo "🐋 Building Docker image: $IMAGE_NAME"
-docker build -t "$IMAGE_NAME" "$PROJECT_ROOT"
+    echo ""
+    echo "=============================="
+    echo "⚙️  Building target: $EXEC_NAME"
+    echo "=============================="
 
-# 🔹 Run Docker container
-echo "🚀 Starting container: $CONTAINER_NAME"
-docker run -d \
-  -p 8080:8080 \
-  --name "$CONTAINER_NAME" \
-  -e LOG_LEVEL=info \
-  "$IMAGE_NAME"
+    EXEC_PATH=$(find "$BUILD_DIR" -type f -name "${EXEC_NAME}${EXEC_EXT}" 2>/dev/null | head -n 1)
+    if [ -z "$EXEC_PATH" ]; then
+        echo "❌ Executable not found for $EXEC_NAME"
+        continue
+    fi
 
-echo "✅ Done!"
-echo "➡️ To run interactively:"
-echo "   docker exec -it $CONTAINER_NAME /app/$EXEC_NAME"
+    echo "✅ Found executable: $EXEC_PATH"
+    cp "$EXEC_PATH" "$PROJECT_ROOT/${EXEC_NAME}${EXEC_EXT}"
+
+    DOCKERFILE_PATH="$PROJECT_ROOT/$DOCKERFILE"
+    if [ ! -f "$DOCKERFILE_PATH" ]; then
+        echo "❌ Dockerfile not found: $DOCKERFILE_PATH"
+        continue
+    fi
+
+    echo "🐋 Building Docker image: $IMAGE_NAME (using $DOCKERFILE_PATH)"
+    docker build -t "$IMAGE_NAME" -f "$DOCKERFILE_PATH" "$PROJECT_ROOT"
+
+    # 🧹 Remove old container if it exists
+    if docker ps -a --format '{{.Names}}' | grep -Eq "^${CONTAINER_NAME}\$"; then
+        echo "🧹 Removing existing container: $CONTAINER_NAME"
+        docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
+    fi
+
+    # 🚀 Conditional port exposure
+    if [[ "${EXEC_NAME,,}" == "dashboardsim" ]]; then
+        echo "🌐 Exposing ports for $EXEC_NAME"
+        docker run -d \
+            -p 8080:8080 \
+            --name "$CONTAINER_NAME" \
+            -e LOG_LEVEL=info \
+            "$IMAGE_NAME"
+        echo "➡️  Running at: http://localhost:8080"
+    else
+        echo "🚀 Starting container without port exposure: $CONTAINER_NAME"
+        docker run -d \
+            --name "$CONTAINER_NAME" \
+            -e LOG_LEVEL=info \
+            "$IMAGE_NAME"
+    fi
+
+    echo "✅ Done for $EXEC_NAME"
+    echo "➡️  To run interactively: docker exec -it $CONTAINER_NAME /app/${EXEC_NAME}${EXEC_EXT}"
+done

@@ -1,2 +1,2 @@
-add_executable(TransmissionSim Main.cpp)
+add_executable(Tcm Main.cpp)
 

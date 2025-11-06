@@ -1,8 +1,6 @@
-add_executable(EngineSim
+add_executable(Ecm
 	Main.cpp)
 
-
-
 target_include_directories(
-    EngineSim
+    Ecm
     PRIVATE ${Boost_INCLUDE_DIRS})

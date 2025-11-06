@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-docker rm -f enginesim_container
-docker rm -f dashboard
-
+docker rm -f dashboardsim
+docker rm -f ecmsim
+docker rm -f tcmsim
 

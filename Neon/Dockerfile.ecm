@@ -1,0 +1,6 @@
+# Use a newer Ubuntu image
+FROM ubuntu:24.04
+
+WORKDIR /app
+COPY /ecm/Ecm /app/
+CMD ["./Ecm"]
