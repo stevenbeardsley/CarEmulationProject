@@ -88,3 +88,5 @@ _ReSharper*/
 *.pidb
 *.svclog
 *.scc
+/Neon/build-linux
+/Neon/build-windows

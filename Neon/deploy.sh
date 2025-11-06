@@ -24,7 +24,7 @@ CPU_CORES=$(nproc 2>/dev/null || echo 4)
 
 # --- Executable names (built output names) ---
 EXEC_NAMES=(
-    "DashboardSim"
+    "Dashboard"
     "Ecm"
     "Tcm"
 )
@@ -104,7 +104,7 @@ for i in "${!EXEC_NAMES[@]}"; do
     fi
 
     # 🚀 Conditional port exposure
-    if [[ "${EXEC_NAME,,}" == "dashboardsim" ]]; then
+    if [[ "${EXEC_NAME,,}" == "dashboard" ]]; then
         echo "🌐 Exposing ports for $EXEC_NAME"
         docker run -d \
             -p 8080:8080 \
