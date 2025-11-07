@@ -11,7 +11,8 @@ add_executable(Dashboard
     ${dashboard_HEADERS}
 )
 
-target_link_libraries(Dashboard
+target_link_libraries(
+    Dashboard
     PRIVATE
         Boost::system
         Boost::json

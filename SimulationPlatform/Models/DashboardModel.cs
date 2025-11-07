@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SimulationPlatform.Models;
 internal class DashboardModel
 {
-    public string m_status { get;set; } = string.Empty;
-    public int m_pid { get; set; }
+    public string m_speed { get;set; } = string.Empty;
+    public string m_status { get; set; } = string.Empty;
     public DateTime m_timestamp { get; set; } = DateTime.UtcNow;
 
 }

@@ -49,12 +49,12 @@ namespace SimulationPlatform.Services
                     var json = JObject.Parse(message);
                     _latestStatus = new DashboardModel
                     {
-                        m_status = json["status"]?.ToString() ?? "unknown",
-                        m_pid = (int?)json["pid"] ?? -1,
+                        m_speed = json["speed"]?.ToString() ?? "0",
+                        m_status = json["status"]?.ToString() ?? "disconnected",
                         m_timestamp = DateTime.UtcNow
                     };
 
-                    Console.WriteLine($"Updated status: {_latestStatus.m_status}, PID: {_latestStatus.m_pid}");
+                    Console.WriteLine($"Updated status: {_latestStatus.m_status}, status: {_latestStatus.m_status}");
                 }
                 catch (Exception ex)
                 {

@@ -11,6 +11,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Microsoft.UI.Xaml.Shapes;
+using SimulationPlatform.Controllers;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
@@ -26,6 +27,10 @@ namespace SimulationPlatform;
 public partial class App : Application
 {
     private Window? _window;
+    public static WebSocketController m_webSocketController
+    {
+        get; private set;
+    }
 
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
@@ -34,6 +39,7 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
+        m_webSocketController = new();
     }
 
     /// <summary>

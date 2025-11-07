@@ -1,18 +1,24 @@
+#ifndef DASHBOARD_DATA_SOURCE_H
+#define DASHBOARD_DATA_SOURCE_H
+
 #include <string>
 #include <mutex>
+
 namespace dashboard
 {
-
 class DashboardDataSource
 {
 public:
-    void updateData(const std::string& newData);
-    std::string getData() const;
-    std::string toJson(int speed, bool status);
+    DashboardDataSource() : m_speed(0), m_status(false) {}
+
+    void updateData(int speed, bool status);
+    std::string getData() const;  // Returns JSON
 
 private:
     mutable std::mutex mutex_;
-    std::string m_data;
+    int m_speed;
+    bool m_status;
 };
-
 }
+
+#endif

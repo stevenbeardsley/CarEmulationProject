@@ -50,8 +50,8 @@ namespace SimulationPlatform.Pages
         {
             _ = DispatcherQueue.TryEnqueue(() =>
             {
-                StatusText.Text = msg.Status;
-                PidText.Text = msg.Pid.ToString();
+                StatusText.Text = msg.m_speed;
+                PidText.Text = msg.m_status.ToString();
             });
         }
         private async void ConnectButton_Click(object sender, RoutedEventArgs e)
