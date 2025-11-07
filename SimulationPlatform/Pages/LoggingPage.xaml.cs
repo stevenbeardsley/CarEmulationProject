@@ -1,66 +1,83 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Transactions;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 using SimulationPlatform.Controllers;
 using SimulationPlatform.Models;
 
 namespace SimulationPlatform.Pages
 {
-    public sealed partial class LoggingPage : Page
+    public sealed partial class LoggingPage : Page, INotifyPropertyChanged
     {
-        private readonly WebSocketController _controller = new();
+        private string m_speed = string.Empty;
+        private string m_status = string.Empty;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public LoggingPage()
         {
             this.InitializeComponent();
-            // Set a simple title in the TextBlock defined in XAML
-            _controller.Connected += OnConnected;
-            _controller.Disconnected += OnDisconnected;
-            _controller.LogMessage += OnLogMessage;
-            _controller.StatusReceived += OnStatusReceived;
+            DataContext = App.m_model;
+            // TODO: Bind the updates, so this page updates dynamically 
         }
 
-        private void OnConnected()
+        // Property for Speed
+        public string Speed
         {
-            _ = DispatcherQueue.TryEnqueue(() =>
+            get => m_speed;
+            set
             {
-                ConnectionStatus.Text = "Connected";
-                ConnectionStatus.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Green);
-            });
+                if (m_speed != value)
+                {
+                    m_speed = value;
+                    OnPropertyChanged(nameof(Speed));
+                }
+            }
         }
 
-        private void OnDisconnected()
+        // Property for Status
+        public string Status
         {
-            _ = DispatcherQueue.TryEnqueue(() =>
+            get => m_status;
+            set
             {
-                ConnectionStatus.Text = "Disconnected";
-                ConnectionStatus.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Red);
-            });
+                if (m_status != value)
+                {
+                    m_status = value;
+                    OnPropertyChanged(nameof(Status));
+                }
+            }
         }
 
-        private void OnLogMessage(string msg)
+        private void OnPropertyChanged(string propertyName)
         {
-            _ = DispatcherQueue.TryEnqueue(() =>
-            {
-                LogOutput.Text += $"{DateTime.Now:HH:mm:ss} - {msg}\n";
-            });
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private void OnStatusReceived(DashboardMessage msg)
+        private void UpdateCarData(CarData carData)
         {
-            _ = DispatcherQueue.TryEnqueue(() =>
-            {
-                StatusText.Text = msg.m_speed;
-                PidText.Text = msg.m_status.ToString();
-            });
+            Speed = carData.Speed;
+            Status = carData.Status;
+            OnPropertyChanged(nameof(Speed));
+            OnPropertyChanged(nameof(Status));
+
         }
-        private async void ConnectButton_Click(object sender, RoutedEventArgs e)
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            await _controller.ConnectAsync("ws://localhost:8080");
+            // Example: Pull data from model
+            Speed = App.m_model.m_carData.Speed;
+            Status = App.m_model.m_carData.Status;
+            App.m_model.m_webSocketController.CarDataReceived += UpdateCarData;
         }
-        private async void DisconnectButton_Click(object sender, RoutedEventArgs e)
+
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            await _controller.DisconnectAsync();
+            // Unsubscribe from model changes (if you add them later)
+            App.m_model.m_webSocketController.CarDataReceived -= UpdateCarData;
         }
     }
 }

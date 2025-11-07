@@ -1,31 +1,38 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace SimulationPlatform.Models
 {
-public class DashboardMessage
-{
-    public string m_speed { get; set; } = "-";
-    public string m_status { get; set; } = "-";
-
-    public static DashboardMessage? FromJson(string json)
+    public class DashboardMessage
     {
-        try
+        [JsonPropertyName("speed")]
+        public string? Speed
         {
-            var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-
-            return new DashboardMessage
-            {
-                m_speed = root.TryGetProperty("speed", out var s) ? s.GetString() ?? "-" : "-",
-                m_status = root.TryGetProperty("status", out var _) ? s.GetString() ?? "-" : "-",
-            };
+            get; set;
         }
-        catch
+
+        [JsonPropertyName("status")]
+        public string? Status
         {
-            return null;
+            get; set;
+        }
+
+        public static DashboardMessage? FromJson(string json)
+        {
+            try
+            {
+                return JsonSerializer.Deserialize<DashboardMessage>(json);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public CarData ToCarData()
+        {
+            // TODO: Impplement 
+            return new CarData(Speed ?? "-", Status ?? "-");
         }
     }
-
-    public override string ToString() => $"Speed: {m_speed}, Status: {m_status}";
-}
 }

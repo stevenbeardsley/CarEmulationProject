@@ -15,11 +15,11 @@ namespace SimulationPlatform.Controllers
         public event Action? Connected;
         public event Action? Disconnected;
         public event Action<string>? LogMessage;
-        public event Action<DashboardMessage>? StatusReceived;
+        public event Action<CarData>? CarDataReceived;
 
         public async Task ConnectAsync(string url = "ws://localhost:8080")
         {
-            if (_ws != null && _ws.State == WebSocketState.Open)
+            if (_ws?.State == WebSocketState.Open)
             {
                 LogMessage?.Invoke("Already connected.");
                 return;
@@ -35,7 +35,7 @@ namespace SimulationPlatform.Controllers
                 Connected?.Invoke();
                 LogMessage?.Invoke("✅ Connected to WebSocket server.");
 
-                _ = Task.Run(() => ReceiveLoopAsync(_cts.Token)); // start background receive
+                _ = Task.Run(() => ReceiveLoopAsync(_cts.Token));
             }
             catch (Exception ex)
             {
@@ -53,6 +53,7 @@ namespace SimulationPlatform.Controllers
                 while (_ws != null && _ws.State == WebSocketState.Open && !token.IsCancellationRequested)
                 {
                     var result = await _ws.ReceiveAsync(buffer, token);
+
                     if (result.MessageType == WebSocketMessageType.Close)
                     {
                         await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", token);
@@ -62,13 +63,19 @@ namespace SimulationPlatform.Controllers
                     }
 
                     string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    LogMessage?.Invoke($"📩 {message}");
+                    LogMessage?.Invoke($"📩 Received: {message}");
 
-                    var parsed = DashboardMessage.FromJson(message);
-                    if (parsed != null)
-                        StatusReceived?.Invoke(parsed);
+                    var msg = DashboardMessage.FromJson(message);
+                    if (msg != null)
+                    {
+                        // TODO should really set the model car data here 
+                        var carData = msg.ToCarData();
+                        CarDataReceived?.Invoke(carData);
+                    }
                     else
+                    {
                         LogMessage?.Invoke("⚠️ Invalid JSON received.");
+                    }
                 }
             }
             catch (Exception ex)

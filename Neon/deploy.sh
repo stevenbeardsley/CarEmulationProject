@@ -122,4 +122,5 @@ for i in "${!EXEC_NAMES[@]}"; do
 
     echo "✅ Done for $EXEC_NAME"
     echo "➡️  To run interactively: docker exec -it $CONTAINER_NAME /app/${EXEC_NAME}${EXEC_EXT}"
+exit 0
 done

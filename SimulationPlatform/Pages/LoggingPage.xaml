@@ -18,32 +18,44 @@
 					   FontSize="14"
 					   Foreground="DarkGray"/>
 		</StackPanel>
-		<StackPanel  Grid.Row="1" Spacing="10">
-			<TextBlock Text="WebSocket Status Monitor" FontSize="20" FontWeight="Bold"/>
+        
+        <StackPanel  Grid.Row="1" Spacing="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition></ColumnDefinition>
+                    <ColumnDefinition></ColumnDefinition>
+                    <ColumnDefinition></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                </Grid.RowDefinitions>
+                <TextBlock 
+                    Text="Car data"
+                    FontWeight="Bold"
+                    Grid.Column="0"
+                    Grid.Row="0"/>
+                <TextBlock
+                    Text="Speed"
+                    Grid.Row="1"
+                    Grid.Column="0"/>
+                <TextBlock 
+                    Text="{x:Bind Speed, Mode=OneWay}"
+                    Grid.Row="1"
+                    Grid.Column="2"/>
+                <TextBlock
+                    Text="Status"
+                    Grid.Row="2"
+                    Grid.Column="0"/>
+                <TextBlock 
+                    Text="{x:Bind Status, Mode=OneWay}"
+                    Grid.Row="2"
+                    Grid.Column="2"/>
 
-			<StackPanel Orientation="Horizontal" Spacing="10">
-				<TextBlock Text="Connection:" Width="100"/>
-				<TextBlock x:Name="ConnectionStatus" Text="Disconnected" Foreground="Red"/>
-			</StackPanel>
-
-			<StackPanel Orientation="Horizontal" Spacing="10">
-				<TextBlock Text="Status:" Width="100"/>
-				<TextBlock x:Name="StatusText" Text="-" FontWeight="SemiBold"/>
-			</StackPanel>
-
-			<StackPanel Orientation="Horizontal" Spacing="10">
-				<TextBlock Text="PID:" Width="100"/>
-				<TextBlock x:Name="PidText" Text="-" FontWeight="SemiBold"/>
-			</StackPanel>
-
-			<Button Content="Connect"
-                    Width="100"
-                    Click="ConnectButton_Click"
-                    Margin="0,20,0,0"/>
-
-			<ScrollViewer Height="100">
-				<TextBlock x:Name="LogOutput" TextWrapping="Wrap"/>
-			</ScrollViewer>
+            </Grid>
 		</StackPanel>
     </Grid>
 </Page>

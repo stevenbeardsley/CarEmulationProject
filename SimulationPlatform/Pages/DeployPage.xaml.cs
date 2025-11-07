@@ -1,5 +1,4 @@
-﻿using System.Collections.Specialized;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
@@ -9,18 +8,36 @@ namespace SimulationPlatform.Pages
 {
     public sealed partial class DeployPage : Page, INotifyPropertyChanged
     {
-        private readonly DeploymentController m_deploymentController = new("Ubuntu");
+        private readonly DeploymentController m_deploymentController = new("Ubuntu"); // TODO: Move to the model?
 
-        private bool m_connected = false;
-
+        private readonly AppModel m_model; // reference to the base model
+    
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public Visibility ConnectedVisibility => m_connected ? Visibility.Visible : Visibility.Collapsed;
-        
+        public Visibility ConnectedVisibility = Visibility.Collapsed;
+        public Visibility DeployingVisibility = Visibility.Collapsed;
+        public Visibility DeployErrorVisibility = Visibility.Collapsed;
         public DeployPage()
         {
-            this.InitializeComponent();
-            this.DataContext = this;
+            InitializeComponent();
+            m_model = App.m_model; // Classes are ref type, so this is a ref 
+            DataContext = m_model;
+            m_model.Connected += OnConnected;
+            m_model.Disconnected += OnDisconnected;
+        }
+
+        private void OnConnected()
+        {
+            DeployingVisibility = Visibility.Collapsed;
+            OnPropertyChanged(nameof(DeployingVisibility));
+            ConnectedVisibility = Visibility.Visible;
+            OnPropertyChanged(nameof(ConnectedVisibility));
+        }
+
+        private void OnDisconnected()
+        {
+            ConnectedVisibility = Visibility.Collapsed;
+            OnPropertyChanged(nameof(ConnectedVisibility));
         }
 
         private void OnPropertyChanged(string propertyName = null)
@@ -30,50 +47,37 @@ namespace SimulationPlatform.Pages
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            App.m_webSocketController.Connected += OnConnected;
-            App.m_webSocketController.Disconnected += onDisconnected;
-
+            // Subscribe to message changes 
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            App.m_webSocketController.Connected -= OnConnected;
-            App.m_webSocketController.Disconnected -= onDisconnected;
+                // TODO 
         }
-
 
         private async void DeployButton_Click(object sender, RoutedEventArgs e)
         {
             var scriptPath = "/mnt/c/Users/swbea/source/repos/CarEmulationProject/Neon/deploy.sh";  // adjust path
-            var test = await m_deploymentController.Deploy(scriptPath);
-            // Try and connect 
-            await App.m_webSocketController.ConnectAsync("ws://localhost:8080");
-            // TOOO, show loaded?
+            DeployingVisibility = Visibility.Visible;
+            OnPropertyChanged(nameof(DeployingVisibility));
+            var output = await m_deploymentController.Deploy(scriptPath);
 
-        }
-        private void OnConnected()
-        {
-            _ = DispatcherQueue.TryEnqueue(() =>
+            // TODO - Try and just connect if deployment fails 
+            
+            if (output.ExitCode == 0)
             {
-                // Disable deploy button 
-                m_connected = true;
-                OnPropertyChanged(nameof(ConnectedVisibility));
-                // Print connected and status is deployed 
-
-            });
-        }
-
-        private void onDisconnected()
-        {
-            _ = DispatcherQueue.TryEnqueue(() =>
+                // Try and connect 
+                await m_model.m_webSocketController.ConnectAsync("ws://localhost:8080");
+            }
+            else
             {
-                // Disable deploy button 
-
-                // Print connected and status is deployed 
-
-            });
+                // Failed to deploy, output error message 
+                DeployErrorVisibility = Visibility.Visible;
+                OnPropertyChanged(nameof(DeployErrorVisibility));
+            }
         }
+   
 
 
-    }
+}
 }

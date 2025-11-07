@@ -9,7 +9,7 @@
 			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="Auto"/>
 		</Grid.RowDefinitions>
-		<StackPanel Grid.Row="0" Margin="10,0,0,0">
+		<StackPanel Grid.Row="0" Margin="20,0,0,0">
 			<TextBlock Text="Deploy Page"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
@@ -19,10 +19,15 @@
 					   Foreground="DarkGray"/>
 		</StackPanel>
 
-		<StackPanel Grid.Row="1" Margin="10,0,0,0">
+		<StackPanel Grid.Row="1" Margin="20,50,0,0">
 			<Button Content="Deploy" Click="DeployButton_Click"/>
+            <TextBlock Text="Deploying..." FontSize="14" 
+                       Foreground="Orange" 
+                       Visibility="{x:Bind DeployingVisibility, Mode=OneWay}"/>
             <TextBlock Text="Connected!" FontSize="14" Foreground="Green" 
                        Visibility="{x:Bind ConnectedVisibility, Mode=OneWay}"/>
+            <TextBlock Text="Deployment failed" FontSize="14" Foreground="IndianRed"  
+                       Visibility="{x:Bind DeployErrorVisibility, Mode=OneWay}"/>
         </StackPanel>
     </Grid>
 </Page>
