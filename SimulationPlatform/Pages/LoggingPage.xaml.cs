@@ -6,6 +6,8 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using SimulationPlatform.Controllers;
 using SimulationPlatform.Models;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Dispatching;
 
 namespace SimulationPlatform.Pages
 {
@@ -58,11 +60,13 @@ namespace SimulationPlatform.Pages
 
         private void UpdateCarData(CarData carData)
         {
-            Speed = carData.Speed;
-            Status = carData.Status;
-            OnPropertyChanged(nameof(Speed));
-            OnPropertyChanged(nameof(Status));
-
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                Speed = carData.Speed;
+                Status = carData.Status;
+                OnPropertyChanged(nameof(Speed));
+                OnPropertyChanged(nameof(Status));
+            });
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
