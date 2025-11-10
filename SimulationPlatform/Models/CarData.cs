@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SimulationPlatform.Models
+﻿namespace SimulationPlatform.Models
 {
     public class CarData
     {

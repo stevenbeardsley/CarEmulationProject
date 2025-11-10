@@ -1,12 +1,7 @@
-﻿using System;
-using System.ComponentModel;
-using System.Transactions;
-using Microsoft.UI.Xaml;
+﻿using System.ComponentModel;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
-using SimulationPlatform.Controllers;
 using SimulationPlatform.Models;
-using Microsoft.UI.Dispatching;
 using Microsoft.UI.Dispatching;
 
 namespace SimulationPlatform.Pages
