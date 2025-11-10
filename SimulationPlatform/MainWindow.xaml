@@ -7,8 +7,9 @@
 
     <NavigationView x:Name="NavView"
                     PaneDisplayMode="Left"
-                    IsSettingsVisible="True"
-                    SelectionChanged="NavView_SelectionChanged">
+                    IsSettingsVisible="False"
+                    SelectionChanged="NavView_SelectionChanged"
+                    IsBackButtonVisible="Collapsed">
 
         <NavigationView.MenuItems>
             <NavigationViewItem Content="Deploy" Icon="Upload" Tag="DeployPage"/>

@@ -14,16 +14,16 @@
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    FontSize="32"/>
-			<TextBlock Text="See what is being sent from NEON."
+			<TextBlock Text="Feedback from the Networked ECU Orchestration Nodes (NEON)."
 					   FontSize="14"
 					   Foreground="DarkGray"/>
 		</StackPanel>
         
-        <StackPanel  Grid.Row="1" Spacing="10">
+        <StackPanel  Grid.Row="1" Spacing="10" Margin="10,10,0,0">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition></ColumnDefinition>
-                    <ColumnDefinition></ColumnDefinition>
+                    <ColumnDefinition Width="100"></ColumnDefinition>
+                    <ColumnDefinition Width="10"></ColumnDefinition>
                     <ColumnDefinition></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
@@ -39,7 +39,7 @@
                     Grid.Column="0"
                     Grid.Row="0"/>
                 <TextBlock
-                    Text="Speed"
+                    Text="Speed:"
                     Grid.Row="1"
                     Grid.Column="0"/>
                 <TextBlock 
@@ -47,7 +47,7 @@
                     Grid.Row="1"
                     Grid.Column="2"/>
                 <TextBlock
-                    Text="Status"
+                    Text="Status:"
                     Grid.Row="2"
                     Grid.Column="0"/>
                 <TextBlock 

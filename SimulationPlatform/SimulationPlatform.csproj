@@ -15,6 +15,7 @@
   <ItemGroup>
     <None Remove="Pages\DeployPage.xaml" />
     <None Remove="Pages\LoggingPage.xaml" />
+    <None Remove="Pages\TrackPage.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,6 +45,11 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.250916003" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="websocketsharp.core" Version="1.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Pages\TrackPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Pages\LoggingPage.xaml">

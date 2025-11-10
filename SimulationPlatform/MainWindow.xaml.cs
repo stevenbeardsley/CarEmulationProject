@@ -30,9 +30,9 @@ namespace SimulationPlatform
                     case "LoggingPage":
                         ContentFrame.Navigate(typeof(LoggingPage));
                         break;
-                        //case "TrackPage":
-                        //    ContentFrame.Navigate(typeof(TrackPage));
-                        //    break;
+                    case "TrackPage":
+                        ContentFrame.Navigate(typeof(TrackPage));
+                        break;
                 }
             }
         }
