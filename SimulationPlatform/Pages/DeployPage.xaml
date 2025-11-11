@@ -18,6 +18,27 @@
 					   FontSize="14"
 					   Foreground="DarkGray"/>
 		</StackPanel>
+        <!-- Grid to configure the car -->
+        <StackPanel Height="400">
+            <Grid>
+                <Image Source="/Assets/carBackground.png"
+                       Margin="0,50,0,0"
+                       Stretch="Fill"
+                       Opacity="0.6"
+                       Height="400"
+                       Width="800"/>
+                <StackPanel 
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center">
+                    <ComboBox Width="150" PlaceholderText="Tyre Type" Margin="780,280,0,0">
+                        <ComboBoxItem Content="Tyre Type" />
+                        <ComboBoxItem Content="Slicks" />
+                        <ComboBoxItem Content="B" />
+                    </ComboBox>
+
+                </StackPanel>
+            </Grid>
+        </StackPanel>
 
 		<StackPanel Grid.Row="1" Margin="20,50,0,0">
 			<Button Content="Deploy" Click="DeployButton_Click"/>

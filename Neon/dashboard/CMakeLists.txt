@@ -13,6 +13,8 @@ add_executable(Dashboard
 
 target_link_libraries(
     Dashboard
+    PUBLIC 
+        LogFile
     PRIVATE
         Boost::system
         Boost::json

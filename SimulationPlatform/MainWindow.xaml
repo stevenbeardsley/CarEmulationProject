@@ -16,7 +16,26 @@
             <NavigationViewItem Content="Track"  Icon="Map" Tag="TrackPage"/>
             <NavigationViewItem Content="Logging" Icon="Document" Tag="LoggingPage"/>
         </NavigationView.MenuItems>
+        <NavigationView.PaneFooter>
+            <StackPanel Orientation="Vertical" Margin="12,8,12,12">
+                <!-- Connected status -->
+                <NavigationViewItem Content="Connected"
+                                    Icon="Link"
+                                    IsSelected="False"
+                                    Visibility="{x:Bind ConnectedVisibility, Mode=OneWay}"
+                                    Foreground="Green"/>
 
+                <!-- Disconnected status -->
+                <NavigationViewItem Content="Disconnected"
+                                    Foreground="IndianRed"
+                                    IsSelected="False"
+                                    Visibility="{x:Bind DisconnectedVisibility, Mode=OneWay}">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE774;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </StackPanel>
+        </NavigationView.PaneFooter>
         <Frame x:Name="ContentFrame"/>
     </NavigationView>
 </Window>
