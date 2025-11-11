@@ -16,7 +16,7 @@ public class AppModel : INotifyPropertyChanged
 
         public CarData m_carData; // Current car data being fed back 
         public event PropertyChangedEventHandler PropertyChanged;
-        public WebSocketController m_webSocketController = new();
+        public WebSocketController m_webSocketController = new WebSocketController(isCommandSocket: false);
 
         public AppModel()
         {

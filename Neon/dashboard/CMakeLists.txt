@@ -1,10 +1,14 @@
 find_package(Boost REQUIRED COMPONENTS system json)
 set(dashboard_HEADERS
-    DashboardDataSource.h)
+    DashboardDataSource.h
+    Process.h
+    WebSocketReceiver.h)
 
 set(dashboard_SOURCE
     Main.cpp
-    DashboardDataSource.cpp)
+    DashboardDataSource.cpp
+    Process.cpp
+    WebSocketReceiver.cpp)
 
 add_executable(Dashboard 
     ${dashboard_SOURCE}

@@ -7,17 +7,23 @@ using SimulationPlatform.Models;
 
 namespace SimulationPlatform.Controllers
 {
-    public class WebSocketController
+    public class WebSocketController : IDisposable
     {
         private ClientWebSocket? _ws;
         private CancellationTokenSource? _cts;
+        private readonly bool _isCommandSocket;
 
         public event Action? Connected;
         public event Action? Disconnected;
         public event Action<string>? LogMessage;
         public event Action<CarData>? CarDataReceived;
 
-        public async Task ConnectAsync(string url = "ws://localhost:8080")
+        public WebSocketController(bool isCommandSocket = false)
+        {
+            _isCommandSocket = isCommandSocket;
+        }
+
+        public async Task ConnectAsync(string host = "ws://localhost", int port = 8080)
         {
             if (_ws?.State == WebSocketState.Open)
             {
@@ -28,14 +34,24 @@ namespace SimulationPlatform.Controllers
             _ws = new ClientWebSocket();
             _cts = new CancellationTokenSource();
 
+            string path = _isCommandSocket ? "carCommands" : "carData";
+
+            // ✅ Fix: only append port if host doesn’t already include one
+            string baseUrl = host.Contains(":") && !host.EndsWith("localhost")
+                ? host
+                : $"{host}:{port}";
+
+            string url = $"{baseUrl}/{path}";
+
             try
             {
                 LogMessage?.Invoke($"🔌 Connecting to {url}...");
                 await _ws.ConnectAsync(new Uri(url), _cts.Token);
                 Connected?.Invoke();
-                LogMessage?.Invoke("✅ Connected to WebSocket server.");
+                LogMessage?.Invoke($"✅ Connected to {_isCommandSocket switch { true => "command", false => "data" }} socket.");
 
-                _ = Task.Run(() => ReceiveLoopAsync(_cts.Token));
+                if (!_isCommandSocket)
+                    _ = Task.Run(() => ReceiveLoopAsync(_cts.Token));
             }
             catch (Exception ex)
             {
@@ -44,9 +60,10 @@ namespace SimulationPlatform.Controllers
             }
         }
 
+
         private async Task ReceiveLoopAsync(CancellationToken token)
         {
-            var buffer = new byte[4096];
+            var buffer = new byte[8192];
 
             try
             {
@@ -56,25 +73,31 @@ namespace SimulationPlatform.Controllers
 
                     if (result.MessageType == WebSocketMessageType.Close)
                     {
-                        await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", token);
-                        Disconnected?.Invoke();
+                        await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Server closed connection", token);
                         LogMessage?.Invoke("🔒 Connection closed by server.");
+                        Disconnected?.Invoke();
                         return;
                     }
 
                     string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
                     LogMessage?.Invoke($"📩 Received: {message}");
 
-                    var msg = DashboardMessage.FromJson(message);
-                    if (msg != null)
+                    try
                     {
-                        // TODO should really set the model car data here 
-                        var carData = msg.ToCarData();
-                        CarDataReceived?.Invoke(carData);
+                        var msg = DashboardMessage.FromJson(message);
+                        if (msg != null)
+                        {
+                            var carData = msg.ToCarData();
+                            CarDataReceived?.Invoke(carData);
+                        }
+                        else
+                        {
+                            LogMessage?.Invoke("⚠️ Invalid JSON received.");
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        LogMessage?.Invoke("⚠️ Invalid JSON received.");
+                        LogMessage?.Invoke($"⚠️ JSON parse error: {ex.Message}");
                     }
                 }
             }
@@ -82,6 +105,32 @@ namespace SimulationPlatform.Controllers
             {
                 LogMessage?.Invoke($"⚠️ Receive loop ended: {ex.Message}");
                 Disconnected?.Invoke();
+            }
+        }
+
+        public async Task SendCommandAsync(string command)
+        {
+            if (!_isCommandSocket)
+            {
+                LogMessage?.Invoke("⚠️ This WebSocket is for receiving data, not sending commands.");
+                return;
+            }
+
+            if (_ws == null || _ws.State != WebSocketState.Open)
+            {
+                LogMessage?.Invoke("⚠️ Not connected to server.");
+                return;
+            }
+
+            try
+            {
+                var bytes = Encoding.UTF8.GetBytes(command);
+                await _ws.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
+                LogMessage?.Invoke($"🚀 Sent command: {command}");
+            }
+            catch (Exception ex)
+            {
+                LogMessage?.Invoke($"❌ Send failed: {ex.Message}");
             }
         }
 
@@ -101,6 +150,12 @@ namespace SimulationPlatform.Controllers
             {
                 LogMessage?.Invoke($"⚠️ Error during disconnect: {ex.Message}");
             }
+        }
+
+        public void Dispose()
+        {
+            _cts?.Cancel();
+            _ws?.Dispose();
         }
     }
 }
