@@ -156,10 +156,13 @@
 
                                     <Button Grid.Column="0"
                                             Content="Gear -"
-                                            HorizontalAlignment="Stretch"/>
+                                            HorizontalAlignment="Stretch"
+                                            Click="GearShiftDown_Click"/>
+                                    
                                     <Button Grid.Column="1"
                                             Content="Gear +"
-                                            HorizontalAlignment="Stretch"/>
+                                            HorizontalAlignment="Stretch"
+                                            Click="GearShiftUp_Click"/>
                                 </Grid>
 
                                 <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">

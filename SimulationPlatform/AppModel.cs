@@ -17,6 +17,11 @@ public class AppModel : INotifyPropertyChanged
         public CarData m_carData; // Current car data being fed back 
         public event PropertyChangedEventHandler PropertyChanged;
         public WebSocketController m_webSocketController = new WebSocketController(isCommandSocket: false);
+        public VehicleController VehicleController
+        {
+            get;
+        }
+        private readonly HttpClient m_commandSender;
 
         public AppModel()
         {
@@ -24,6 +29,9 @@ public class AppModel : INotifyPropertyChanged
             m_webSocketController.Connected += OnConnected;
             m_webSocketController.Disconnected += OnDisconnected;
             m_webSocketController.CarDataReceived += OnCarDataReceived;
+
+            m_commandSender = new HttpClient("localhost", 8081);
+            VehicleController = new VehicleController(m_commandSender);
         }
         // Standard event boilerplate
 
