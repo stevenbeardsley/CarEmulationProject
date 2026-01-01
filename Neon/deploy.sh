@@ -1,9 +1,6 @@
 #!/bin/bash
 set -e
 
-# ==============================
-# 🚀 Multi-Target Build & Docker Runner
-# ==============================
 
 # --- Detect OS ---
 OS_TYPE="$(uname)"
@@ -45,20 +42,20 @@ IMAGE_NAMES=(
 
 # --- Validate list lengths ---
 if [[ ${#EXEC_NAMES[@]} -ne ${#DOCKERFILES[@]} || ${#EXEC_NAMES[@]} -ne ${#IMAGE_NAMES[@]} ]]; then
-    echo "❌ Error: EXEC_NAMES, DOCKERFILES, and IMAGE_NAMES must have the same length."
+    echo " Error: EXEC_NAMES, DOCKERFILES, and IMAGE_NAMES must have the same length."
     exit 1
 fi
 
 # ==============================
-# 🏗️  Build Section
+#    Build Section
 # ==============================
 
-echo "🔧 Cleaning previous build..."
+echo " Cleaning previous build..."
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
 
-echo "🏗️  Running CMake and Make..."
+echo "  Running CMake and Make..."
 cmake -G "Unix Makefiles" ..
 make -j"$CPU_CORES"
 
@@ -81,31 +78,31 @@ for i in "${!EXEC_NAMES[@]}"; do
 
     EXEC_PATH=$(find "$BUILD_DIR" -type f -name "${EXEC_NAME}${EXEC_EXT}" 2>/dev/null | head -n 1)
     if [ -z "$EXEC_PATH" ]; then
-        echo "❌ Executable not found for $EXEC_NAME"
+        echo "Executable not found for $EXEC_NAME"
         continue
     fi
 
-    echo "✅ Found executable: $EXEC_PATH"
+    echo "Found executable: $EXEC_PATH"
     cp "$EXEC_PATH" "$PROJECT_ROOT/${EXEC_NAME}${EXEC_EXT}"
 
     DOCKERFILE_PATH="$PROJECT_ROOT/$DOCKERFILE"
     if [ ! -f "$DOCKERFILE_PATH" ]; then
-        echo "❌ Dockerfile not found: $DOCKERFILE_PATH"
+        echo "Dockerfile not found: $DOCKERFILE_PATH"
         continue
     fi
 
-    echo "🐋 Building Docker image: $IMAGE_NAME (using $DOCKERFILE_PATH)"
+    echo "Building Docker image: $IMAGE_NAME (using $DOCKERFILE_PATH)"
     docker build -t "$IMAGE_NAME" -f "$DOCKERFILE_PATH" "$PROJECT_ROOT"
 
-    # 🧹 Remove old container if it exists
+    # Remove old container if it exists
     if docker ps -a --format '{{.Names}}' | grep -Eq "^${CONTAINER_NAME}\$"; then
         echo "🧹 Removing existing container: $CONTAINER_NAME"
         docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
     fi
 
-    # 🚀 Conditional port exposure
+    #  Conditional port exposure
     if [[ "${EXEC_NAME,,}" == "dashboard" ]]; then
-        echo "🌐 Exposing ports for $EXEC_NAME"
+        echo "Exposing ports for $EXEC_NAME"
         docker run -d \
             -p 8080:8080 \
             --name "$CONTAINER_NAME" \
@@ -113,14 +110,15 @@ for i in "${!EXEC_NAMES[@]}"; do
             "$IMAGE_NAME"
         echo "➡️  Running at: http://localhost:8080"
     else
-        echo "🚀 Starting container without port exposure: $CONTAINER_NAME"
+        echo " Starting container without port exposure: $CONTAINER_NAME"
         docker run -d \
             --name "$CONTAINER_NAME" \
             -e LOG_LEVEL=info \
             "$IMAGE_NAME"
     fi
 
-    echo "✅ Done for $EXEC_NAME"
+    echo "Done for $EXEC_NAME"
     echo "➡️  To run interactively: docker exec -it $CONTAINER_NAME /app/${EXEC_NAME}${EXEC_EXT}"
 exit 0
+echo "Finished deploying you filthy idiot"
 done

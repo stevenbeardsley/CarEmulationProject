@@ -19,7 +19,7 @@ namespace SimulationPlatform.Pages
         public Visibility DeployErrorVisibility = Visibility.Collapsed;
         public DeployPage()
         {
-            InitializeComponent();
+            this.InitializeComponent();
             m_model = App.m_model; // Classes are ref type, so this is a ref 
             DataContext = m_model;
             m_model.Connected += OnConnected;

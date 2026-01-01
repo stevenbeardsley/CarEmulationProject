@@ -14,3 +14,4 @@ add_library(LogFile
 target_include_directories(LogFile PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
+

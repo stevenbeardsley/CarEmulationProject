@@ -5,33 +5,320 @@
     xmlns:local="using:SimulationPlatform.Pages">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Margin="20,0,0,0">
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Grid.Column="0" Margin="20,0,0,0">
             <TextBlock Text="Track Page"
-                   HorizontalAlignment="Left"
-                   VerticalAlignment="Top"
-                   FontSize="32"/>
-            <TextBlock Text="Control a vehicle on a virtual track."
-					   FontSize="14"
-					   Foreground="DarkGray"/>
-			<TextBlock
-				Text="UNDER CONSTRUCTION"
-				FontSize="18"
-				Foreground="IndianRed"/>
+                       FontSize="32"
+                       HorizontalAlignment="Left"/>
+            <TextBlock Text="Control a virtual vehicle on a simulated track."
+                       FontSize="14"
+                       Foreground="DarkGray"/>
         </StackPanel>
-		
-		<!-- Temporary inputs to test and demo the track mechanics, replace with driving images-->
-		<StackPanel Grid.Row="1" Margin="20,10,0,0">
-			<Button
-				Content="Accelerate"
-				Click="AccelerateButton_Click"/>
-		</StackPanel>
-		<!-- Dashboard stack panel, show some of the data in a nice "dashboard" format-->
-		<StackPanel>
-			<!-- TODO -->
-		</StackPanel>
-	</Grid>
+
+        <!-- Left column: track view + controls -->
+        <Grid Grid.Row="1" Grid.Column="0" Margin="20,10,20,20" MaxHeight="700">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Track / Map area -->
+            <Border Grid.Row="0"
+                    CornerRadius="12"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                    Background="{ThemeResource SystemControlBackgroundAltHighBrush}"
+                    Padding="16">
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Simple 2D road "map" placeholder -->
+                    <Grid Grid.Column="0">
+                        <Border CornerRadius="12"
+                                Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
+                                BorderThickness="1"
+                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}">
+                            <Grid>
+                                <!-- "Road" -->
+                                <Border Margin="40"
+                                        CornerRadius="18"
+                                        Background="#FF2B2B2B"/>
+
+                                <!-- Lane markers (placeholder) -->
+                                <StackPanel Orientation="Vertical"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Spacing="14">
+                                    <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
+                                    <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
+                                    <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
+                                    <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
+                                    <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
+                                </StackPanel>
+
+                                <!-- Top-down car placeholder -->
+                                <Border Width="54"
+                                        Height="90"
+                                        CornerRadius="10"
+                                        Background="#FF3A86FF"
+                                        BorderThickness="1"
+                                        BorderBrush="#AAFFFFFF"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center">
+                                    <Grid>
+                                        <Rectangle Width="10" Height="14" Fill="#DDFFFFFF"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10,0,0"
+                                                   RadiusX="2" RadiusY="2"/>
+                                        <Rectangle Width="38" Height="6" Fill="#33000000"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10"
+                                                   RadiusX="2" RadiusY="2"/>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Text="Track View"
+                                   Margin="10"
+                                   Foreground="DarkGray"
+                                   HorizontalAlignment="Left"
+                                   VerticalAlignment="Top"/>
+                    </Grid>
+
+                    <!-- Right-side controls within the track panel -->
+                    <StackPanel Grid.Column="1"
+                                Margin="16,0,0,0"
+                                Width="180"
+                                Spacing="14">
+
+                        <!-- Acceleration slider -->
+                        <Border CornerRadius="12"
+                                BorderThickness="1"
+                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                                Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
+                                Padding="12">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="Acceleration"
+                                           FontWeight="SemiBold"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0"
+                                               Text="0%"
+                                               Foreground="DarkGray"
+                                               VerticalAlignment="Bottom"
+                                               Margin="0,0,10,0"/>
+
+                                    <Slider Grid.Column="1"
+                                            Minimum="0"
+                                            Maximum="100"
+                                            Value="25"
+                                            Orientation="Vertical"
+                                            Height="220"
+                                            VerticalAlignment="Center"/>
+                                </Grid>
+                                <TextBlock Text="100%"
+                                           Foreground="DarkGray"
+                                           HorizontalAlignment="Left"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Gear controls -->
+                        <Border CornerRadius="12"
+                                BorderThickness="1"
+                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                                Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
+                                Padding="12">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="Transmission"
+                                           FontWeight="SemiBold"/>
+
+                                <Grid ColumnSpacing="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Button Grid.Column="0"
+                                            Content="Gear -"
+                                            HorizontalAlignment="Stretch"/>
+                                    <Button Grid.Column="1"
+                                            Content="Gear +"
+                                            HorizontalAlignment="Stretch"/>
+                                </Grid>
+
+                                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                    <TextBlock Text="Current:"
+                                               Foreground="DarkGray"/>
+                                    <TextBlock Text="3"
+                                               FontSize="20"
+                                               FontWeight="Bold"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Extra placeholder buttons -->
+                        <Border CornerRadius="12"
+                                BorderThickness="1"
+                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                                Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
+                                Padding="12">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="Controls"
+                                           FontWeight="SemiBold"/>
+                                <Button Content="Start / Stop"/>
+                                <Button Content="Reset Position"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Bottom hint/status bar -->
+            <Border Grid.Row="1"
+                    Margin="0,12,0,0"
+                    CornerRadius="10"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                    Background="{ThemeResource SystemControlBackgroundAltHighBrush}"
+                    Padding="12">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <TextBlock Text="Status:"
+                               Foreground="DarkGray"/>
+                    <TextBlock Text="Idle"
+                               FontWeight="SemiBold"/>
+                    <TextBlock Text="•"
+                               Foreground="DarkGray"/>
+                    <TextBlock Text="Use the slider and gear buttons (no logic yet)."
+                               Foreground="DarkGray"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Right column: dashboard -->
+        <Grid Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Margin="0,20,20,20">
+            <Border CornerRadius="12"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                    Background="{ThemeResource SystemControlBackgroundAltHighBrush}"
+                    Padding="16">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="Dashboard"
+                               FontSize="20"
+                               FontWeight="SemiBold"/>
+
+                    <Grid ColumnSpacing="12" RowSpacing="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Speed -->
+                        <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                                CornerRadius="12"
+                                Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
+                                BorderThickness="1"
+                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                                Padding="14">
+                            <StackPanel>
+                                <TextBlock Text="SPEED" Foreground="DarkGray" FontWeight="SemiBold"/>
+                                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Bottom">
+                                    <TextBlock Text="72" FontSize="56" FontWeight="Bold"/>
+                                    <TextBlock Text="mph" FontSize="22" Foreground="DarkGray" Margin="0,0,0,8"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- RPM -->
+                        <Border Grid.Row="1" Grid.Column="0"
+                                CornerRadius="12"
+                                Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
+                                BorderThickness="1"
+                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                                Padding="14">
+                            <StackPanel>
+                                <TextBlock Text="RPM" Foreground="DarkGray" FontWeight="SemiBold"/>
+                                <TextBlock Text="3,450" FontSize="34" FontWeight="Bold"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Gear -->
+                        <Border Grid.Row="1" Grid.Column="1"
+                                CornerRadius="12"
+                                Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
+                                BorderThickness="1"
+                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                                Padding="14">
+                            <StackPanel>
+                                <TextBlock Text="GEAR" Foreground="DarkGray" FontWeight="SemiBold"/>
+                                <TextBlock Text="3" FontSize="34" FontWeight="Bold"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Throttle -->
+                        <Border Grid.Row="2" Grid.Column="0"
+                                CornerRadius="12"
+                                Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
+                                BorderThickness="1"
+                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                                Padding="14">
+                            <StackPanel>
+                                <TextBlock Text="THROTTLE" Foreground="DarkGray" FontWeight="SemiBold"/>
+                                <TextBlock Text="25%" FontSize="28" FontWeight="Bold"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Temp -->
+                        <Border Grid.Row="2" Grid.Column="1"
+                                CornerRadius="12"
+                                Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
+                                BorderThickness="1"
+                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                                Padding="14">
+                            <StackPanel>
+                                <TextBlock Text="TEMP" Foreground="DarkGray" FontWeight="SemiBold"/>
+                                <TextBlock Text="92°C" FontSize="28" FontWeight="Bold"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Notes / alerts -->
+                        <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                                CornerRadius="12"
+                                Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
+                                BorderThickness="1"
+                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                                Padding="14">
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="INFO" Foreground="DarkGray" FontWeight="SemiBold"/>
+                                <TextBlock Text="All values are placeholders until you wire up bindings."
+                                           TextWrapping="Wrap"
+                                           Foreground="DarkGray"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
 </Page>
