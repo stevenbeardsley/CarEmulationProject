@@ -1,4 +1,5 @@
 find_package(Boost REQUIRED COMPONENTS system json)
+
 set(dashboard_HEADERS
     DashboardDataSource.h
     Process.h
@@ -26,3 +27,4 @@ target_link_libraries(
 
 source_group("Source Files" FILES ${dashboard_SOURCE})
 source_group("Header Files" FILES ${dashboard_HEADERS})
+set_target_properties(Dashboard PROPERTIES FOLDER "components/dashboard")
