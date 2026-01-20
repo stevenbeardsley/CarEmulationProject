@@ -16,6 +16,7 @@ namespace beast = boost::beast;
 namespace websocket = beast::websocket;
 namespace http = beast::http;
 namespace net = boost::asio;
+
 using tcp = net::ip::tcp;
 
 std::atomic<bool> running(true);
@@ -41,21 +42,25 @@ void handleCarData(websocket::stream<tcp::socket> ws, dashboard::DashboardDataSo
 
 void handleCarCommands(websocket::stream<tcp::socket> ws) {
     LogFile::Info("Client subscribed to /carCommands");
-    try {
+    try
+    {
         beast::flat_buffer buffer;
-        while (running) {
+        while (running)
+       	{
             ws.read(buffer);
             std::string message = beast::buffers_to_string(buffer.data());
             LogFile::Info("Received command: " + message);
             buffer.consume(buffer.size()); // clear buffer
         }
     }
-    catch (const std::exception& e) {
+    catch (const std::exception& e) 
+    {
         LogFile::Error("Error in /carCommands connection: " + std::string(e.what()));
     }
 }
 
-int main() {
+int main() 
+{
     try {
         // === Logging setup ===
         LogFile::Instance().setLogFile("dashboard.log");
@@ -77,10 +82,10 @@ int main() {
 
         // === Data updater thread ===
         std::thread updater([&]() {
-            int iteration = 0;
+            auto iteration = 0;
             while (running) {
-                int speed = 50 + (iteration % 10) * 10;
-                bool status = (iteration % 3 != 0);
+                auto speed = 50 + (iteration % 10) * 10;
+                auto status = (iteration % 3 != 0);
                 dataSource.updateData(speed, status);
                 LogFile::Debug("Updated data[" + std::to_string(iteration) +
                     "]: speed=" + std::to_string(speed) +
@@ -91,8 +96,10 @@ int main() {
             });
 
         // === Main WebSocket accept loop ===
-        while (running) {
-            try {
+        while (running)
+       	{
+            try
+	    {
                 tcp::socket socket(ioc);
                 acceptor.accept(socket);
 
@@ -117,7 +124,7 @@ int main() {
                     std::thread(&handleCarCommands, std::move(ws)).detach();
                 }
                 else {
-                    LogFile::Error("❌ Unknown path: " + target);
+                    LogFile::Error("Unknown path: " + target);
                     ws.close(websocket::close_code::protocol_error);
                 }
 
@@ -128,15 +135,16 @@ int main() {
         }
 
         // === Graceful shutdown ===
-        LogFile::Info("🛑 Shutting down...");
+        LogFile::Info("Shutting down dashboard.");
         updater.join();
         processThread.join();
-        LogFile::Info("✅ All threads stopped cleanly.");
+        LogFile::Info("All threads stopped cleanly.");
 
     }
     catch (const std::exception& e) {
         std::cerr << "Fatal server error: " << e.what() << std::endl;
-        return 1;
+	LogFile::Error("Fatal error, server down");
+	return 1;
     }
 
     return 0;

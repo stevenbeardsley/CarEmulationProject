@@ -2,6 +2,7 @@
 
 namespace dashboard
 {
+
 void DashboardDataSource::updateData(int speed, bool status)
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -11,7 +12,7 @@ void DashboardDataSource::updateData(int speed, bool status)
 
 std::string DashboardDataSource::getData() const
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(mutex_); // Lock the dashboard data so it does not change`
 
     std::string jsonStr;
     jsonStr += "{\n";
@@ -20,4 +21,5 @@ std::string DashboardDataSource::getData() const
     jsonStr += "\n}";
     return jsonStr;
 }
+
 }

@@ -90,3 +90,7 @@ _ReSharper*/
 *.scc
 /Neon/build-linux
 /Neon/build-windows
+/Neon/CMakeFiles
+/Neon/Makefile
+/Neon/cmake_install.cmake
+/Neon/CMakeCache.txt
