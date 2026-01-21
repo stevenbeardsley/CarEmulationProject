@@ -1,5 +1,6 @@
 ﻿#include "LogFile.h"
 #include "Process.h"
+#include "CommandWebSocketServer.h"
 #include "DashboardDataSource.h"
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
@@ -78,28 +79,39 @@ int main()
         dashboard::Process process;
         std::thread processThread([&process]() { process.run(); });
 
-        LogFile::Info("🚀 WebSocket server listening on port 8080");
 
+        // Command Server
+        //CommandWebSocketServer commandServer{ ioc, running, 8081 };
+        //commandServer.SetCommandHandler([&](const std::string& cmd)
+            //{
+            //    LogFile::Info("Dispatch command: " + cmd);
+            //    // TODO: parse + forward into your sim/process
+            //});
+
+
+        LogFile::Info("WebSocket server listening on port 8080");
         // === Data updater thread ===
-        std::thread updater([&]() {
-            auto iteration = 0;
-            while (running) {
-                auto speed = 50 + (iteration % 10) * 10;
-                auto status = (iteration % 3 != 0);
-                dataSource.updateData(speed, status);
-                LogFile::Debug("Updated data[" + std::to_string(iteration) +
-                    "]: speed=" + std::to_string(speed) +
-                    ", status=" + std::to_string(status));
-                iteration++;
-                std::this_thread::sleep_for(std::chrono::seconds(2));
-            }
+        std::thread updater([&]()
+            {
+                auto iteration = 0;
+                while (running)
+                {
+                    auto speed = 50 + (iteration % 10) * 10;
+                    auto status = (iteration % 3 != 0);
+                    dataSource.updateData(speed, status);
+                    LogFile::Debug("Updated data[" + std::to_string(iteration) +
+                        "]: speed=" + std::to_string(speed) +
+                        ", status=" + std::to_string(status));
+                    iteration++;
+                    std::this_thread::sleep_for(std::chrono::seconds(2));
+                }
             });
 
         // === Main WebSocket accept loop ===
         while (running)
        	{
             try
-	    {
+	        {
                 tcp::socket socket(ioc);
                 acceptor.accept(socket);
 

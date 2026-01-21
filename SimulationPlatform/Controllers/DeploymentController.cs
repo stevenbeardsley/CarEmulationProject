@@ -15,9 +15,9 @@ namespace SimulationPlatform.Controllers
 
         public async Task<(int ExitCode, string Output, string Error)> Deploy(string scriptPath)
         {
-            // TODO: Create the config.json
-
-            var arguments = $"-d {_distroName} bash -c \"{scriptPath}\"";
+            // Quote the script path safely for bash -c
+            var bashCmd = $"\"{scriptPath}\"";
+            var arguments = $"-d {_distroName} -- bash -lc {bashCmd}";
 
             var psi = new ProcessStartInfo
             {
@@ -32,12 +32,17 @@ namespace SimulationPlatform.Controllers
             using var process = new Process { StartInfo = psi };
             process.Start();
 
-            var output = await process.StandardOutput.ReadToEndAsync();
-            var error = await process.StandardError.ReadToEndAsync();
+            // Read both streams concurrently to avoid deadlock
+            var outputTask = process.StandardOutput.ReadToEndAsync();
+            var errorTask = process.StandardError.ReadToEndAsync();
 
             await process.WaitForExitAsync();
 
+            var output = await outputTask;
+            var error = await errorTask;
+
             return (process.ExitCode, output, error);
         }
+
     }
 }

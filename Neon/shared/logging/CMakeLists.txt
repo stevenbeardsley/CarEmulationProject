@@ -6,7 +6,7 @@ set(logFile_SOURCES
     LogFile.cpp
 )
 
-add_library(LogFile
+add_library(LogFile STATIC 
     ${logFile_SOURCES}
     ${logFile_HEADERS}
 )
