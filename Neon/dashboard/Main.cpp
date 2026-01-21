@@ -1,6 +1,6 @@
 ﻿#include "LogFile.h"
 #include "Process.h"
-#include "CommandWebSocketServer.h"
+#include "CommandHttpServer.h"
 #include "DashboardDataSource.h"
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
@@ -81,13 +81,17 @@ int main()
 
 
         // Command Server
-        //CommandWebSocketServer commandServer{ ioc, running, 8081 };
-        //commandServer.SetCommandHandler([&](const std::string& cmd)
-            //{
-            //    LogFile::Info("Dispatch command: " + cmd);
-            //    // TODO: parse + forward into your sim/process
-            //});
+        // Command HTTP Server (8081)
+        CommandHttpServer commandServer{ ioc, running, 8081 };
+        commandServer.SetCommandHandler([&](const std::string& messageId, const std::string& rawJson)
+            {
+                LogFile::Info("Dispatch command: " + messageId + " raw=" + rawJson);
+                // TODO: parse rawJson further (value, gear, etc.) and forward into your sim/process
+            });
 
+        // IMPORTANT: actually run the accept loop on a thread
+        std::thread commandThread([&]() { commandServer.Run(); });
+        LogFile::Info("HTTP Server up and running.");
 
         LogFile::Info("WebSocket server listening on port 8080");
         // === Data updater thread ===

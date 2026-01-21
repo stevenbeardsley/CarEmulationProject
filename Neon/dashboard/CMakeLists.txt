@@ -3,14 +3,14 @@ find_package(Boost REQUIRED COMPONENTS system json)
 set(dashboard_HEADERS
     DashboardDataSource.h
     Process.h
-    CommandWebSocketServer.h
+    CommandHttpServer.h
     WebSocketReceiver.h)
 
 set(dashboard_SOURCE
     Main.cpp
     DashboardDataSource.cpp
     Process.cpp
-    CommandWebSocketServer.cpp
+    CommandHttpServer.cpp
     WebSocketReceiver.cpp)
 
 add_executable(Dashboard 
