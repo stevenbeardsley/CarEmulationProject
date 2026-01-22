@@ -2,7 +2,7 @@
 #include <iostream>
 #include <thread>
 
-namespace ecm
+namespace tcm
 {
 
 void Process::run()
