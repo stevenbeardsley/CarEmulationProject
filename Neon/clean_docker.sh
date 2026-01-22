@@ -2,7 +2,7 @@
 set -e
 
 docker rm -f dashboard
-docker rm -f ecmsim
-docker rm -f tcmsim
+docker rm -f ecm
+docker rm -f tcm
  
 echo "clean as a whistle!"
