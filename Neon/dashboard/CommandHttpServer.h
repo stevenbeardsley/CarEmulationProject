@@ -1,4 +1,5 @@
 #pragma once
+#include "CommandMessage.h"
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
 #include <atomic>
@@ -9,6 +10,9 @@ namespace net = boost::asio;
 namespace beast = boost::beast;
 namespace http = beast::http;
 using tcp = net::ip::tcp;
+
+namespace dashboard
+{
 
 class CommandHttpServer
 {
@@ -21,6 +25,7 @@ public:
 
     void SetCommandHandler(CommandHandler handler);
     void Run(); // blocking accept loop
+    std::pair<Command, int> ParseSingleCommandJson(const std::string& json);
 
 private:
     void AcceptOne();
@@ -29,10 +34,10 @@ private:
     http::response<http::string_body>
         MakeResponse(const http::request<http::string_body>& req);
 
-    static std::string ExtractJsonStringField(const std::string& json, const std::string& key);
-
     net::io_context& m_ioc;
     tcp::acceptor m_acceptor;
     std::atomic<bool>& m_running;
     CommandHandler m_commandHandler;
 };
+
+}

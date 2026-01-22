@@ -2,6 +2,7 @@
 #include "Process.h"
 #include "CommandHttpServer.h"
 #include "DashboardDataSource.h"
+#include "CommandMessage.h"
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
 #include <boost/beast/http.hpp>
@@ -82,11 +83,11 @@ int main()
 
         // Command Server
         // Command HTTP Server (8081)
-        CommandHttpServer commandServer{ ioc, running, 8081 };
-        commandServer.SetCommandHandler([&](const std::string& messageId, const std::string& rawJson)
+        dashboard::CommandHttpServer commandServer{ ioc, running, 8081 };
+        commandServer.SetCommandHandler(
+            [&](const std::string& messageId, const std::string& rawJson)
             {
-                LogFile::Info("Dispatch command: " + messageId + " raw=" + rawJson);
-                // TODO: parse rawJson further (value, gear, etc.) and forward into your sim/process
+                LogFile::Info("Message Received");
             });
 
         // IMPORTANT: actually run the accept loop on a thread

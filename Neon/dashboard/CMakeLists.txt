@@ -1,6 +1,7 @@
 find_package(Boost REQUIRED COMPONENTS system json)
 
 set(dashboard_HEADERS
+    CommandMessage.h  
     DashboardDataSource.h
     Process.h
     CommandHttpServer.h

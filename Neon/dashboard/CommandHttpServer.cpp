@@ -3,6 +3,9 @@
 #include <thread>
 #include <sstream>
 
+namespace dashboard
+{
+
 CommandHttpServer::CommandHttpServer(net::io_context& ioc,
     std::atomic<bool>& runningFlag,
     unsigned short listenPort)
@@ -94,41 +97,66 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
     if (req.target() != "/command")
         return notFound();
 
-    // Expect JSON body like: {"messageId":"GEAR_UP","value":1}
     const std::string& body = req.body();
-    const std::string messageId = ExtractJsonStringField(body, "messageId");
-    if (messageId.empty())
-        return badRequest("missing messageId");
-
-    LogFile::Info("HTTP command received messageId=" + messageId + " body=" + body);
-
-    if (m_commandHandler)
-        m_commandHandler(messageId, body);
+    LogFile::Info("Message body: " + body);
+    
+    // Extract JSON values 
+    auto [command, value] = ParseSingleCommandJson(body);
+    switch (command)
+    {
+        case Command::GearUp:
+            LogFile::Info("Gear up request received.");
+            break;
+        case Command::Unknown:
+            LogFile::Info("Unknown command type received.");
+            break;
+    }
 
     http::response<http::string_body> res{ http::status::ok, req.version() };
     res.set(http::field::content_type, "application/json");
-    res.body() = std::string("{\"ok\":true,\"messageId\":\"") + messageId + "\"}";
+    res.body() = std::string("{\"ok\":true,\"command\":\"") +" TODO" +  "\"}";
     res.content_length(res.body().size());
     res.keep_alive(false);
+
     return res;
 }
 
-// Tiny “good enough” JSON string-field extractor (no external deps).
-// Assumes: "key":"VALUE" with double quotes.
-std::string CommandHttpServer::ExtractJsonStringField(const std::string& json, const std::string& key)
+std::pair<Command, int> CommandHttpServer::ParseSingleCommandJson(const std::string& json)
 {
-    const std::string needle = "\"" + key + "\"";
-    auto kpos = json.find(needle);
-    if (kpos == std::string::npos) return {};
+    // Expected format: {"key": value}
 
-    auto colon = json.find(':', kpos + needle.size());
-    if (colon == std::string::npos) return {};
+    const std::size_t keyBegin = json.find('"') + 1;
+    const std::size_t keyEnd = json.find('"', keyBegin);
 
-    auto firstQuote = json.find('"', colon + 1);
-    if (firstQuote == std::string::npos) return {};
+    const std::size_t colonPos = json.find(':', keyEnd);
+    std::size_t valPos = colonPos + 1;
 
-    auto secondQuote = json.find('"', firstQuote + 1);
-    if (secondQuote == std::string::npos) return {};
+    // Skip spaces after colon
+    while (valPos < json.size() && json[valPos] == ' ')
+        ++valPos;
 
-    return json.substr(firstQuote + 1, secondQuote - (firstQuote + 1));
+    bool negative = false;
+    if (json[valPos] == '-')
+    {
+        negative = true;
+        ++valPos;
+    }
+
+    int value = 0;
+    while (valPos < json.size() && std::isdigit(json[valPos]))
+    {
+        value = value * 10 + (json[valPos] - '0');
+        ++valPos;
+    }
+
+    if (negative)
+        value = -value;
+
+    return {
+        toCommand(json.substr(keyBegin, keyEnd - keyBegin)),
+        value
+    };
+}
+
+
 }

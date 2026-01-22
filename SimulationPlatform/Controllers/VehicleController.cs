@@ -12,7 +12,7 @@ public class VehicleController
 
     public async Task ShiftUpAsync()
     {
-        await m_httpClient.SendAsync("carCommands", "gear_delta", 2);
+        await m_httpClient.SendAsync("command", "gear_up", 1);
     }
 
     public async Task SetThrottleAsync(double value)
