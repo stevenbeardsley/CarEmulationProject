@@ -10,5 +10,8 @@ add_subdirectory(ecm)
 add_subdirectory(tcm)
 add_subdirectory(dashboard)
 add_subdirectory(shared/logging)
+add_subdirectory(shared/bit_parser)
+add_subdirectory(tests)
+
 # Enables IDE folder grouping (Visual Studio, Xcode, etc.)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
