@@ -1,15 +1,17 @@
-#pragma once 
+#ifndef SHARED_BIT_PARSER_BITREADER_H
+#define SHARED_BIT_PARSER_BITREADER_H
 
-#include "ByteBuffer.h"
-#include "BitOrder.h"
 #include "ByteOrder.h"
 #include "Span.h"
 #include "Error.h"
+#include "BitOrder.h"
+
 #include <cstdint>
 #include <vector>
 #include <string>
 #include <string_view>
-#include <span>
+#include <cstddef>
+
 #include <limits>
 
 namespace shared::bit_parser
@@ -32,26 +34,26 @@ public:
     bool ok() const { return err_ == Error::None; }
     Error error() const { return err_; }
 
-    size_t bitPosition() const { return bitPos_; }
-    size_t remainingBits() const { return (in_.size() * 8) - bitPos_; }
+    std::size_t bitPosition() const { return bitPos_; }
+    std::size_t remainingBits() const { return (in_.size() * 8) - bitPos_; }
 
     void alignToByte() {
         if (!ok()) return;
-        const size_t mod = bitPos_ % 8;
+        const std::size_t mod = bitPos_ % 8;
         if (mod == 0) return;
-        const size_t skip = 8 - mod;
+        const std::size_t skip = 8 - mod;
         if (remainingBits() < skip) { err_ = Error::OutOfRange; return; }
         bitPos_ += skip;
     }
 
-    uint64_t readBits(size_t bitCount) {
+    uint64_t readBits(std::size_t bitCount) {
         if (!ok()) return 0;
         if (bitCount > 64) { err_ = Error::OutOfRange; return 0; }
         if (remainingBits() < bitCount) { err_ = Error::OutOfRange; return 0; }
 
         uint64_t out = 0;
-        for (size_t i = 0; i < bitCount; ++i) {
-            const size_t byteIndex = bitPos_ / 8;
+        for (std::size_t i = 0; i < bitCount; ++i) {
+            const std::size_t byteIndex = bitPos_ / 8;
             const uint8_t bitIndexInByte = static_cast<uint8_t>(bitPos_ % 8);
             const uint8_t mask = bitMaskInByte(bitIndexInByte, bitOrder_);
             const uint8_t bit = (in_[byteIndex] & mask) ? 1u : 0u;
@@ -127,14 +129,14 @@ public:
         return 0;
     }
 
-    std::vector<uint8_t> readBytes(size_t n) {
+    std::vector<uint8_t> readBytes(std::size_t n) {
         if (!ok()) return {};
         if ((bitPos_ % 8) != 0) { err_ = Error::Misaligned; return {}; }
         if (remainingBits() < n * 8) { err_ = Error::OutOfRange; return {}; }
 
         std::vector<uint8_t> out;
         out.reserve(n);
-        for (size_t i = 0; i < n; ++i) out.push_back(readU8());
+        for (std::size_t i = 0; i < n; ++i) out.push_back(readU8());
         return out;
     }
 
@@ -142,11 +144,11 @@ public:
         if (!ok()) return {};
         const uint64_t len64 = readVarUInt();
         if (!ok()) return {};
-        if (len64 > static_cast<uint64_t>(std::numeric_limits<size_t>::max())) {
+        if (len64 > static_cast<uint64_t>(std::numeric_limits<std::size_t>::max())) {
             err_ = Error::OutOfRange;
             return {};
         }
-        const size_t len = static_cast<size_t>(len64);
+        const std::size_t len = static_cast<std::size_t>(len64);
         auto bytes = readBytes(len);
         if (!ok()) return {};
         return std::string(reinterpret_cast<const char*>(bytes.data()), bytes.size());
@@ -154,10 +156,11 @@ public:
 
 private:
     Span<const uint8_t> in_;
-    size_t bitPos_ = 0;
+    std::size_t bitPos_ = 0;
     Error err_ = Error::None;
     BitOrder bitOrder_ = BitOrder::MsbFirst;
     ByteOrder byteOrder_ = ByteOrder::BigEndian;
 };
 
 }
+#endif

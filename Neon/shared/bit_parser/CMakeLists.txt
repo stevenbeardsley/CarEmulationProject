@@ -12,7 +12,7 @@ set(bit_parser_SOURCE
 )
 
 
-add_library(BitParser STATIC
+add_library(BitParser
     ${bit_parser_HEADERS}
     ${bit_parser_SOURCE}
 )

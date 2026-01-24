@@ -1,27 +1,20 @@
-#pragma once 
+#ifndef SHARED_BIT_PARSER_BITWRITER_H
+#define SHARED_BIT_PARSER_BITWRITER_H
 
 #include "BitOrder.h"
 #include "Error.h"
-#include "ByteOrder.h"
+#include "shared/bit_parser/ByteOrder.h"
 #include "ByteBuffer.h"
 #include "Span.h"
 #include <cstdint>
 #include <vector>
 #include <string>
 #include <string_view>
-#include <span>
+
 #include <limits>
 
 namespace shared::bit_parser
 {
-    inline uint8_t bitMaskInByte(uint8_t bitIndex0to7, BitOrder bo) {
-    // For MsbFirst: bitIndex 0 -> mask 0x80, bitIndex 7 -> mask 0x01
-    // For LsbFirst: bitIndex 0 -> mask 0x01, bitIndex 7 -> mask 0x80
-    return (bo == BitOrder::MsbFirst)
-        ? static_cast<uint8_t>(0x80u >> bitIndex0to7)
-        : static_cast<uint8_t>(0x01u << bitIndex0to7);
-}
-
     class BitWriter {
     public:
         explicit BitWriter(ByteBuffer& out,
@@ -39,31 +32,31 @@ namespace shared::bit_parser
         bool ok() const { return err_ == Error::None; }
         Error error() const { return err_; }
 
-        size_t bitPosition() const { return bitPos_; }
-        size_t bytePosition() const { return bitPos_ / 8; }
+        std::size_t bitPosition() const { return bitPos_; }
+        std::size_t bytePosition() const { return bitPos_ / 8; }
 
         // Ensure buffer is big enough for bitPos_ (and upcoming writes)
-        void ensureBits(size_t bitsNeeded) {
-            const size_t totalBits = bitPos_ + bitsNeeded;
-            const size_t requiredBytes = (totalBits + 7) / 8;
+        void ensureBits(std::size_t bitsNeeded) {
+            const std::size_t totalBits = bitPos_ + bitsNeeded;
+            const std::size_t requiredBytes = (totalBits + 7) / 8;
             if (out_->size() < requiredBytes) out_->resize(requiredBytes, 0);
         }
 
         // Write lowest 'bitCount' bits of value into the stream.
         // Example: writeBits(0b101, 3) writes bits: 1,0,1 (in that order)
-        void writeBits(uint64_t value, size_t bitCount) {
+        void writeBits(uint64_t value, std::size_t bitCount) {
             if (!ok()) return;
             if (bitCount > 64) { err_ = Error::OutOfRange; return; }
 
             ensureBits(bitCount);
 
-            for (size_t i = 0; i < bitCount; ++i) {
+            for (std::size_t i = 0; i < bitCount; ++i) {
                 // Write from MSB of the field to LSB? We choose "field MSB first":
                 // i=0 writes the (bitCount-1)th bit, i=bitCount-1 writes bit 0.
-                const size_t srcShift = (bitCount - 1) - i;
+                const std::size_t srcShift = (bitCount - 1) - i;
                 const uint8_t bit = static_cast<uint8_t>((value >> srcShift) & 0x1u);
 
-                const size_t byteIndex = bitPos_ / 8;
+                const std::size_t byteIndex = bitPos_ / 8;
                 const uint8_t bitIndexInByte = static_cast<uint8_t>(bitPos_ % 8);
                 const uint8_t mask = bitMaskInByte(bitIndexInByte, bitOrder_);
 
@@ -79,10 +72,10 @@ namespace shared::bit_parser
 
         void alignToByte(uint8_t padBit = 0) {
             if (!ok()) return;
-            const size_t mod = bitPos_ % 8;
+            const std::size_t mod = bitPos_ % 8;
             if (mod == 0) return;
-            const size_t pad = 8 - mod;
-            for (size_t i = 0; i < pad; ++i) writeBits(padBit ? 1u : 0u, 1);
+            const std::size_t pad = 8 - mod;
+            for (std::size_t i = 0; i < pad; ++i) writeBits(padBit ? 1u : 0u, 1);
         }
 
         // Fixed-width helpers (unsigned only, minimal)
@@ -155,9 +148,11 @@ namespace shared::bit_parser
 
     private:
         ByteBuffer* out_ = nullptr;
-        size_t bitPos_ = 0;
+        std::size_t bitPos_ = 0;
         Error err_ = Error::None;
         BitOrder bitOrder_ = BitOrder::MsbFirst;
         ByteOrder byteOrder_ = ByteOrder::BigEndian;
     };
 }
+
+#endif
