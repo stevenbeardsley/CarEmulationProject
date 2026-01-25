@@ -26,6 +26,7 @@ target_link_libraries(
     PRIVATE
         Boost::system
         Boost::json
+        Can
 )
 
 source_group("Source Files" FILES ${dashboard_SOURCE})

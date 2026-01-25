@@ -1,17 +1,18 @@
 #include "CommandHttpServer.h"
 #include "LogFile.h"
-#include <thread>
-#include <sstream>
+
 
 namespace dashboard
 {
 
 CommandHttpServer::CommandHttpServer(net::io_context& ioc,
     std::atomic<bool>& runningFlag,
-    unsigned short listenPort)
+    unsigned short listenPort,
+    shared::can::Bus& bus)
     : m_ioc(ioc)
     , m_acceptor(ioc, tcp::endpoint(tcp::v4(), listenPort))
     , m_running(runningFlag)
+    , m_bus(bus)
 {
     LogFile::Info("CommandHttpServer listening on port " + std::to_string(listenPort));
 }
@@ -102,15 +103,24 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
     
     // Extract JSON values 
     auto [command, value] = ParseSingleCommandJson(body);
+    auto messageType = shared::can::MessageType::Gear;
     switch (command)
     {
         case Command::GearUp:
             LogFile::Info("Gear up request received.");
+            messageType = shared::can::MessageType::Gear; // TODO support other message types and define an icd
             break;
         case Command::Unknown:
             LogFile::Info("Unknown command type received.");
             break;
     }
+    
+    const auto msg = shared::can::Message
+    {
+        messageType,
+        value
+    };
+    m_bus.Send(msg);
 
     http::response<http::string_body> res{ http::status::ok, req.version() };
     res.set(http::field::content_type, "application/json");

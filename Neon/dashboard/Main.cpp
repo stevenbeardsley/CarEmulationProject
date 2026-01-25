@@ -3,6 +3,7 @@
 #include "CommandHttpServer.h"
 #include "DashboardDataSource.h"
 #include "CommandMessage.h"
+#include "shared/can/Bus.h"
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
 #include <boost/beast/http.hpp>
@@ -23,7 +24,8 @@ using tcp = net::ip::tcp;
 
 std::atomic<bool> running(true);
 
-void signalHandler(int signal) {
+void signalHandler(int signal)
+{
     LogFile::Info("Received stop signal, shutting down...");
     running = false;
 }
@@ -63,7 +65,8 @@ void handleCarCommands(websocket::stream<tcp::socket> ws) {
 
 int main() 
 {
-    try {
+    try 
+    {
         // === Logging setup ===
         LogFile::Instance().setLogFile("dashboard.log");
         LogFile::Instance().setLevel(LogLevel::DEBUG);
@@ -80,10 +83,12 @@ int main()
         dashboard::Process process;
         std::thread processThread([&process]() { process.run(); });
 
+        // Set up CAN bus
+        auto canBus = shared::can::Bus(9090);
 
         // Command Server
         // Command HTTP Server (8081)
-        dashboard::CommandHttpServer commandServer{ ioc, running, 8081 };
+        dashboard::CommandHttpServer commandServer{ ioc, running, 8081, canBus };
         commandServer.SetCommandHandler(
             [&](const std::string& messageId, const std::string& rawJson)
             {
