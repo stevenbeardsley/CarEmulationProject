@@ -1,5 +1,6 @@
 #include "Bus.h"
 
+#include "Logfile.h"
 #include <iostream>
 
 namespace shared::can
@@ -39,20 +40,24 @@ namespace shared::can
     {
         boost::system::error_code ec;
 
-        // Resolve host:port to UDP endpoints.
-        // Docker user-defined networks provide DNS so host like "ecm" resolves.
         auto results = resolver_.resolve(udp::v4(), host, std::to_string(port), ec);
-        if (ec)
+        if (ec || results.empty())
         {
-            std::cerr << "Bus: resolve failed for " << host << ":" << port
-                << " : " << ec.message() << "\n";
+            LogFile::Error("Bus: resolve failed for " + host + ":" + std::to_string(port) +
+                " : " + ec.message());
             return false;
         }
 
-        // Store the first resolved endpoint.
-        peers_.push_back(*results.begin());
+        // IMPORTANT: results elements are resolver entries -> use .endpoint()
+        udp::endpoint ep = results.begin()->endpoint();
+
+        LogFile::Info("CAN peer resolved: " + host + ":" + std::to_string(port) +
+            " -> " + ep.address().to_string() + ":" + std::to_string(ep.port()));
+
+        peers_.push_back(ep);
         return true;
     }
+
 
     bool Bus::AddPeer(const std::string& host)
     {
@@ -94,6 +99,12 @@ namespace shared::can
                 ep,
                 0,
                 ec
+            );
+
+            LogFile::Info(
+                "CAN TX sending " + std::to_string(datagram.size()) +
+                " bytes to " + ep.address().to_string() + ":" +
+                std::to_string(ep.port())
             );
 
             if (ec || sent != datagram.size())

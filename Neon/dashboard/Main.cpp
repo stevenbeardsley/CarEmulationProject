@@ -84,7 +84,8 @@ int main()
         std::thread processThread([&process]() { process.run(); });
 
         // Set up CAN bus
-        auto canBus = shared::can::Bus(9090);
+        auto canBus = shared::can::Bus(15000);
+        canBus.AddPeer("ecm");
 
         // Command Server
         // Command HTTP Server (8081)
@@ -109,9 +110,10 @@ int main()
                     auto speed = 50 + (iteration % 10) * 10;
                     auto status = (iteration % 3 != 0);
                     dataSource.updateData(speed, status);
-                    LogFile::Debug("Updated data[" + std::to_string(iteration) +
+                    /*LogFile::Debug("Updated data[" + std::to_string(iteration) +
                         "]: speed=" + std::to_string(speed) +
                         ", status=" + std::to_string(status));
+                    */
                     iteration++;
                     std::this_thread::sleep_for(std::chrono::seconds(2));
                 }

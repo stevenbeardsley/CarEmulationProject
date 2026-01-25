@@ -16,6 +16,7 @@ target_link_libraries(
     Ecm
     PUBLIC 
         LogFile
+        Can
 )
 
 source_group("Source Files" FILES ${ecm_SOURCE})

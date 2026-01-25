@@ -36,6 +36,19 @@ if [[ ${#EXEC_NAMES[@]} -ne ${#DOCKERFILES[@]} || ${#EXEC_NAMES[@]} -ne ${#IMAGE
 fi
 
 # ==============================
+# Docker Network 
+# ==============================
+DOCKER_NETWORK="neon_network"
+
+if ! docker network ls --format '{{.Name}}' | grep -Eq "^${DOCKER_NETWORK}\$"; then 
+	echo "Creating Docker network: $DOCKER_NETWORK"
+	docker network create "$DOCKER_NETWORK" > /dev/null
+else 
+	echo "Docker netowkr already exists: $DOCKER_NETWORK"
+fi
+
+
+# ==============================
 # Build Section
 # ==============================
 echo "Cleaning previous build: $BUILD_DIR"
@@ -105,6 +118,7 @@ for i in "${!EXEC_NAMES[@]}"; do
     docker run -d \
       -p 8080:8080 \
       -p 8081:8081 \
+      --network "$DOCKER_NETWORK" \
       --name "$CONTAINER_NAME" \
       -e LOG_LEVEL=info \
       "$IMAGE_NAME"
@@ -112,6 +126,7 @@ for i in "${!EXEC_NAMES[@]}"; do
   else
     echo "Running container without port exposure: $CONTAINER_NAME"
     docker run -d \
+	--network "$DOCKER_NETWORK" \
       --name "$CONTAINER_NAME" \
       -e LOG_LEVEL=info \
       "$IMAGE_NAME"

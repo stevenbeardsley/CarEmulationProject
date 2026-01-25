@@ -4,11 +4,13 @@ set(can_HEADERS
     Bus.h
     MessageType.h
     Message.h
+    Receiver.h
 )
 
 set(can_SOURCE
     Bus.cpp
     Message.cpp
+    Receiver.cpp
 )
 
 add_library(Can STATIC 
@@ -32,5 +34,6 @@ target_link_libraries(Can
         Threads::Threads
     PRIVATE 
         BitParser
+        LogFile
 )
 set_target_properties(Can PROPERTIES FOLDER "shared")

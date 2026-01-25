@@ -1,3 +1,6 @@
+#ifndef LOGFILE_H
+#define LOGFILE_H
+
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -43,3 +46,5 @@ private:
     mutable std::mutex mutex_;
 };
 
+
+#endif

@@ -118,10 +118,14 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
     const auto msg = shared::can::Message
     {
         messageType,
-        value
+        static_cast<std::uint32_t>(value)
     };
-    m_bus.Send(msg);
-
+    const bool test = m_bus.Send(msg);
+    LogFile::Info("CommandHttpServer: CAN message sent.");
+    if (test)
+    {
+        LogFile::Info("And it was successful!");
+    }
     http::response<http::string_body> res{ http::status::ok, req.version() };
     res.set(http::field::content_type, "application/json");
     res.body() = std::string("{\"ok\":true,\"command\":\"") +" TODO" +  "\"}";

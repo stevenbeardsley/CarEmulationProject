@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SHARED_CAN_BUS_H
+#define SHARED_CAN_BUS_H
 
 #include <cstdint>
 #include <string>
@@ -44,3 +45,5 @@ namespace shared::can
         std::vector<udp::endpoint> peers_;
     };
 }
+
+#endif
