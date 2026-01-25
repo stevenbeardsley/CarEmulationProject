@@ -11,6 +11,8 @@ add_subdirectory(tcm)
 add_subdirectory(dashboard)
 add_subdirectory(shared/logging)
 add_subdirectory(shared/bit_parser)
+add_subdirectory(shared/can)
+
 add_subdirectory(tests)
 
 # Enables IDE folder grouping (Visual Studio, Xcode, etc.)

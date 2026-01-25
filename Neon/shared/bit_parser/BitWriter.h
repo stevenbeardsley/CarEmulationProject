@@ -3,8 +3,9 @@
 
 #include "BitOrder.h"
 #include "Error.h"
-#include "shared/bit_parser/ByteOrder.h"
+#include "ByteOrder.h"
 #include "ByteBuffer.h"
+#include "BitReader.h"
 #include "Span.h"
 #include <cstdint>
 #include <vector>
