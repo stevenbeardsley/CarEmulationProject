@@ -55,6 +55,16 @@ namespace shared::can
             return false;
 
         const uint8_t canIdRaw = data[0];
+        LogFile::Debug(
+            "RX bytes: [" +
+            std::to_string(data[0]) + " " +
+            std::to_string(data[1]) + " " +
+            std::to_string(data[2]) + " " +
+            std::to_string(data[3]) + " " +
+            std::to_string(data[4]) + "]"
+        );
+
+        LogFile::Debug("RX type raw=" + std::to_string(canIdRaw));
         const int32_t value = read_i32_be(data + 1);
 
         const auto type = static_cast<MessageType>(canIdRaw);
@@ -118,7 +128,7 @@ namespace shared::can
             // Log received values via accessors
             LogFile::Info(
                 "CAN RX from " + sender.address().to_string() + ":" + std::to_string(sender.port()) +
-                " type=" + toString(static_cast<MessageType>(msg.getMessageType())) +
+                " type=" + toString(msg.getMessageType()) +
                 " value=" + std::to_string(msg.getValue())
             );
 

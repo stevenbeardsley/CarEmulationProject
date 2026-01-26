@@ -66,18 +66,13 @@ namespace shared::can
 
     void Bus::PackMessage(const Message& msg, std::vector<uint8_t>& out)
     {
-        // Minimal binary envelope (v1):
-        // [u16 can_id] [i32 value]
-        //
-        // For now MessageType == CAN ID.
-
         out.clear();
-        out.reserve(2 + 4);
+        out.reserve(1 + 4);
 
         const uint8_t canId = static_cast<uint8_t>(msg.getMessageType());
-        const int32_t  value = static_cast<int32_t>(msg.getValue());  
+        const int32_t value = static_cast<int32_t>(msg.getValue());
 
-        append_u16_be(out, canId);
+        out.push_back(canId);
         append_i32_be(out, value);
     }
 
