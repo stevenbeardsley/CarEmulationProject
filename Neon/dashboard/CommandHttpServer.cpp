@@ -120,6 +120,7 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
         messageType,
         static_cast<std::uint32_t>(value)
     };
+
     const bool test = m_bus.Send(msg);
     LogFile::Info("CommandHttpServer: CAN message sent.");
     if (test)

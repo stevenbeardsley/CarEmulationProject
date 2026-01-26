@@ -83,12 +83,16 @@ namespace shared::can
         {
             LogFile::Info("Running the receiverrrrr");
             boost::system::error_code ec;
+            
+            LogFile::Info("Receive is the next line.");
             const std::size_t n = socket_.receive_from(
                 boost::asio::buffer(buf),
                 sender,
                 0,
                 ec
             );
+            LogFile::Info("Receive from ran.");
+            
             LogFile::Info(
                 "CAN RX raw datagram: bytes=" + std::to_string(n) +
                 " from " + sender.address().to_string() + ":" +
@@ -114,7 +118,7 @@ namespace shared::can
             // Log received values via accessors
             LogFile::Info(
                 "CAN RX from " + sender.address().to_string() + ":" + std::to_string(sender.port()) +
-                " type=" + std::to_string(static_cast<uint32_t>(static_cast<uint8_t>(msg.getMessageType()))) +
+                " type=" + toString(static_cast<MessageType>(msg.getMessageType())) +
                 " value=" + std::to_string(msg.getValue())
             );
 

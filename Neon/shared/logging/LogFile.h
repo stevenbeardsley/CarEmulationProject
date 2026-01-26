@@ -1,6 +1,11 @@
 #ifndef LOGFILE_H
 #define LOGFILE_H
-
+#ifdef ERROR
+#undef ERROR
+#endif
+#ifdef WARNING
+#undef WARNING
+#endif
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -16,7 +21,7 @@ enum class LogLevel
     DEBUG,
     INFO,
     WARNING,
-    ERROR
+    ERROR,
 };
 
 class LogFile 
