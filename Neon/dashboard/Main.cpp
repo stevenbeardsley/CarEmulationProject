@@ -86,6 +86,7 @@ int main()
         // Set up CAN bus
         auto canBus = shared::can::Bus(15000);
         canBus.AddPeer("ecm");
+        canBus.AddPeer("tcm");
 
         // Command Server
         // Command HTTP Server (8081)

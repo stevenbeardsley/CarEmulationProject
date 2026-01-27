@@ -5,16 +5,12 @@
 
 namespace shared::can
 {
-    static inline int32_t read_i32_be(const uint8_t* p)
+    static inline std::uint32_t read_u32_be(const std::uint8_t* p)
     {
-        // p[0] is MSB
-        uint32_t u =
-            (static_cast<uint32_t>(p[0]) << 24) |
-            (static_cast<uint32_t>(p[1]) << 16) |
-            (static_cast<uint32_t>(p[2]) << 8) |
-            (static_cast<uint32_t>(p[3]) << 0);
-
-        return static_cast<int32_t>(u);
+        return (static_cast<std::uint32_t>(p[0]) << 24) |
+            (static_cast<std::uint32_t>(p[1]) << 16) |
+            (static_cast<std::uint32_t>(p[2]) << 8) |
+            (static_cast<std::uint32_t>(p[3]) << 0);
     }
 
     Receiver::Receiver(std::atomic<bool>& runningFlag, uint16_t listenPort)
@@ -23,7 +19,6 @@ namespace shared::can
     {
         boost::system::error_code ec;
 
-        // Open + bind UDP socket to all interfaces (inside container)
         socket_.open(udp::v4(), ec);
         if (ec)
         {
@@ -44,36 +39,30 @@ namespace shared::can
     void Receiver::Stop()
     {
         boost::system::error_code ec;
-        socket_.close(ec); // closing unblocks receive_from on most platforms
+        socket_.close(ec);
     }
 
-    bool Receiver::TryDecodeMessage(const uint8_t* data, std::size_t len, Message& out)
+    void Receiver::handleDatagram(const uint8_t* data, std::size_t n, const udp::endpoint& sender)
     {
-        // Your current TX format:
-        // [u8 can_id][i32 value BE] => 5 bytes
-        if (len != 5)
-            return false;
+        // Expect exactly 5 bytes: [u8 id][u32 value BE]
+        if (n < 5)
+        {
+            LogFile::Warn("CAN RX: datagram too small (n=" + std::to_string(n) + ")");
+            return;
+        }
 
-        const uint8_t canIdRaw = data[0];
-        LogFile::Debug(
-            "RX bytes: [" +
-            std::to_string(data[0]) + " " +
-            std::to_string(data[1]) + " " +
-            std::to_string(data[2]) + " " +
-            std::to_string(data[3]) + " " +
-            std::to_string(data[4]) + "]"
-        );
-
-        LogFile::Debug("RX type raw=" + std::to_string(canIdRaw));
-        const int32_t value = read_i32_be(data + 1);
-
+        const std::uint8_t canIdRaw = data[0];
+        const std::uint32_t value = read_u32_be(data + 1);
         const auto type = static_cast<MessageType>(canIdRaw);
 
-        // Construct using your Message class API (public ctor)
-        out = Message{ type, static_cast<std::uint32_t>(value) }; // if your Message value is unsigned
-        // If your Message stores signed ints, change to: out = Message{ type, value };
+        LogFile::Debug("RX raw: id=" + std::to_string(canIdRaw) +
+            " value=" + std::to_string(value) +
+            " from " + sender.address().to_string() + ":" + std::to_string(sender.port()));
 
-        return true;
+        Message msg{ type, value };
+
+        if (handler_)
+            handler_(msg, sender);
     }
 
     void Receiver::Run()
@@ -86,52 +75,35 @@ namespace shared::can
             return;
         }
 
-        std::array<uint8_t, 256> buf{};
+        std::array<std::uint8_t, 256> buf{};
         udp::endpoint sender;
 
         while (running_)
         {
-            LogFile::Info("Running the receiverrrrr");
             boost::system::error_code ec;
-            
-            LogFile::Info("Receive is the next line.");
             const std::size_t n = socket_.receive_from(
                 boost::asio::buffer(buf),
                 sender,
                 0,
                 ec
             );
-            LogFile::Info("Receive from ran.");
-            
-            LogFile::Info(
-                "CAN RX raw datagram: bytes=" + std::to_string(n) +
-                " from " + sender.address().to_string() + ":" +
-                std::to_string(sender.port())
-            );
-            Message msg{ MessageType{0}, 0u };
-            if (!TryDecodeMessage(buf.data(), n, msg))
-            {
-                LogFile::Error("CAN Receiver: invalid datagram size=" + std::to_string(n));
-                continue;
-            }
 
             if (!running_)
                 break;
 
             if (ec)
             {
-                // If socket closed during shutdown, receive_from will error.
                 LogFile::Error("CAN Receiver: receive_from failed: " + ec.message());
                 continue;
             }
 
-            // Log received values via accessors
-            LogFile::Info(
-                "CAN RX from " + sender.address().to_string() + ":" + std::to_string(sender.port()) +
-                " type=" + toString(msg.getMessageType()) +
-                " value=" + std::to_string(msg.getValue())
+            LogFile::Debug(
+                "CAN RX raw datagram: bytes=" + std::to_string(n) +
+                " from " + sender.address().to_string() + ":" + std::to_string(sender.port())
             );
 
+            //  ACTUALLY PARSE THE BUFFER YOU JUST RECEIVED
+            handleDatagram(buf.data(), n, sender);
         }
 
         LogFile::Info("CAN Receiver stopped.");

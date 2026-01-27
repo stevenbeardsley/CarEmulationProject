@@ -16,6 +16,7 @@ target_link_libraries(
     Tcm
     PUBLIC 
         LogFile
+        Can
 )
 
 source_group("Source Files" FILES ${tcm_SOURCE})
