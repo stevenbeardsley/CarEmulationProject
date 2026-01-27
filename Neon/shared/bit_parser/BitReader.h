@@ -54,9 +54,9 @@ public:
         uint64_t out = 0;
         for (std::size_t i = 0; i < bitCount; ++i) {
             const std::size_t byteIndex = bitPos_ / 8;
-            const uint8_t bitIndexInByte = static_cast<uint8_t>(bitPos_ % 8);
-            const uint8_t mask = bitMaskInByte(bitIndexInByte, bitOrder_);
-            const uint8_t bit = (in_[byteIndex] & mask) ? 1u : 0u;
+            const auto bitIndexInByte = static_cast<uint8_t>(bitPos_ % 8);
+            const auto mask = bitMaskInByte(bitIndexInByte, bitOrder_);
+            const auto bit = (in_[byteIndex] & mask) ? 1u : 0u;
 
             // Field MSB-first reconstruction:
             out = (out << 1) | bit;

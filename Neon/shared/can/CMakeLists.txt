@@ -36,4 +36,4 @@ target_link_libraries(Can
         BitParser
         LogFile
 )
-set_target_properties(Can PROPERTIES FOLDER "shared")
+set_target_properties(Can PROPERTIES FOLDER "shared/can")

@@ -1,0 +1,17 @@
+set(shared_HEADERS
+    Peers.h
+)
+
+add_library(shared INTERFACE)
+
+target_include_directories(shared INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_sources(shared INTERFACE
+    ${shared_HEADERS}
+)
+
+set_target_properties(shared PROPERTIES FOLDER "shared")
+add_custom_target(shared_headers SOURCES ${shared_HEADERS})
+set_target_properties(shared_headers PROPERTIES FOLDER "shared")

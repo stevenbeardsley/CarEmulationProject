@@ -17,6 +17,7 @@ target_link_libraries(
     PUBLIC 
         LogFile
         Can
+        shared
 )
 
 source_group("Source Files" FILES ${tcm_SOURCE})

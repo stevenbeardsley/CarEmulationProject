@@ -3,6 +3,7 @@
 #include "CommandHttpServer.h"
 #include "DashboardDataSource.h"
 #include "CommandMessage.h"
+#include "shared/Peers.h"
 #include "shared/can/Bus.h"
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>

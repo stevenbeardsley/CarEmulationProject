@@ -27,6 +27,7 @@ target_link_libraries(
         Boost::system
         Boost::json
         Can
+        shared
 )
 
 source_group("Source Files" FILES ${dashboard_SOURCE})

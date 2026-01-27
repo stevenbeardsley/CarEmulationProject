@@ -102,7 +102,6 @@ namespace shared::can
                 " from " + sender.address().to_string() + ":" + std::to_string(sender.port())
             );
 
-            //  ACTUALLY PARSE THE BUFFER YOU JUST RECEIVED
             handleDatagram(buf.data(), n, sender);
         }
 

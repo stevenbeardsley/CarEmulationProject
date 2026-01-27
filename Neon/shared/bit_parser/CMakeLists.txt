@@ -24,4 +24,4 @@ target_include_directories(BitParser
 
 source_group("Header Files" FILES ${bit_parser_HEADERS})
 
-set_target_properties(BitParser PROPERTIES FOLDER "shared")
+set_target_properties(BitParser PROPERTIES FOLDER "shared/bit_parser")

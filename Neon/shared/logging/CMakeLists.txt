@@ -15,4 +15,4 @@ target_include_directories(LogFile PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-set_target_properties(LogFile PROPERTIES FOLDER "shared")
+set_target_properties(LogFile PROPERTIES FOLDER "shared/logging")
