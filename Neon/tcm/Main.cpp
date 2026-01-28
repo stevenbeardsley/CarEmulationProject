@@ -98,6 +98,7 @@ int main()
     // Current gear broadcast thread 
     auto canBus = shared::can::Bus(15000);
     canBus.AddPeer("ecm");
+    canBus.AddPeer("dashboard");
     std::thread gearPublishThread([&]()
         {
             while (running)

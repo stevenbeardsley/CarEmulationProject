@@ -3,24 +3,34 @@
 namespace dashboard
 {
 
-void DashboardDataSource::updateData(int speed, bool status)
+DashboardDataSource::DashboardDataSource(UiData& data) :
+    m_data(data)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    m_speed = speed;
-    m_status = status;
 }
-
 
 std::string DashboardDataSource::getData() const
 {
-    std::lock_guard<std::mutex> lock(mutex_); // Lock the dashboard data so it does not change`
+    std::lock_guard<std::mutex> lock(m_mutex);
 
     std::string jsonStr;
     jsonStr += "{\n";
-    jsonStr += "\"speed\": \"" + std::to_string(m_speed) + "\", ";
-    jsonStr += "\"status\": \"" + std::string(m_status ? "true" : "false") + "\"";
+    jsonStr += "\"speed\": \"" + std::to_string(m_data.m_speed) + "\", ";
+    jsonStr += "\"gear\": \"" + std::to_string(m_data.m_gear) + "\", ";
+    jsonStr += "\"status\": \"" + std::string(m_data.m_status ? "true" : "false") + "\"";
     jsonStr += "\n}";
     return jsonStr; // TODO: Update the datasource to account for the new data
 }
+
+void DashboardDataSource::updateData(
+    std::uint32_t gear,
+    std::uint32_t speed,
+    bool status)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_data.m_gear = gear;
+    m_data.m_speed = speed;
+    m_data.m_status = status;
+}
+
 
 }

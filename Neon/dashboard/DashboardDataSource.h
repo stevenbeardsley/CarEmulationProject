@@ -4,28 +4,25 @@
 #include <string>
 #include <mutex>
 #include <cstdint>
+#include "UiData.h"
+
 namespace dashboard
 {
 class DashboardDataSource
 {
 public:
-    DashboardDataSource() : m_speed(0), m_status(false) {}
-    
-    struct m_data
-    {
-        std::uint32_t m_gear;
-        std::uint32_t m_speed;
-        bool m_status;
-    };
+    DashboardDataSource(UiData& data);
 
-    void updateData(int speed, bool status);
+    void updateData(std::uint32_t gear,
+        std::uint32_t speed,
+        bool status);
+
+    [[nodiscard]]
     std::string getData() const;  // Returns JSON
 
 private:
-    mutable std::mutex mutex_;
-    int m_speed;
-    bool m_status;
-    std::uint32_t m_gear;
+    mutable std::mutex m_mutex;
+    UiData& m_data;
 };
 }
 

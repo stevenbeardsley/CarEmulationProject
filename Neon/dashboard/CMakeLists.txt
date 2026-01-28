@@ -5,7 +5,9 @@ set(dashboard_HEADERS
     DashboardDataSource.h
     Process.h
     CommandHttpServer.h
-    WebSocketReceiver.h)
+    WebSocketReceiver.h
+    UiData.h
+)
 
 set(dashboard_SOURCE
     Main.cpp
