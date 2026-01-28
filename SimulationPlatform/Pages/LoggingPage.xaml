@@ -32,6 +32,7 @@
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
                 </Grid.RowDefinitions>
                 <TextBlock 
                     Text="Car data"
@@ -47,12 +48,20 @@
                     Grid.Row="1"
                     Grid.Column="2"/>
                 <TextBlock
-                    Text="Status:"
+                    Text="Gear:"
                     Grid.Row="2"
                     Grid.Column="0"/>
                 <TextBlock 
-                    Text="{x:Bind Status, Mode=OneWay}"
+                    Text="{x:Bind Gear, Mode=OneWay}"
                     Grid.Row="2"
+                    Grid.Column="2"/>
+                <TextBlock
+                    Text="Status:"
+                    Grid.Row="3"
+                    Grid.Column="0"/>
+                <TextBlock 
+                    Text="{x:Bind Status, Mode=OneWay}"
+                    Grid.Row="3"
                     Grid.Column="2"/>
 
             </Grid>

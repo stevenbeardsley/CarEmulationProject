@@ -11,6 +11,12 @@ namespace SimulationPlatform.Models
             get; set;
         }
 
+        [JsonPropertyName("gear")]
+        public string? Gear
+        {
+            get; set;
+        }
+
         [JsonPropertyName("status")]
         public string? Status
         {
@@ -32,7 +38,7 @@ namespace SimulationPlatform.Models
         public CarData ToCarData()
         {
             // TODO: Impplement 
-            return new CarData(Speed ?? "-", Status ?? "-");
+            return new CarData(Speed ?? "-", Gear ?? "-", Status ?? "-");
         }
     }
 }

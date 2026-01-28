@@ -16,8 +16,9 @@ namespace SimulationPlatform.Controllers
         public async Task<(int ExitCode, string Output, string Error)> Deploy(string scriptPath)
         {
             // Quote the script path safely for bash -c
-            var bashCmd = $"\"{scriptPath}\"";
+            var bashCmd = $"'{scriptPath.Replace("'", "'\\''")}'"; // single-quote safe
             var arguments = $"-d {_distroName} -- bash -lc {bashCmd}";
+
 
             var psi = new ProcessStartInfo
             {

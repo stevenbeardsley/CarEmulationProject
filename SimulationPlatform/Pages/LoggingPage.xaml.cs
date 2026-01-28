@@ -9,8 +9,9 @@ namespace SimulationPlatform.Pages
     public sealed partial class LoggingPage : Page, INotifyPropertyChanged
     {
         private string m_speed = string.Empty;
+        private string m_gear = string.Empty;
         private string m_status = string.Empty;
-
+        
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public LoggingPage()
@@ -30,6 +31,19 @@ namespace SimulationPlatform.Pages
                 {
                     m_speed = value;
                     OnPropertyChanged(nameof(Speed));
+                }
+            }
+        }
+
+        public string Gear
+        {
+            get => m_gear;
+            set
+            {
+                if (m_gear != value)
+                {
+                    m_gear = value;
+                    OnPropertyChanged(nameof(Gear));
                 }
             }
         }
@@ -59,8 +73,10 @@ namespace SimulationPlatform.Pages
             {
                 Speed = carData.Speed;
                 Status = carData.Status;
+                Gear = carData.Gear;
                 OnPropertyChanged(nameof(Speed));
                 OnPropertyChanged(nameof(Status));
+                OnPropertyChanged(nameof(Gear));
             });
         }
 
@@ -69,6 +85,7 @@ namespace SimulationPlatform.Pages
             // Example: Pull data from model
             Speed = App.m_model.m_carData.Speed;
             Status = App.m_model.m_carData.Status;
+            Gear = App.m_model.m_carData.Gear;
             App.m_model.m_webSocketController.CarDataReceived += UpdateCarData;
         }
 
