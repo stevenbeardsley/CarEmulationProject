@@ -18,6 +18,7 @@ target_link_libraries(
         LogFile
         Can
         shared
+        Transmission
 )
 
 source_group("Source Files" FILES ${tcm_SOURCE})

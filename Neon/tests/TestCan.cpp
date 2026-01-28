@@ -9,9 +9,9 @@ namespace shared::can
 {
     TEST(CanMessage, Gear100_RoundTripsViaAccessors)
     {
-        Message msg(MessageType::Gear, 100u);
+        Message msg(MessageType::CurrentGear, 100u);
 
-        EXPECT_EQ(msg.getMessageType(), MessageType::Gear);
+        EXPECT_EQ(msg.getMessageType(), MessageType::CurrentGear);
         EXPECT_EQ(msg.getValue(), 100u);
     }
 
@@ -24,10 +24,10 @@ namespace shared::can
         };
 
         const Case cases[] = {
-            { MessageType::Gear, 0u },
-            { MessageType::Gear, 1u },
-            { MessageType::Gear, 100u },
-            { MessageType::Gear, 0xFFFFFFFFu },
+            { MessageType::CurrentGear, 0u },
+            { MessageType::CurrentGear, 1u },
+            { MessageType::CurrentGear, 100u },
+            { MessageType::CurrentGear, 0xFFFFFFFFu },
         };
 
         for (const auto& c : cases)
@@ -41,9 +41,9 @@ namespace shared::can
     TEST(CanMessage, DifferentMessageTypes_RoundTripViaAccessors)
     {
         // This test assumes these enum values exist in your MessageType.
-        // If you only have Gear right now, remove the extra cases.
+        // If you only have CurrentGear right now, remove the extra cases.
         const MessageType typesToTry[] = {
-            MessageType::Gear,
+            MessageType::CurrentGear,
             MessageType::Speed,
             MessageType::RPM
         };

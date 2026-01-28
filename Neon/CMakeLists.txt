@@ -8,6 +8,8 @@ find_package(Boost CONFIG REQUIRED COMPONENTS system json)
 
 add_subdirectory(ecm)
 add_subdirectory(tcm)
+add_subdirectory(tcm/transmission)
+
 add_subdirectory(dashboard)
 add_subdirectory(shared/logging)
 add_subdirectory(shared/bit_parser)

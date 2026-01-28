@@ -8,17 +8,19 @@ namespace shared::can
 
 enum class MessageType
 {
-	Speed, 
-	Gear,
-	RPM
+	GearUpRequest,
+    GearDownRequest,
+    CurrentGear,
+	RPM, // TODO implement 
+    Speed
 };
 
 inline const std::string toString(MessageType type)
 {
     switch (type)
     {
-    case MessageType::Gear:    
-        return "gear";
+    case MessageType::GearUpRequest:    
+        return "gear up";
     case MessageType::Speed:   
         return "speed";
     case MessageType::RPM:     

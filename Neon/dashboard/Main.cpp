@@ -4,6 +4,9 @@
 #include "DashboardDataSource.h"
 #include "CommandMessage.h"
 #include "shared/Peers.h"
+#include "shared/can/Receiver.h"
+#include <queue>
+#include "shared/can/Message.h"
 #include "shared/can/Bus.h"
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
@@ -159,6 +162,62 @@ int main()
                 LogFile::Error("Client connection error: " + std::string(e.what()));
             }
         }
+
+
+        // Receiver to receive and store information 
+        shared::can::Receiver canRx(running, /*listenPort=*/15000);
+        std::queue<shared::can::Message> inbox;
+        std::mutex m;
+        std::condition_variable cv;
+        // Receiver thread: enqueue + notify
+        canRx.SetHandler([&](shared::can::Message msg, const auto& sender) {
+            (void)sender;
+            {
+                std::lock_guard<std::mutex> lk(m);
+                inbox.push(std::move(msg));
+            }
+            cv.notify_one();
+            });
+
+        std::thread rxThread([&]() {
+            canRx.Run(); // blocking loop inside receiver
+            });
+
+        std::thread processThread([&]() {
+            while (running) {
+                shared::can::Message msg = [&]() {
+                    std::unique_lock<std::mutex> lk(m);
+                    cv.wait(lk, [&]() { return !running || !inbox.empty(); });
+
+                    // shutdown path
+                    if (!running && inbox.empty()) {
+                        // return *something* unreachable; we'll break above
+                        // but keep structure simple:
+                        // (we'll handle break outside)
+                    }
+
+                    if (inbox.empty()) {
+                        // running became false
+                        return shared::can::Message(shared::can::MessageType::RPM, 0);
+                    }
+
+                    auto m0 = std::move(inbox.front());
+                    inbox.pop();
+                    return m0;
+                    }();
+
+                if (!running) break;
+
+                switch (msg.getMessageType()) {
+                case shared::can::MessageType::CurrentGear:
+                    LogFile::Info("Current gear received.");
+                    dataSource.updateData(speed, status);
+                    break;
+                default:
+                    break;
+                }
+            }
+            });
 
         // === Graceful shutdown ===
         LogFile::Info("Shutting down dashboard.");

@@ -103,12 +103,12 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
     
     // Extract JSON values 
     auto [command, value] = ParseSingleCommandJson(body);
-    auto messageType = shared::can::MessageType::Gear;
+    auto messageType = shared::can::MessageType::GearUpRequest;
     switch (command)
     {
         case Command::GearUp:
             LogFile::Info("Gear up request received.");
-            messageType = shared::can::MessageType::Gear; // TODO support other message types and define an icd
+            messageType = shared::can::MessageType::GearUpRequest; // TODO support other message types and define an icd
             break;
         case Command::Unknown:
             LogFile::Info("Unknown command type received.");

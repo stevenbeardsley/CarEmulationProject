@@ -74,11 +74,13 @@ int main()
 
             switch (msg.getMessageType())
             {
-            case shared::can::MessageType::Gear:
+            case shared::can::MessageType::GearUpRequest:
                 LogFile::Info("Gear command received - not subscribed .");
                 // process.onGearUp(); or onGearDown based on msg.getValue()
                 break;
-
+            case shared::can::MessageType::CurrentGear:
+                LogFile::Info("Current gear received");
+                break;
             default:
                 break;
             }

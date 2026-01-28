@@ -10,6 +10,7 @@ void DashboardDataSource::updateData(int speed, bool status)
     m_status = status;
 }
 
+
 std::string DashboardDataSource::getData() const
 {
     std::lock_guard<std::mutex> lock(mutex_); // Lock the dashboard data so it does not change`
@@ -19,7 +20,7 @@ std::string DashboardDataSource::getData() const
     jsonStr += "\"speed\": \"" + std::to_string(m_speed) + "\", ";
     jsonStr += "\"status\": \"" + std::string(m_status ? "true" : "false") + "\"";
     jsonStr += "\n}";
-    return jsonStr;
+    return jsonStr; // TODO: Update the datasource to account for the new data
 }
 
 }

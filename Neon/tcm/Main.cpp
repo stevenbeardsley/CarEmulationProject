@@ -1,8 +1,9 @@
 #include "LogFile.h"
 #include "Process.h"
+#include "transmission/Transmission.h"
 #include "shared/can/Receiver.h"
 #include "shared/can/Message.h"
-
+#include "shared/can/Bus.h"
 #include <atomic>
 #include <condition_variable>
 #include <csignal>
@@ -25,6 +26,9 @@ int main()
 
     LogFile::Instance().setLogFile("tcm.log");
     LogFile::Instance().setLevel(LogLevel::DEBUG);
+
+    // Create Transmission object 
+    tcm::transmission::Transmission transmission;
     LogFile::Info("Transmission is running!");
 
     std::mutex m;
@@ -76,17 +80,41 @@ int main()
             if (!running) break;
 
             switch (msg.getMessageType()) {
-            case shared::can::MessageType::Gear:
-                LogFile::Info("Gear command received.");
-                // process.onGearUp(); or onGearDown based on msg.getValue()
+            case shared::can::MessageType::GearUpRequest:
+                LogFile::Info("Gear up command received.");
+                transmission.gearUp();
                 break;
-
+            case shared::can::MessageType::GearDownRequest:
+                LogFile::Info("Gear down command received.");
+                transmission.gearDown();
+                break;
             default:
                 break;
             }
         }
         });
 
+
+    // Current gear broadcast thread 
+    auto canBus = shared::can::Bus(15000);
+    canBus.AddPeer("ecm");
+    std::thread gearPublishThread([&]()
+        {
+            while (running)
+            {
+                shared::can::Message msg{
+                    shared::can::MessageType::CurrentGear,
+                    transmission.getGear()
+                };
+
+                LogFile::Debug("Publishing CurrentGear=" + std::to_string(transmission.getGear()));
+                canBus.Send(msg);
+
+                // sleep ~1s, but allow quicker shutdown
+                for (int i = 0; i < 10 && running; ++i)
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+        });
     // Main thread just blocks; container stays alive
     processThread.join();
 
@@ -94,6 +122,8 @@ int main()
     canRx.Stop();
     cv.notify_all();
     rxThread.join();
+    gearPublishThread.join();
+
 
     LogFile::Info("All threads stopped cleanly.");
     return 0;
