@@ -158,7 +158,8 @@
                                     <Button Grid.Column="0"
                                             Content="Gear -"
                                             HorizontalAlignment="Stretch"
-                                            Click="GearShiftDown_Click"/>
+                                            Click="GearShiftDown_Click"
+                                            IsEnabled="{x:Bind m_downShiftEnabled, Mode= OneWay }"/>
                                     
                                     <Button Grid.Column="1"
                                             Content="Gear +"
@@ -315,7 +316,7 @@
                                 Padding="14">
                             <StackPanel Spacing="6">
                                 <TextBlock Text="INFO" Foreground="DarkGray" FontWeight="SemiBold"/>
-                                <TextBlock Text="All values are placeholders until you wire up bindings."
+                                <TextBlock Text="Data is received from the Networked ECU Orchestration Nodes (NEON)."
                                            TextWrapping="Wrap"
                                            Foreground="DarkGray"/>
                             </StackPanel>

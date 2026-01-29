@@ -42,7 +42,7 @@ namespace SimulationPlatform.Controllers
             var output = await outputTask;
             var error = await errorTask;
 
-            return (process.ExitCode, output, error);
+            return (process.ExitCode, output, error); // TODO: Needs breakpoint here for some reason, threading issue?
         }
 
     }

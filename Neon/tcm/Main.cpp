@@ -77,7 +77,10 @@ int main()
                 return m0;
                 }();
 
-            if (!running) break;
+            if (!running)
+            {
+                break;
+            }
 
             switch (msg.getMessageType()) {
             case shared::can::MessageType::GearUpRequest:

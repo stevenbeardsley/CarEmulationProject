@@ -15,6 +15,20 @@ namespace SimulationPlatform.Pages
         public event PropertyChangedEventHandler? PropertyChanged;
         private string m_speed = string.Empty;
         private string m_gear = string.Empty;
+
+        public bool m_downShiftEnabled
+        {
+            get
+            {
+                var enabled = true;
+                if (m_gear == "0")
+                {
+                    enabled = false;
+                }
+                return enabled;
+            }
+        }
+
         public string Gear
         {
             get => m_gear;
@@ -73,6 +87,7 @@ namespace SimulationPlatform.Pages
                 Gear = carData.Gear.ToString();
                 OnPropertyChanged(nameof(Speed));
                 OnPropertyChanged(nameof(Gear));
+                OnPropertyChanged(nameof(m_downShiftEnabled));
             });
         }
 
@@ -86,6 +101,7 @@ namespace SimulationPlatform.Pages
             {
                 // TODO: log or surface error
                 System.Diagnostics.Debug.WriteLine(ex.Message);
+                OnPropertyChanged(nameof(m_downShiftEnabled));
             }
         }
 
