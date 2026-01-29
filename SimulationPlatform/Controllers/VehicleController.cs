@@ -15,6 +15,11 @@ public class VehicleController
         await m_httpClient.SendAsync("command", "gear_up", 1);
     }
 
+    public async Task ShiftDownAsync()
+    {
+        await m_httpClient.SendAsync("command", "gear_down", 1);
+    }
+
     public async Task SetThrottleAsync(double value)
     {
         await m_httpClient.SendAsync("carCommands", "throttle", value);

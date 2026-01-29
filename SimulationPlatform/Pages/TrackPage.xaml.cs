@@ -78,7 +78,15 @@ namespace SimulationPlatform.Pages
 
         private async void GearShiftDown_Click(object sender, RoutedEventArgs e)
         {
-            ;
+            try
+            {
+                await m_model.VehicleController.ShiftDownAsync();
+            }
+            catch (Exception ex)
+            {
+                // TODO: log or surface error
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
         }
 
         private async void GearShiftUp_Click(object sender, RoutedEventArgs e)

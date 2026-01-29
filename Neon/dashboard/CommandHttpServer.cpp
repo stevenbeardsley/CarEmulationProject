@@ -110,6 +110,10 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
             LogFile::Info("Gear up request received.");
             messageType = shared::can::MessageType::GearUpRequest; // TODO support other message types and define an icd
             break;
+        case Command::GearDown:
+            LogFile::Info("Gear down request received.");
+            messageType = shared::can::MessageType::GearDownRequest;
+            break;
         case Command::Unknown:
             LogFile::Info("Unknown command type received.");
             break;
