@@ -37,8 +37,12 @@ namespace SimulationPlatform.Models
 
         public CarData ToCarData()
         {
-            // TODO: Impplement 
-            return new CarData(Speed ?? "-", Gear ?? "-", Status ?? "-");
+            var speed = int.TryParse(Speed, out var parsedSpeed) ? parsedSpeed : 0;
+            var gear = int.TryParse(Gear, out var parsedGear) ? parsedGear : 0;
+            var status = bool.TryParse(Status, out var b) && b;
+
+            return new CarData(speed, gear, status);
         }
+
     }
 }

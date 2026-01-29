@@ -136,4 +136,4 @@ for i in "${!EXEC_NAMES[@]}"; do
 done
 
 echo "Finished deploying."
-
+exit 0;

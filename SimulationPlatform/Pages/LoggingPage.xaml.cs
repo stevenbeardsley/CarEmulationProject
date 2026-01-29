@@ -71,9 +71,9 @@ namespace SimulationPlatform.Pages
         {
             DispatcherQueue.TryEnqueue(() =>
             {
-                Speed = carData.Speed;
-                Status = carData.Status;
-                Gear = carData.Gear;
+                Speed = carData.Speed.ToString();
+                Status = carData.Status.ToString();
+                Gear = carData.Gear.ToString();
                 OnPropertyChanged(nameof(Speed));
                 OnPropertyChanged(nameof(Status));
                 OnPropertyChanged(nameof(Gear));
@@ -83,9 +83,9 @@ namespace SimulationPlatform.Pages
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             // Example: Pull data from model
-            Speed = App.m_model.m_carData.Speed;
-            Status = App.m_model.m_carData.Status;
-            Gear = App.m_model.m_carData.Gear;
+            Speed = App.m_model.m_carData.Speed.ToString();
+            Status = App.m_model.m_carData.Status.ToString();
+            Gear = App.m_model.m_carData.Gear.ToString();
             App.m_model.m_webSocketController.CarDataReceived += UpdateCarData;
         }
 
