@@ -8,6 +8,7 @@ enum class Command
 {
     GearUp,
     GearDown,
+    Throttle,
     Unknown
 };
 
@@ -22,6 +23,10 @@ static Command toCommand(std::string command)
     if (command == "gear_down")
     {
         commandType = Command::GearDown;
+    }
+    if (command == "throttle")
+    {
+        commandType = Command::Throttle;
     }
 
     return commandType;

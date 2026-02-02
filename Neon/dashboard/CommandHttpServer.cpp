@@ -103,7 +103,7 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
     
     // Extract JSON values 
     auto [command, value] = ParseSingleCommandJson(body);
-    auto messageType = shared::can::MessageType::GearUpRequest;
+    auto messageType = shared::can::MessageType::CurrentGear;
     switch (command)
     {
         case Command::GearUp:
@@ -114,7 +114,11 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
             LogFile::Info("Gear down request received.");
             messageType = shared::can::MessageType::GearDownRequest;
             break;
-        case Command::Unknown:
+        case Command::Throttle:
+            LogFile::Info("Throttle change received.");
+            messageType = shared::can::MessageType::ThrottleRequest;
+            break;
+        default:
             LogFile::Info("Unknown command type received.");
             break;
     }
@@ -125,11 +129,14 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
         static_cast<std::uint32_t>(69)
     };
 
-    const bool test = m_bus.Send(msg);
-    LogFile::Info("CommandHttpServer: CAN message sent.");
-    if (test)
+    const bool messageSent = m_bus.Send(msg);
+    if (messageSent)
     {
-        LogFile::Info("And it was successful!");
+        LogFile::Info("CommandHttpServer: CAN message sent.");
+    }
+    else
+    {
+        LogFile::Info("CommandHttpServer: CAN message failed to send.");
     }
     http::response<http::string_body> res{ http::status::ok, req.version() };
     res.set(http::field::content_type, "application/json");

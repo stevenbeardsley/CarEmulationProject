@@ -1,5 +1,3 @@
-find_package(Boost REQUIRED COMPONENTS system json)
-
 set(transmission_HEADERS
     Transmission.h
 )

@@ -22,6 +22,7 @@ target_link_libraries(
     PUBLIC
         LogFile
         Can
+        Engine
 )
 
 source_group("Source Files" FILES ${ecm_SOURCE})

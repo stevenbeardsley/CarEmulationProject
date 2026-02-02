@@ -11,8 +11,10 @@ enum class MessageType
 	GearUpRequest,
     GearDownRequest,
     CurrentGear,
-	RPM, // TODO implement 
-    Speed
+    ThrottleRequest,
+    Acceleration,
+	RPM, // TODO: Implement
+    Speed // TODO: Implement
 };
 
 inline const std::string toString(MessageType type)

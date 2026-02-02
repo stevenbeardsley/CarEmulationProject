@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Boost CONFIG REQUIRED COMPONENTS system json)
 
 add_subdirectory(ecm)
+add_subdirectory(ecm/engine)
 add_subdirectory(tcm)
 add_subdirectory(tcm/transmission)
 

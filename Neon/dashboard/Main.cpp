@@ -170,14 +170,12 @@ int main()
                     switch (msg.getMessageType())
                     {
                     case shared::can::MessageType::CurrentGear:
-                        LogFile::Info("Current gear received.");
                         uiData.m_gear = static_cast<std::uint32_t>(msg.getValue());
-                        LogFile::Info("WebSocket data updated with new gear.");
                         break;
-
-                        // Add more cases as you grow:
-                        // case shared::can::MessageType::Speed: uiData.m_speed = ...; break;
-
+                    case shared::can::MessageType::Speed:
+                        uiData.m_speed = static_cast<std::uint32_t>(msg.getValue());
+                        break;
+                        // TODO: RPM
                     default:
                         break;
                     }
@@ -207,21 +205,6 @@ int main()
 
         LogFile::Info("HTTP Server up and running.");
 
-        // =========================
-        // Temporary updater thread (simulates speed updates)
-        // =========================
-        std::thread updater([&]()
-            {
-                int iteration = 0;
-                while (running)
-                {
-                    const auto speed = 50 + (iteration % 10) * 10;
-                    uiData.m_speed = static_cast<std::uint32_t>(speed);
-                    uiData.m_status = true;
-                    iteration++;
-                    std::this_thread::sleep_for(std::chrono::seconds(2));
-                }
-            });
 
         // =========================
         // WebSocket server (main thread)
@@ -293,7 +276,6 @@ int main()
         // Wake the CAN consumer if it's waiting.
         inboxCv.notify_all();
 
-        if (updater.joinable()) updater.join();
         if (commandThread.joinable()) commandThread.join();
         if (canRxThread.joinable()) canRxThread.join();
         if (canProcessThread.joinable()) canProcessThread.join();
