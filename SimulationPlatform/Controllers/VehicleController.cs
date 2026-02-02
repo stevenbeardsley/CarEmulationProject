@@ -22,6 +22,7 @@ public class VehicleController
 
     public async Task SetThrottleAsync(double value)
     {
-        await m_httpClient.SendAsync("carCommands", "throttle", value);
+        await m_httpClient.SendAsync("carCommands", "throttle", value); // TODO: Is this being sent multiple times (?)
     }
+
 }
