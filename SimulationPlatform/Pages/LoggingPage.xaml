@@ -56,12 +56,20 @@
                     Grid.Row="2"
                     Grid.Column="2"/>
                 <TextBlock
-                    Text="Status:"
+                    Text="RPM:"
+                    Grid.Row="2"
+                    Grid.Column="0"/>
+                <TextBlock 
+                    Text="{x:Bind Rpm, Mode=OneWay}"
                     Grid.Row="3"
+                    Grid.Column="3"/>
+                <TextBlock
+                    Text="Status:"
+                    Grid.Row="4"
                     Grid.Column="0"/>
                 <TextBlock 
                     Text="{x:Bind Status, Mode=OneWay}"
-                    Grid.Row="3"
+                    Grid.Row="4"
                     Grid.Column="2"/>
 
             </Grid>
