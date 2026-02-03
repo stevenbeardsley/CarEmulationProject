@@ -16,6 +16,7 @@ std::string DashboardDataSource::getData() const
     jsonStr += "{\n";
     jsonStr += "\"speed\": \"" + std::to_string(m_data.m_speed) + "\", ";
     jsonStr += "\"gear\": \"" + std::to_string(m_data.m_gear) + "\", ";
+    jsonStr += "\"rpm\": \"" + std::to_string(m_data.m_rpm) + "\", ";
     jsonStr += "\"status\": \"" + std::string(m_data.m_status ? "true" : "false") + "\"";
     jsonStr += "\n}";
     return jsonStr; // TODO: Update the datasource to account for the new data

@@ -15,6 +15,7 @@ namespace SimulationPlatform.Pages
 
         private string m_speed = string.Empty;
         private string m_gear = string.Empty;
+        private string m_rpms = string.Empty;
 
         private double _acceleration = 25;
         private double _speedValue;
@@ -81,6 +82,19 @@ namespace SimulationPlatform.Pages
             }
         }
 
+        public string Rpm
+        {
+            get => m_rpms;
+            set
+            {
+                if (m_rpms != value)
+                {
+                    m_rpms = value;
+                    OnPropertyChanged(nameof(Rpm));
+                }
+            }
+        }
+
         public TrackPage()
         {
             InitializeComponent();
@@ -113,6 +127,7 @@ namespace SimulationPlatform.Pages
         {
             SpeedValue = App.m_model.m_carData.Speed;
             Speed = SpeedValue.ToString();
+            Rpm = App.m_model.m_carData.Rpms.ToString();
             Gear = App.m_model.m_carData.Gear.ToString();
 
             App.m_model.m_webSocketController.CarDataReceived += UpdateCarData;
@@ -140,20 +155,33 @@ namespace SimulationPlatform.Pages
             {
                 SpeedValue = carData.Speed;           // drives animation + raises property changed
                 Speed = carData.Speed.ToString();
+                Rpm = carData.Rpms.ToString();
                 Gear = carData.Gear.ToString();
             });
         }
 
         private async void GearShiftDown_Click(object sender, RoutedEventArgs e)
         {
-            try { await m_model.VehicleController.ShiftDownAsync(); }
-            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex.Message); }
+            try
+            { 
+                await m_model.VehicleController.ShiftDownAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
         }
 
         private async void GearShiftUp_Click(object sender, RoutedEventArgs e)
         {
-            try { await m_model.VehicleController.ShiftUpAsync(); }
-            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex.Message); }
+            try 
+            {
+                await m_model.VehicleController.ShiftUpAsync(); 
+            }
+            catch (Exception ex) 
+            { 
+                System.Diagnostics.Debug.WriteLine(ex.Message); 
+            }
         }
 
         private void AccelerationSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)

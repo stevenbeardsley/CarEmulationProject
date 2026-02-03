@@ -102,7 +102,7 @@ int main()
         // =========================
         // Shared dashboard data
         // =========================
-        dashboard::UiData uiData{ 0, 0, true };
+        dashboard::UiData uiData{ 0, 0, 0, true };
         dashboard::DashboardDataSource dataSource{ uiData };
 
         // =========================
@@ -170,12 +170,14 @@ int main()
                     switch (msg.getMessageType())
                     {
                     case shared::can::MessageType::CurrentGear:
-                        uiData.m_gear = static_cast<std::uint32_t>(msg.getValue());
+                        uiData.m_gear = msg.getValue();
                         break;
                     case shared::can::MessageType::Speed:
-                        uiData.m_speed = static_cast<std::uint32_t>(msg.getValue());
+                        uiData.m_speed = msg.getValue();
                         break;
-                        // TODO: RPM
+                    case shared::can::MessageType::RPM:
+                        uiData.m_rpm = msg.getValue();
+                        break;
                     default:
                         break;
                     }

@@ -20,11 +20,11 @@ static Command toCommand(std::string command)
     {
         commandType = Command::GearUp;
     }
-    if (command == "gear_down")
+    else if (command == "gear_down")
     {
         commandType = Command::GearDown;
     }
-    if (command == "throttle")
+    else if (command == "throttle")
     {
         commandType = Command::Throttle;
     }

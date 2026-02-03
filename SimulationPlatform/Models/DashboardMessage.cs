@@ -17,6 +17,12 @@ namespace SimulationPlatform.Models
             get; set;
         }
 
+        [JsonPropertyName("rpm")]
+        public string? Rpms
+        {
+            get; set;
+        }
+
         [JsonPropertyName("status")]
         public string? Status
         {
@@ -39,9 +45,10 @@ namespace SimulationPlatform.Models
         {
             var speed = int.TryParse(Speed, out var parsedSpeed) ? parsedSpeed : 0;
             var gear = int.TryParse(Gear, out var parsedGear) ? parsedGear : 0;
+            var rpms = int.TryParse(Rpms, out var parsedRpms) ? parsedRpms : 0;
             var status = bool.TryParse(Status, out var b) && b;
 
-            return new CarData(speed, gear, status);
+            return new CarData(speed, gear, rpms, status);
         }
 
     }

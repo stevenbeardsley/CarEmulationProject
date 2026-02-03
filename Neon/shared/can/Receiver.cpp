@@ -55,10 +55,6 @@ namespace shared::can
         const std::uint32_t value = read_u32_be(data + 1);
         const auto type = static_cast<MessageType>(canIdRaw);
 
-        LogFile::Debug("RX raw: id=" + std::to_string(canIdRaw) +
-            " value=" + std::to_string(value) +
-            " from " + sender.address().to_string() + ":" + std::to_string(sender.port()));
-
         Message msg{ type, value };
 
         if (handler_)
@@ -96,11 +92,6 @@ namespace shared::can
                 LogFile::Error("CAN Receiver: receive_from failed: " + ec.message());
                 continue;
             }
-
-            LogFile::Debug(
-                "CAN RX raw datagram: bytes=" + std::to_string(n) +
-                " from " + sender.address().to_string() + ":" + std::to_string(sender.port())
-            );
 
             handleDatagram(buf.data(), n, sender);
         }

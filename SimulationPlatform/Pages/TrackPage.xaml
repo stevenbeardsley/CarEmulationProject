@@ -120,93 +120,92 @@
                                 <!-- Top-down car placeholder TODO: Make colour configurable -->
                                 <!-- Top-down car placeholder (improved) -->
                                 <Grid Width="60"
-      Height="110"
-      HorizontalAlignment="Center"
-      VerticalAlignment="Center">
+                                  Height="110"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center">
 
                                     <!-- Shadow -->
                                     <Border Width="52"
-            Height="100"
-            CornerRadius="14"
-            Background="#33000000"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Margin="2,4,0,0"/>
+                                        Height="100"
+                                        CornerRadius="14"
+                                        Background="#33000000"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Margin="2,4,0,0"/>
 
                                     <!-- Car body -->
                                     <Border Width="52"
-            Height="100"
-            CornerRadius="14"
-            Background="#FF3A86FF"
-            BorderThickness="1"
-            BorderBrush="#AAFFFFFF"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center">
+                                        Height="100"
+                                        CornerRadius="14"
+                                        Background="#FF3A86FF"
+                                        BorderThickness="1"
+                                        BorderBrush="#AAFFFFFF"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center">
 
                                         <Grid>
-
                                             <!-- Wheels -->
                                             <Rectangle Width="8" Height="20"
-                       Fill="#FF1E1E1E"
-                       RadiusX="3" RadiusY="3"
-                       HorizontalAlignment="Left"
-                       VerticalAlignment="Top"
-                       Margin="-4,14,0,0"/>
+                                               Fill="#FF1E1E1E"
+                                               RadiusX="3" RadiusY="3"
+                                               HorizontalAlignment="Left"
+                                               VerticalAlignment="Top"
+                                               Margin="-4,14,0,0"/>
                                             <Rectangle Width="8" Height="20"
-                       Fill="#FF1E1E1E"
-                       RadiusX="3" RadiusY="3"
-                       HorizontalAlignment="Right"
-                       VerticalAlignment="Top"
-                       Margin="0,14,-4,0"/>
+                                               Fill="#FF1E1E1E"
+                                               RadiusX="3" RadiusY="3"
+                                               HorizontalAlignment="Right"
+                                               VerticalAlignment="Top"
+                                               Margin="0,14,-4,0"/>
 
                                             <Rectangle Width="8" Height="20"
-                       Fill="#FF1E1E1E"
-                       RadiusX="3" RadiusY="3"
-                       HorizontalAlignment="Left"
-                       VerticalAlignment="Bottom"
-                       Margin="-4,0,0,14"/>
+                                               Fill="#FF1E1E1E"
+                                               RadiusX="3" RadiusY="3"
+                                               HorizontalAlignment="Left"
+                                               VerticalAlignment="Bottom"
+                                               Margin="-4,0,0,14"/>
                                             <Rectangle Width="8" Height="20"
-                       Fill="#FF1E1E1E"
-                       RadiusX="3" RadiusY="3"
-                       HorizontalAlignment="Right"
-                       VerticalAlignment="Bottom"
-                       Margin="0,0,-4,14"/>
+                                               Fill="#FF1E1E1E"
+                                               RadiusX="3" RadiusY="3"
+                                               HorizontalAlignment="Right"
+                                               VerticalAlignment="Bottom"
+                                               Margin="0,0,-4,14"/>
 
                                             <!-- Cabin -->
                                             <Border Width="36"
-                    Height="44"
-                    CornerRadius="10"
-                    Background="#FF2F6FD6"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Margin="0,-6,0,0"/>
+                                                Height="44"
+                                                CornerRadius="10"
+                                                Background="#FF2F6FD6"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Margin="0,-6,0,0"/>
 
                                             <!-- Windscreen -->
                                             <Rectangle Width="26"
-                       Height="12"
-                       Fill="#66FFFFFF"
-                       RadiusX="4" RadiusY="4"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Top"
-                       Margin="0,18,0,0"/>
+                                               Height="12"
+                                               Fill="#66FFFFFF"
+                                               RadiusX="4" RadiusY="4"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Top"
+                                               Margin="0,18,0,0"/>
 
                                             <!-- Rear window -->
                                             <Rectangle Width="22"
-                       Height="10"
-                       Fill="#44FFFFFF"
-                       RadiusX="4" RadiusY="4"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Bottom"
-                       Margin="0,0,0,20"/>
+                                               Height="10"
+                                               Fill="#44FFFFFF"
+                                               RadiusX="4" RadiusY="4"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Bottom"
+                                               Margin="0,0,0,20"/>
 
                                             <!-- Hood detail -->
                                             <Rectangle Width="6"
-                       Height="18"
-                       Fill="#33FFFFFF"
-                       RadiusX="3" RadiusY="3"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Top"
-                       Margin="0,6,0,0"/>
+                                               Height="18"
+                                               Fill="#33FFFFFF"
+                                               RadiusX="3" RadiusY="3"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Top"
+                                               Margin="0,6,0,0"/>
 
                                         </Grid>
                                     </Border>
@@ -389,7 +388,7 @@
                                 Padding="14">
                             <StackPanel>
                                 <TextBlock Text="RPM" Foreground="DarkGray" FontWeight="SemiBold"/>
-                                <TextBlock Text="3,450" FontSize="34" FontWeight="Bold"/>
+                                <TextBlock Text="{x:Bind Rpm, Mode=OneWay}" FontSize="34" FontWeight="Bold"/>
                             </StackPanel>
                         </Border>
 

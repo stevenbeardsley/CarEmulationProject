@@ -7,11 +7,13 @@
         private int _speed;
         private bool _status;
         private int _gear;
+        private int _rpms;
 
-        public CarData(int speed, int gear, bool status)
+        public CarData(int speed, int gear, int rpms, bool status)
         {
             _speed = speed;
             _gear = gear;
+            _rpms = rpms;
             _status = status;
         }
 
@@ -19,6 +21,7 @@
         {
             _speed = 0;
             _gear = 0;
+            _rpms = 0;
             _status = true;
         }
 
@@ -58,6 +61,24 @@
             }
         }
 
+        public int Rpms
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    return _rpms;
+                }
+            }
+            set
+            {
+                lock (_lock)
+                {
+                    _rpms = value;
+                }
+            }
+        }
+
         public bool Status
         {
             get
@@ -80,12 +101,13 @@
         /// Atomically update all fields together
         /// (important to avoid mixed-state reads)
         /// </summary>
-        public void Update(int speed, int gear, bool status)
+        public void Update(int speed, int gear, int rpms, bool status)
         {
             lock (_lock)
             {
                 _speed = speed;
                 _gear = gear;
+                _rpms = rpms;
                 _status = status;
             }
         }
@@ -93,11 +115,11 @@
         /// <summary>
         /// Atomically read a consistent snapshot
         /// </summary>
-        public (int Speed, int Gear, bool Status) Snapshot()
+        public (int Speed, int Gear, int Rpms, bool Status) Snapshot()
         {
             lock (_lock)
             {
-                return (_speed, _gear, _status);
+                return (_speed, _gear, _rpms, _status);
             }
         }
     }
