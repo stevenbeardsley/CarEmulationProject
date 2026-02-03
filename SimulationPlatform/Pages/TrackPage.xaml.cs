@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -11,13 +10,31 @@ namespace SimulationPlatform.Pages
 {
     public sealed partial class TrackPage : Page, INotifyPropertyChanged
     {
-
         private readonly AppModel m_model;
         public event PropertyChangedEventHandler? PropertyChanged;
+
         private string m_speed = string.Empty;
         private string m_gear = string.Empty;
-        private double _acceleration = 25; // default matches your old Value="25"
-        private bool _isDraggingAcceleration;
+
+        private double _acceleration = 25;
+        private double _speedValue;
+        private double _oneCopyHeight = 0;
+
+        private bool _laneScrollStarted = false;
+
+        public double SpeedValue
+        {
+            get => _speedValue;
+            set
+            {
+                if (Math.Abs(_speedValue - value) > 0.001)
+                {
+                    _speedValue = value;
+                    OnPropertyChanged(nameof(SpeedValue));
+                    UpdateRoadScrollSpeed();
+                }
+            }
+        }
 
         public double Acceleration
         {
@@ -27,26 +44,15 @@ namespace SimulationPlatform.Pages
                 if (Math.Abs(_acceleration - value) > 0.001)
                 {
                     _acceleration = value;
-                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(Acceleration));
                     OnPropertyChanged(nameof(AccelerationText));
                 }
             }
         }
+
         public string AccelerationText => $"{Acceleration:0}%";
 
-
-        public bool m_downShiftEnabled
-        {
-            get
-            {
-                var enabled = true;
-                if (m_gear == "0")
-                {
-                    enabled = false;
-                }
-                return enabled;
-            }
-        }
+        public bool m_downShiftEnabled => m_gear != "0";
 
         public string Gear
         {
@@ -57,6 +63,7 @@ namespace SimulationPlatform.Pages
                 {
                     m_gear = value;
                     OnPropertyChanged(nameof(Gear));
+                    OnPropertyChanged(nameof(m_downShiftEnabled));
                 }
             }
         }
@@ -74,12 +81,12 @@ namespace SimulationPlatform.Pages
             }
         }
 
-
         public TrackPage()
         {
             InitializeComponent();
             m_model = App.m_model;
-            // Slider eats pointer events, so listen even if already handled
+
+            // slider commit on release only (registered once)
             AccelerationSlider.AddHandler(
                 UIElement.PointerReleasedEvent,
                 new Microsoft.UI.Xaml.Input.PointerEventHandler(AccelerationSlider_PointerReleased),
@@ -89,96 +96,143 @@ namespace SimulationPlatform.Pages
                 UIElement.PointerCaptureLostEvent,
                 new Microsoft.UI.Xaml.Input.PointerEventHandler(AccelerationSlider_PointerCaptureLost),
                 handledEventsToo: true);
-        }
-        protected override void OnNavigatedTo(NavigationEventArgs e)
-        {
-            Speed = App.m_model.m_carData.Speed.ToString();
-            Gear = App.m_model.m_carData.Gear.ToString();
-            App.m_model.m_webSocketController.CarDataReceived += UpdateCarData;
+
+            // clipping
+            LaneViewport.SizeChanged += LaneViewport_SizeChanged;
+
+            Loaded += (_, __) =>
+            {
+                ApplyLaneClip();
+                SetupSeamlessLaneScroll();     // sets To = -_oneCopyHeight
+                StartLaneScrollIfNeeded();     // begins storyboard controllably once
+                UpdateRoadScrollSpeed();       // applies correct ratio/pause/resume
+            };
         }
 
-        private void OnPropertyChanged(string propertyName = null)
+        protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            SpeedValue = App.m_model.m_carData.Speed;
+            Speed = SpeedValue.ToString();
+            Gear = App.m_model.m_carData.Gear.ToString();
+
+            App.m_model.m_webSocketController.CarDataReceived += UpdateCarData;
+
+            UpdateRoadScrollSpeed();
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            // Unsubscribe from model changes (if you add them later)
             App.m_model.m_webSocketController.CarDataReceived -= UpdateCarData;
         }
 
+        private void OnPropertyChanged(string propertyName)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
         private async void accelerationSelected()
         {
-            try
-            {
-                await m_model.VehicleController.SetThrottleAsync(Acceleration);
-            }
-            catch (Exception ex)
-            {
-                // TODO: log or surface error
-                System.Diagnostics.Debug.WriteLine(ex.Message);
-            }
+            try { await m_model.VehicleController.SetThrottleAsync(Acceleration); }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex.Message); }
         }
+
         private void UpdateCarData(CarData carData)
         {
             DispatcherQueue.TryEnqueue(() =>
             {
+                SpeedValue = carData.Speed;           // drives animation + raises property changed
                 Speed = carData.Speed.ToString();
                 Gear = carData.Gear.ToString();
-                OnPropertyChanged(nameof(Speed));
-                OnPropertyChanged(nameof(Gear));
-                OnPropertyChanged(nameof(m_downShiftEnabled));
             });
         }
 
         private async void GearShiftDown_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                await m_model.VehicleController.ShiftDownAsync();
-            }
-            catch (Exception ex)
-            {
-                // TODO: log or surface error
-                System.Diagnostics.Debug.WriteLine(ex.Message);
-                OnPropertyChanged(nameof(m_downShiftEnabled));
-            }
+            try { await m_model.VehicleController.ShiftDownAsync(); }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex.Message); }
+        }
+
+        private async void GearShiftUp_Click(object sender, RoutedEventArgs e)
+        {
+            try { await m_model.VehicleController.ShiftUpAsync(); }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex.Message); }
         }
 
         private void AccelerationSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
-            // With x:Bind TwoWay, you technically don't need this at all.
-            // But if you keep it, don't do extra commit logic here.
             if (Math.Abs(Acceleration - e.NewValue) > 0.001)
                 Acceleration = e.NewValue;
         }
 
         private void AccelerationSlider_PointerReleased(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
-        {
-            // Commit/send only when the user lets go
-            accelerationSelected();
-        }
+            => accelerationSelected();
 
         private void AccelerationSlider_PointerCaptureLost(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+            => accelerationSelected();
+
+        private void LaneViewport_SizeChanged(object sender, SizeChangedEventArgs e)
+            => ApplyLaneClip();
+
+        private void ApplyLaneClip()
         {
-            // Also commit if capture is lost (pointer leaves window etc.)
-            accelerationSelected();
+            var w = LaneViewport.ActualWidth;
+            var h = LaneViewport.ActualHeight;
+
+            if (w > 0 && h > 0)
+            {
+                LaneViewport.Clip = new Microsoft.UI.Xaml.Media.RectangleGeometry
+                {
+                    Rect = new Windows.Foundation.Rect(0, 0, w, h)
+                };
+            }
         }
 
-
-        private async void GearShiftUp_Click(object sender, RoutedEventArgs e)
+        private void SetupSeamlessLaneScroll()
         {
-            try
+            LaneScrollContent.UpdateLayout();
+
+            if (LaneScrollContent.Children.Count > 0 &&
+                LaneScrollContent.Children[0] is FrameworkElement firstCopy)
             {
-                await m_model.VehicleController.ShiftUpAsync();
-            }
-            catch (Exception ex)
-            {
-                // TODO: log or surface error
-                System.Diagnostics.Debug.WriteLine(ex.Message);
+                _oneCopyHeight = firstCopy.ActualHeight;
+
+                if (_oneCopyHeight > 0)
+                {
+                    LaneScrollAnim.From = 0;
+                    LaneScrollAnim.To = -_oneCopyHeight;
+                    LaneScrollAnim.Duration = new Duration(TimeSpan.FromSeconds(1.0));
+                }
             }
         }
 
+        private void StartLaneScrollIfNeeded()
+        {
+            if (_laneScrollStarted) return;
+            if (_oneCopyHeight <= 0) return;
+
+            // Begin controllably ONCE, then Pause/Resume + SpeedRatio changes won’t restart it
+            LaneScrollStoryboard.Begin();
+            _laneScrollStarted = true;
+        }
+
+        private void UpdateRoadScrollSpeed()
+        {
+            if (LaneScrollStoryboard == null) return;
+
+            // ensure started once (in case speed arrives after load)
+            StartLaneScrollIfNeeded();
+
+            if (!_laneScrollStarted) return;
+
+            if (SpeedValue < 1.0)
+            {
+                LaneScrollStoryboard.Pause();
+                return;
+            }
+
+            double ratio = SpeedValue / 60.0;
+            ratio = Math.Clamp(ratio, 0.15, 8.0);
+
+            LaneScrollStoryboard.SpeedRatio = ratio;
+            LaneScrollStoryboard.Resume();
+        }
     }
 }
