@@ -96,11 +96,6 @@ namespace shared::can
                 ec
             );
 
-            LogFile::Info(
-                "CAN TX sending " + std::to_string(datagram.size()) +
-                " bytes to " + ep.address().to_string() + ":" +
-                std::to_string(ep.port())
-            );
 
             if (ec || sent != datagram.size())
             {

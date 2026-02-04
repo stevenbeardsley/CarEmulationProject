@@ -108,10 +108,10 @@ int main()
                 {
                 case shared::can::MessageType::ThrottleRequest:
                 {
+                    LogFile::Info("Throttle Request received.");
                     // Value expected 0..100
                     auto thr = static_cast<std::uint32_t>(msg.getValue());
                     engine.setThrottle(thr);
-                    LogFile::Debug("ECM: ThrottleRequest=" + std::to_string(thr));
                     break;
                 }
 
@@ -136,29 +136,12 @@ int main()
                         " ratio=" + std::to_string(ratio));
                     break;
                 }
-
-                // If you add these types:
-                // case shared::can::MessageType::GearRatio:
-                // {
-                //     // e.g. send ratio*1000 as int32
-                //     const double ratio = msg.getValue() / 1000.0;
-                //     engine.setGearRatio(ratio);
-                //     break;
-                // }
-
-                // case shared::can::MessageType::TelemetryRequest:
-                // {
-                //     // immediate one-shot telemetry
-                //     const auto rpm = engine.getRpm();
-                //     const auto spd = engine.getSpeedMph();
-                //     const auto acc = scaleAccel(engine.getAccelerationMps2());
-                //     canTx.Send(shared::can::Message(shared::can::MessageType::RPM, (int)rpm));
-                //     canTx.Send(shared::can::Message(shared::can::MessageType::Speed, (int)spd));
-                //     canTx.Send(shared::can::Message(shared::can::MessageType::Acceleration, acc));
-                //     break;
-                // }
-
+                case shared::can::MessageType::GearDownRequest:
+                case shared::can::MessageType::GearUpRequest:
+                    LogFile::Info("Message received that the ecm is not subscribed to.");
+                    break;
                 default:
+                    LogFile::Info("Unaccounted for message type received.");
                     break;
                 }
             }
