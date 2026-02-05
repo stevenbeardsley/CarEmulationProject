@@ -94,3 +94,8 @@ _ReSharper*/
 /Neon/Makefile
 /Neon/cmake_install.cmake
 /Neon/CMakeCache.txt
+
+# Executables should not be committed
+/Neon/ecm/Ecm
+/Neon/tcm/Tcm
+/Neon/dashboard/Dashboard

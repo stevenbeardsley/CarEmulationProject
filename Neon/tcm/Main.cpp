@@ -91,7 +91,13 @@ int main()
                 LogFile::Info("Gear down command received.");
                 transmission.gearDown();
                 break;
+            case shared::can::MessageType::Acceleration:
+            case shared::can::MessageType::RPM:
+            case shared::can::MessageType::ThrottleRequest:
+            case shared::can::MessageType::Speed:
+                break;
             default:
+                LogFile::Info("Unaccounted for message received.");
                 break;
             }
         }
@@ -115,7 +121,7 @@ int main()
                 canBus.Send(msg);
 
                 // sleep ~1s, but allow quicker shutdown
-                for (int i = 0; i < 10 && running; ++i)
+                for (auto i = 0; i < 10 && running; ++i)
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
         });
