@@ -27,16 +27,18 @@
                        Opacity="0.6"
                        Height="400"
                        Width="800"/>
-                <StackPanel 
-                    VerticalAlignment="Center"
-                    HorizontalAlignment="Center">
-                    <ComboBox Width="150" PlaceholderText="Tyre Type" Margin="780,280,0,0">
-                        <ComboBoxItem Content="Tyre Type" />
-                        <ComboBoxItem Content="Slicks" />
-                        <ComboBoxItem Content="B" />
+                <ComboBox Width="150" PlaceholderText="Colour" Margin="100,120,0,0">
+                    <ComboBoxItem Content="Blue" />
+                    <ComboBoxItem Content="Red" />
+                </ComboBox>
+                <ComboBox Width="150" PlaceholderText="Engine Type" Margin="100,350,0,0">
+                    <ComboBoxItem Content="1.0L" />
+                    <ComboBoxItem Content="2.0L" />
                     </ComboBox>
-
-                </StackPanel>
+                    <ComboBox Width="150" PlaceholderText="Transmission" Margin="950,350,0,0">
+                        <ComboBoxItem Content="5-speed" />
+                        <ComboBoxItem Content="7-speed" />
+                </ComboBox>
             </Grid>
         </StackPanel>
 

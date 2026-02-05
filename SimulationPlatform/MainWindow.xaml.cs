@@ -30,6 +30,7 @@ namespace SimulationPlatform
         private void OnConnected()
         {
             m_connected = true;
+
             OnPropertyChanged(nameof(ConnectedVisibility));
             OnPropertyChanged(nameof(DisconnectedVisibility));
         }

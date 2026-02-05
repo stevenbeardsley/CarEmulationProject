@@ -45,17 +45,17 @@ namespace SimulationPlatform.Controllers
 
             try
             {
-                LogMessage?.Invoke($"🔌 Connecting to {url}...");
+                LogMessage?.Invoke($" Connecting to {url}...");
                 await _ws.ConnectAsync(new Uri(url), _cts.Token);
                 Connected?.Invoke();
-                LogMessage?.Invoke($"✅ Connected to {_isCommandSocket switch { true => "command", false => "data" }} socket.");
+                LogMessage?.Invoke($" Connected to {_isCommandSocket switch { true => "command", false => "data" }} socket.");
 
                 if (!_isCommandSocket)
                     _ = Task.Run(() => ReceiveLoopAsync(_cts.Token));
             }
             catch (Exception ex)
             {
-                LogMessage?.Invoke($"❌ Connection failed: {ex.Message}");
+                LogMessage?.Invoke($" Connection failed: {ex.Message}");
                 Disconnected?.Invoke();
             }
         }

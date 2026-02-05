@@ -13,8 +13,8 @@
 
         <NavigationView.MenuItems>
             <NavigationViewItem Content="Deploy" Icon="Upload" Tag="DeployPage"/>
-            <NavigationViewItem Content="Track"  Icon="Map" Tag="TrackPage"/>
-            <NavigationViewItem Content="Logging" Icon="Document" Tag="LoggingPage"/>
+            <NavigationViewItem Content="Track"  Icon="Map" Tag="TrackPage" Visibility="{x:Bind ConnectedVisibility, Mode=OneWay}"/>
+            <NavigationViewItem Content="Logging" Icon="Document" Tag="LoggingPage" Visibility="{x:Bind ConnectedVisibility, Mode=OneWay}"/>
         </NavigationView.MenuItems>
         <NavigationView.PaneFooter>
             <StackPanel Orientation="Vertical" Margin="12,8,12,12">

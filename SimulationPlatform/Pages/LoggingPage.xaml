@@ -57,7 +57,7 @@
                     Grid.Column="2"/>
                 <TextBlock
                     Text="RPM:"
-                    Grid.Row="2"
+                    Grid.Row="3"
                     Grid.Column="0"/>
                 <TextBlock 
                     Text="{x:Bind Rpm, Mode=OneWay}"
