@@ -65,8 +65,8 @@
                             <Grid>
                                 <!-- "Road" -->
                                 <Border Margin="40"
-        CornerRadius="18"
-        Background="#FF2B2B2B">
+                                    CornerRadius="18"
+                                    Background="#FF2B2B2B">
 
                                     <!-- Viewport (we clip this in code via LaneViewport.Clip) -->
                                     <Grid x:Name="LaneViewport">
@@ -84,9 +84,9 @@
 
                                             <!-- Copy A -->
                                             <StackPanel Grid.Row="0"
-                        Orientation="Vertical"
-                        HorizontalAlignment="Center"
-                        Spacing="14">
+                                                Orientation="Vertical"
+                                                HorizontalAlignment="Center"
+                                                Spacing="14">
                                                 <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
                                                 <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
                                                 <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
@@ -100,9 +100,9 @@
 
                                             <!-- Copy B (identical) -->
                                             <StackPanel Grid.Row="1"
-                        Orientation="Vertical"
-                        HorizontalAlignment="Center"
-                        Spacing="14">
+                                                Orientation="Vertical"
+                                                HorizontalAlignment="Center"
+                                                Spacing="14">
                                                 <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
                                                 <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
                                                 <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
@@ -118,7 +118,6 @@
                                 </Border>
 
                                 <!-- Top-down car placeholder TODO: Make colour configurable -->
-                                <!-- Top-down car placeholder (improved) -->
                                 <Grid Width="60"
                                   Height="110"
                                   HorizontalAlignment="Center"
@@ -137,7 +136,7 @@
                                     <Border Width="52"
                                         Height="100"
                                         CornerRadius="14"
-                                        Background="#FF3A86FF"
+                                        Background="{x:Bind m_colour, Mode=OneWay}"
                                         BorderThickness="1"
                                         BorderBrush="#AAFFFFFF"
                                         HorizontalAlignment="Center"
@@ -175,7 +174,7 @@
                                             <Border Width="36"
                                                 Height="44"
                                                 CornerRadius="10"
-                                                Background="#FF2F6FD6"
+                                                Background="{x:Bind m_colour, Mode=OneWay}"
                                                 HorizontalAlignment="Center"
                                                 VerticalAlignment="Center"
                                                 Margin="0,-6,0,0"/>

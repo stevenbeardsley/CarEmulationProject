@@ -3,6 +3,7 @@ using System.ComponentModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using SimulationPlatform.Models;
 
@@ -20,6 +21,11 @@ namespace SimulationPlatform.Pages
         private double _acceleration = 25;
         private double _speedValue;
         private double _oneCopyHeight = 0;
+
+        public Brush m_colour
+        {
+            get;set;
+        }
 
         private bool _laneScrollStarted = false;
 
@@ -132,6 +138,7 @@ namespace SimulationPlatform.Pages
 
             App.m_model.m_webSocketController.CarDataReceived += UpdateCarData;
 
+            m_colour = m_model.CarConfig.Colour;
             UpdateRoadScrollSpeed();
         }
 

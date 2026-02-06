@@ -1,17 +1,31 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using SimulationPlatform.Controllers;
+using Windows.UI;
 
 namespace SimulationPlatform.Pages
 {
     public sealed partial class DeployPage : Page, INotifyPropertyChanged
     {
+        private readonly Dictionary<string, Brush> m_colourMap =
+            new Dictionary<string, Brush>()
+            {
+                { "Blue", new SolidColorBrush(Colors.Blue) },
+                { "Red", new SolidColorBrush(Colors.Red) },
+                { "Green", new SolidColorBrush(Colors.Green) },
+            };
+
+        public Brush m_selectedCarColour { get; private set; } = new SolidColorBrush(Colors.Blue);
+
         private readonly DeploymentController m_deploymentController = new("Ubuntu"); // TODO: Move to the model?
 
         private readonly AppModel m_model; // reference to the base model
-    
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public Visibility ConnectedVisibility = Visibility.Collapsed;
@@ -52,7 +66,7 @@ namespace SimulationPlatform.Pages
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-                // TODO 
+            // TODO 
         }
 
         private async void DeployButton_Click(object sender, RoutedEventArgs e)
@@ -63,7 +77,7 @@ namespace SimulationPlatform.Pages
             var output = await m_deploymentController.Deploy(scriptPath);
 
             // TODO - Try and just connect if deployment fails 
-            
+
             if (output.ExitCode == 0)
             {
                 // Try and connect 
@@ -76,8 +90,24 @@ namespace SimulationPlatform.Pages
                 OnPropertyChanged(nameof(DeployErrorVisibility));
             }
         }
-   
+        private void ColourComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selected = (ComboBoxItem)((ComboBox)sender).SelectedItem;
 
+            switch (selected.Content.ToString())
+            {
+                case "Blue":
+                    App.m_model.CarConfig.Colour = new SolidColorBrush(Colors.Blue);
+                    break;
 
-}
+                case "Red":
+                    App.m_model.CarConfig.Colour = new SolidColorBrush(Colors.Red);
+                    break;
+
+                case "Green":
+                    App.m_model.CarConfig.Colour = new SolidColorBrush(Colors.Green);
+                    break;
+            }
+        }
+    }
 }

@@ -1,4 +1,8 @@
-﻿namespace SimulationPlatform.Models
+﻿using Microsoft.UI;
+using Microsoft.UI.Xaml.Media;
+using Windows.UI;
+
+namespace SimulationPlatform.Models
 {
     public class CarData
     {
@@ -8,7 +12,6 @@
         private bool _status;
         private int _gear;
         private int _rpms;
-
         public CarData(int speed, int gear, int rpms, bool status)
         {
             _speed = speed;

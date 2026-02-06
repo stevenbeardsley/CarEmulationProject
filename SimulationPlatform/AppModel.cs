@@ -15,6 +15,7 @@ public class AppModel : INotifyPropertyChanged
         public event Action? Disconnected;
 
         public CarData m_carData; // Current car data being fed back 
+        public CarConfig CarConfig { get; } = new CarConfig(); // user config
         public event PropertyChangedEventHandler PropertyChanged;
         public WebSocketController m_webSocketController = new WebSocketController(isCommandSocket: false);
         public VehicleController VehicleController

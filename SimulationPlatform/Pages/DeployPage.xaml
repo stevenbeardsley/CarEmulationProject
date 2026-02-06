@@ -27,9 +27,14 @@
                        Opacity="0.6"
                        Height="400"
                        Width="800"/>
-                <ComboBox Width="150" PlaceholderText="Colour" Margin="100,120,0,0">
-                    <ComboBoxItem Content="Blue" />
-                    <ComboBoxItem Content="Red" />
+                <ComboBox x:Name="ColourComboBox"
+                      Width="150"
+                      PlaceholderText="Colour"
+                      Margin="100,120,0,0"
+                      SelectionChanged="ColourComboBox_SelectionChanged">
+                    <ComboBoxItem Content="Blue"/>
+                    <ComboBoxItem Content="Red"/>
+                    <ComboBoxItem Content="Green"/>
                 </ComboBox>
                 <ComboBox Width="150" PlaceholderText="Engine Type" Margin="100,350,0,0">
                     <ComboBoxItem Content="1.0L" />

@@ -110,7 +110,7 @@ int main()
                 {
                     LogFile::Info("Throttle Request received.");
                     // Value expected 0..100
-                    auto thr = static_cast<std::uint32_t>(msg.getValue());
+                    const auto thr = msg.getValue();
                     engine.setThrottle(thr);
                     break;
                 }
@@ -120,7 +120,7 @@ int main()
                     // If your TCM sends gear number, you can map to ratios here.
                     // Example mapping (tune later):
                     // 1->3.50, 2->2.10, 3->1.40, 4->1.00, 5->0.83
-                    const int gear = msg.getValue();
+                    const auto gear = msg.getValue();
                     double ratio = 1.0;
                     switch (gear)
                     {
