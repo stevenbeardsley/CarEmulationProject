@@ -15,7 +15,7 @@ namespace SimulationPlatform.Pages
         public event PropertyChangedEventHandler? PropertyChanged;
 
         private string m_speed = string.Empty;
-        private string m_gear = string.Empty;
+        private int m_gear;
         private string m_rpms = string.Empty;
 
         private double _acceleration = 25;
@@ -58,22 +58,32 @@ namespace SimulationPlatform.Pages
         }
 
         public string AccelerationText => $"{Acceleration:0}%";
-
-        public bool m_downShiftEnabled => m_gear != "0";
-
-        public string Gear
+        
+        public bool m_downShiftEnabled => m_gear != 0;
+        public bool m_upShiftEnabled
         {
-            get => m_gear;
-            set
-            {
-                if (m_gear != value)
-                {
-                    m_gear = value;
-                    OnPropertyChanged(nameof(Gear));
-                    OnPropertyChanged(nameof(m_downShiftEnabled));
-                }
-            }
+            get => m_gear < m_model.CarConfig.GearsCount;
         }
+
+        public int GearValue
+                {
+                    get => m_gear;
+                    set
+                    {
+                        if (m_gear != value)
+                        {
+                            m_gear = value;
+
+                            OnPropertyChanged(nameof(GearValue));   
+                            OnPropertyChanged(nameof(Gear));        
+                            OnPropertyChanged(nameof(m_downShiftEnabled));
+                            OnPropertyChanged(nameof(m_upShiftEnabled));
+                        }
+                    }
+                }
+
+        // UI-facing string
+        public string Gear => m_gear.ToString();
 
         public string Speed
         {
@@ -134,7 +144,7 @@ namespace SimulationPlatform.Pages
             SpeedValue = App.m_model.m_carData.Speed;
             Speed = SpeedValue.ToString();
             Rpm = App.m_model.m_carData.Rpms.ToString();
-            Gear = App.m_model.m_carData.Gear.ToString();
+            GearValue = App.m_model.m_carData.Gear;
 
             App.m_model.m_webSocketController.CarDataReceived += UpdateCarData;
 
@@ -163,7 +173,7 @@ namespace SimulationPlatform.Pages
                 SpeedValue = carData.Speed;           // drives animation + raises property changed
                 Speed = carData.Speed.ToString();
                 Rpm = carData.Rpms.ToString();
-                Gear = carData.Gear.ToString();
+                GearValue = carData.Gear;
             });
         }
 

@@ -22,6 +22,11 @@ namespace SimulationPlatform.Pages
 
         public Brush m_selectedCarColour { get; private set; } = new SolidColorBrush(Colors.Blue);
 
+        public string m_transmissionSelection
+        {
+            get; private set;
+        } = string.Empty;
+        
         private readonly DeploymentController m_deploymentController = new("Ubuntu"); // TODO: Move to the model?
 
         private readonly AppModel m_model; // reference to the base model
@@ -108,6 +113,21 @@ namespace SimulationPlatform.Pages
                     App.m_model.CarConfig.Colour = new SolidColorBrush(Colors.Green);
                     break;
             }
+        }
+
+        private void TransmissionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selected = (ComboBoxItem)((ComboBox)sender).SelectedItem;
+            switch (selected.Content.ToString())
+            {
+                case "5-speed":
+                    App.m_model.CarConfig.GearsCount = 5;
+                    break;
+                case "7-speed":
+                    App.m_model.CarConfig.GearsCount = 7;
+                    break;
+            }
+
         }
     }
 }

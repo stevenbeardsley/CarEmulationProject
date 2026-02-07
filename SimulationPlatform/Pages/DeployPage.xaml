@@ -40,7 +40,10 @@
                     <ComboBoxItem Content="1.0L" />
                     <ComboBoxItem Content="2.0L" />
                     </ComboBox>
-                    <ComboBox Width="150" PlaceholderText="Transmission" Margin="950,350,0,0">
+                    <ComboBox Width="150" 
+                              PlaceholderText="Transmission"
+                              Margin="950,350,0,0"
+                              SelectionChanged="TransmissionComboBox_SelectionChanged">
                         <ComboBoxItem Content="5-speed" />
                         <ComboBoxItem Content="7-speed" />
                 </ComboBox>

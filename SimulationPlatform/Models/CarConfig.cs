@@ -7,20 +7,35 @@ namespace SimulationPlatform.Models
 {
     public class CarConfig : INotifyPropertyChanged
     {
-        private Brush _colour = new SolidColorBrush(Colors.Blue);
+        private Brush m_colour = new SolidColorBrush(Colors.Blue);
+        private int m_gearsCount = 0;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public Brush Colour
         {
-            get => _colour;
+            get => m_colour;
             set
             {
-                if (_colour != value)
+                if (m_colour != value)
                 {
-                    _colour = value;
+                    m_colour = value;
                     OnPropertyChanged();
                 }
+            }
+        }
+        
+        public int GearsCount
+        {
+            get => m_gearsCount;
+            set
+            {
+                if (m_gearsCount != value)
+                {
+                    m_gearsCount = value;
+                    OnPropertyChanged();
+                }
+
             }
         }
 

@@ -287,7 +287,8 @@
                                     <Button Grid.Column="1"
                                             Content="Gear +"
                                             HorizontalAlignment="Stretch"
-                                            Click="GearShiftUp_Click"/>
+                                            Click="GearShiftUp_Click"
+                                            IsEnabled="{x:Bind m_upShiftEnabled, Mode= OneWay }"/>
                                 </Grid>
 
                                 <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
