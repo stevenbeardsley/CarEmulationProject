@@ -20,7 +20,7 @@ namespace SimulationPlatform.Pages
                 { "Green", new SolidColorBrush(Colors.Green) },
             };
 
-        public Brush m_selectedCarColour { get; private set; } = new SolidColorBrush(Colors.Blue);
+        public Brush m_selectedCarColour { get; private set; } = new SolidColorBrush(Colors.White); // Default Null colour 
 
         public string m_transmissionSelection
         {
@@ -36,6 +36,15 @@ namespace SimulationPlatform.Pages
         public Visibility ConnectedVisibility = Visibility.Collapsed;
         public Visibility DeployingVisibility = Visibility.Collapsed;
         public Visibility DeployErrorVisibility = Visibility.Collapsed;
+        public Visibility m_selectOptionTextVisibility => m_deployButtonEnabled ? Visibility.Collapsed : Visibility.Visible;
+
+        private bool m_colourChosen = false;
+        private bool m_engineTypeChosen = false; // TODO: When engine configurations are implemented.
+        private bool m_transmissionTypeChosen = false;
+        public bool m_deployButtonEnabled => m_colourChosen && 
+            m_transmissionTypeChosen &&
+            DeployingVisibility != Visibility.Visible &&
+            DeployErrorVisibility != Visibility.Visible;
         public DeployPage()
         {
             this.InitializeComponent();
@@ -79,6 +88,8 @@ namespace SimulationPlatform.Pages
             var scriptPath = "/mnt/c/Users/swbea/source/repos/CarEmulationProject/Neon/deploy.sh";  // adjust path
             DeployingVisibility = Visibility.Visible;
             OnPropertyChanged(nameof(DeployingVisibility));
+            OnPropertyChanged(nameof(m_deployButtonEnabled));
+            OnPropertyChanged(nameof(m_selectOptionTextVisibility));
             var output = await m_deploymentController.Deploy(scriptPath);
 
             // TODO - Try and just connect if deployment fails 
@@ -93,26 +104,31 @@ namespace SimulationPlatform.Pages
                 // Failed to deploy, output error message 
                 DeployErrorVisibility = Visibility.Visible;
                 OnPropertyChanged(nameof(DeployErrorVisibility));
+                OnPropertyChanged(nameof(m_deployButtonEnabled));
+                OnPropertyChanged(nameof(m_selectOptionTextVisibility));
             }
         }
-        private void ColourComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ColourComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) // TODO: Could just do this on deploy click really
         {
             var selected = (ComboBoxItem)((ComboBox)sender).SelectedItem;
-
             switch (selected.Content.ToString())
             {
                 case "Blue":
-                    App.m_model.CarConfig.Colour = new SolidColorBrush(Colors.Blue);
+                    m_selectedCarColour = new SolidColorBrush(Colors.Blue);
                     break;
 
                 case "Red":
-                    App.m_model.CarConfig.Colour = new SolidColorBrush(Colors.Red);
+                    m_selectedCarColour = new SolidColorBrush(Colors.Red);
                     break;
 
                 case "Green":
-                    App.m_model.CarConfig.Colour = new SolidColorBrush(Colors.Green);
+                    m_selectedCarColour = new SolidColorBrush(Colors.Green);
                     break;
             }
+            App.m_model.CarConfig.Colour = m_selectedCarColour;
+            m_colourChosen = true;
+            OnPropertyChanged(nameof(m_deployButtonEnabled));
+            OnPropertyChanged(nameof(m_selectOptionTextVisibility));
         }
 
         private void TransmissionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -127,6 +143,9 @@ namespace SimulationPlatform.Pages
                     App.m_model.CarConfig.GearsCount = 7;
                     break;
             }
+            m_transmissionTypeChosen = true;
+            OnPropertyChanged(nameof(m_deployButtonEnabled));
+            OnPropertyChanged(nameof(m_selectOptionTextVisibility));
 
         }
     }

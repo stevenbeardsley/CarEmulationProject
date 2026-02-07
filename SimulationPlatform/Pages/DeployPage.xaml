@@ -51,7 +51,37 @@
         </StackPanel>
 
 		<StackPanel Grid.Row="1" Margin="20,50,0,0">
-			<Button Content="Deploy" Click="DeployButton_Click"/>
+            <TextBlock Text="Select a valid configuration for the car."
+                       Foreground="DarkGray"
+                       FontSize="14"
+                       Margin="0,0,0,5"
+                       Visibility="{x:Bind m_selectOptionTextVisibility, Mode=OneWay}"/>
+            
+            <Button Click="DeployButton_Click"
+                IsEnabled="{x:Bind m_deployButtonEnabled, Mode=OneWay}"
+                HorizontalAlignment="Left"
+                BorderBrush="#4CAF50"
+                BorderThickness="1"
+                Background="White"
+                Foreground="#4CAF50"
+                CornerRadius="12"
+                Padding="18,12"
+                MinHeight="44">
+
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <SymbolIcon Symbol="Play"
+                    Width="18"
+                    Height="18"/>
+                    <TextBlock Text="Deploy"
+                   VerticalAlignment="Center"
+                   FontSize="15"
+                   FontWeight="SemiBold"/>
+                </StackPanel>
+
+            </Button>
+
+
+
             <TextBlock Text="Deploying..." FontSize="14" 
                        Foreground="Orange" 
                        Visibility="{x:Bind DeployingVisibility, Mode=OneWay}"/>
