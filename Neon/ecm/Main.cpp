@@ -48,7 +48,10 @@ int main()
     shared::can::Receiver canRx(running, /*listenPort=*/15000);
 
     // CAN transmitter (UDP broadcast)
-    shared::can::Bus canTx(/*defaultPort=*/15000);
+    shared::can::Bus canTx(
+        0,      // ephemeral bind
+        15000   // default peer destination
+    );
     canTx.AddPeer("dashboard");
     canTx.AddPeer("tcm");
 

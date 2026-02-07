@@ -1,29 +1,40 @@
 #ifndef DASHBOARD_DATA_SOURCE_H
 #define DASHBOARD_DATA_SOURCE_H
 
-#include <string>
-#include <mutex>
-#include <cstdint>
 #include "UiData.h"
+
+#include <cstdint>
+#include <mutex>
+#include <string>
 
 namespace dashboard
 {
-class DashboardDataSource
-{
-public:
-    DashboardDataSource(UiData& data);
+    // Owns UiData and provides thread-safe updates + JSON export.
+    class DashboardDataSource
+    {
+    public:
+        DashboardDataSource();                 // default: zeroed + status=true
+        explicit DashboardDataSource(const UiData& initial);
 
-    void updateData(std::uint32_t gear,
-        std::uint32_t speed,
-        bool status);
+        // Thread-safe setters
+        void SetGear(std::int32_t gear);
+        void SetSpeed(std::int32_t speed);
+        void SetRpm(std::int32_t rpm);
+        void SetStatus(bool status);
 
-    [[nodiscard]]
-    std::string getData() const;  // Returns JSON
+        // Convenience: update multiple fields atomically
+        void Update(std::int32_t speed, std::int32_t gear, std::int32_t rpm, bool status);
 
-private:
-    mutable std::mutex m_mutex;
-    UiData& m_data;
-};
+        // Thread-safe snapshot (consistent view)
+        UiData Snapshot() const;
+
+        // JSON string for WebSocket payloads
+        std::string GetDataJson() const;
+
+    private:
+        mutable std::mutex m_mtx;
+        UiData m_data;
+    };
 }
 
-#endif
+#endif 

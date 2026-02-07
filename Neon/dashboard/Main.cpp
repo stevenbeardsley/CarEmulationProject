@@ -56,7 +56,7 @@ void handleCarData(websocket::stream<tcp::socket> ws, dashboard::DashboardDataSo
     {
         while (running)
         {
-            std::string currentData = dataSource.getData();
+            std::string currentData = dataSource.GetDataJson();
             ws.write(net::buffer(currentData));
             std::this_thread::sleep_for(std::chrono::seconds(2));
         }
@@ -118,9 +118,12 @@ int main()
         // CAN bus + receiver threads
         // (MUST be created BEFORE the accept loop)
         // =========================
-        auto canBus = shared::can::Bus(15000);
-        canBus.AddPeer("ecm");
-        canBus.AddPeer("tcm");
+        shared::can::Bus canBus(
+            0,      // ephemeral bind
+            15000   // default peer destination
+        );     
+        canBus.AddPeer("ecm", 15000);
+        canBus.AddPeer("tcm", 15000);
 
         shared::can::Receiver canRx(running, /*listenPort=*/15000);
 
@@ -170,13 +173,14 @@ int main()
                     switch (msg.getMessageType())
                     {
                     case shared::can::MessageType::CurrentGear:
-                        uiData.m_gear = msg.getValue();
+                        LogFile::Info("Current gear is: " + std::to_string(msg.getValue()));
+                        dataSource.SetGear(msg.getValue());
                         break;
                     case shared::can::MessageType::Speed:
-                        uiData.m_speed = msg.getValue();
+                        dataSource.SetSpeed(msg.getValue());
                         break;
                     case shared::can::MessageType::RPM:
-                        uiData.m_rpm = msg.getValue();
+                        dataSource.SetRpm(msg.getValue());
                         break;
                     default:
                         break;

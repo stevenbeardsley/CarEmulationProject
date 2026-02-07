@@ -1,49 +1,66 @@
 #ifndef SHARED_CAN_BUS_H
 #define SHARED_CAN_BUS_H
 
-#include <cstdint>
-#include <string>
-#include <vector>
+#include "Message.h"
 
 #include <boost/asio.hpp>
-
-#include "Message.h"  // your Message class (MessageType == CAN ID for now)
+#include <vector>
+#include <mutex>
+#include <cstdint>
+#include <string>
 
 namespace shared::can
 {
+
     class Bus
     {
     public:
-        explicit Bus(uint16_t defaultPort);
-        ~Bus() = default;
 
-        Bus(const Bus&) = delete;
-        Bus& operator=(const Bus&) = delete;
-
-        // Add a peer by hostname (docker service/container name) or IPv4 address string.
-        // Example: AddPeer("ecm", 15000);
-        bool AddPeer(const std::string& host, uint16_t port);
-
-        // Convenience: uses defaultPort passed in ctor.
-        bool AddPeer(const std::string& host);
-
-        // Logical broadcast: sends the datagram to every configured peer.
-        // Returns true if ALL sends succeeded; false if any failed.
-        bool Send(const Message& msg);
-
-    private:
-        static void PackMessage(const Message& msg, std::vector<uint8_t>& out);
-
-    private:
         using udp = boost::asio::ip::udp;
 
-        boost::asio::io_context io_;
-        udp::resolver resolver_;
-        udp::socket socket_;
+        // bindPort:
+        //    Local port to bind socket to (0 = ephemeral, recommended)
+        //
+        // defaultPeerPort:
+        //    Port used when AddPeer(host) is called without specifying port.
+        //    This should be the Receiver listen port (e.g. 15000).
+        //
+        Bus(unsigned short bindPort,
+            unsigned short defaultPeerPort);
 
-        uint16_t defaultPort_{ 0 };
+        // Add peer with explicit port
+        bool AddPeer(const std::string& host,
+            unsigned short port);
+
+        // Add peer using defaultPeerPort_
+        bool AddPeer(const std::string& host);
+
+        // Thread-safe send
+        bool Send(const Message& msg);
+
+        // Optional debug helper
+        unsigned short GetLocalPort() const;
+
+    private:
+
+        void PackMessage(const Message& msg,
+            std::vector<std::uint8_t>& datagram);
+
+    private:
+
+        boost::asio::io_context ioc_;
+        udp::socket socket_;
+        udp::resolver resolver_;
+
+        unsigned short bindPort_;
+        unsigned short defaultPeerPort_;
+
         std::vector<udp::endpoint> peers_;
+        mutable std::mutex peersMutex_;
+
+        std::mutex sendMutex_;
     };
-}
+
+} // namespace shared::can
 
 #endif

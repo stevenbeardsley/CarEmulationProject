@@ -6,25 +6,25 @@ namespace SimulationPlatform.Models
     public class DashboardMessage
     {
         [JsonPropertyName("speed")]
-        public string? Speed
+        public int Speed
         {
             get; set;
         }
 
         [JsonPropertyName("gear")]
-        public string? Gear
+        public int Gear
         {
             get; set;
         }
 
-        [JsonPropertyName("rpm")]
-        public string? Rpms
+        [JsonPropertyName("rpms")]
+        public int Rpms
         {
             get; set;
         }
 
         [JsonPropertyName("status")]
-        public string? Status
+        public bool Status
         {
             get; set;
         }
@@ -35,7 +35,7 @@ namespace SimulationPlatform.Models
             {
                 return JsonSerializer.Deserialize<DashboardMessage>(json);
             }
-            catch
+            catch (JsonException)
             {
                 return null;
             }
@@ -43,12 +43,7 @@ namespace SimulationPlatform.Models
 
         public CarData ToCarData()
         {
-            var speed = int.TryParse(Speed, out var parsedSpeed) ? parsedSpeed : 0;
-            var gear = int.TryParse(Gear, out var parsedGear) ? parsedGear : 0;
-            var rpms = int.TryParse(Rpms, out var parsedRpms) ? parsedRpms : 0;
-            var status = bool.TryParse(Status, out var b) && b;
-
-            return new CarData(speed, gear, rpms, status);
+            return new CarData(Speed, Gear, Rpms, Status);
         }
 
     }
