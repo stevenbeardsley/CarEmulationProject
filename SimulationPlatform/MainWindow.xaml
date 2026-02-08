@@ -19,14 +19,14 @@
         <NavigationView.PaneFooter>
             <StackPanel Orientation="Vertical" Margin="12,8,12,12">
                 <!-- Connected status -->
-                <NavigationViewItem Content="Connected"
+                <NavigationViewItem Content="Deployed"
                                     Icon="Link"
                                     IsSelected="False"
                                     Visibility="{x:Bind ConnectedVisibility, Mode=OneWay}"
                                     Foreground="Green"/>
 
                 <!-- Disconnected status -->
-                <NavigationViewItem Content="Disconnected"
+                <NavigationViewItem Content="Offline"
                                     Foreground="IndianRed"
                                     IsSelected="False"
                                     Visibility="{x:Bind DisconnectedVisibility, Mode=OneWay}">
