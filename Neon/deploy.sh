@@ -10,8 +10,21 @@ case "$OS_TYPE" in
   *)        PLATFORM="unknown"; EXEC_EXT="";;
 esac
 
-# --- Paths ---
+# -- Copy config json --
+REPO="/mnt/c/Users/swbea/source/repos/CarEmulationProject/Neon"
+SRC="/mnt/c/Users/Public/Documents/SimulationPlatform/config.json"
+
+cp "$SRC" "$REPO/config.json"
+echo "Copied config.json into repo."
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_PATH="$PROJECT_ROOT/config.json"
+
+if [[ ! -f "$CONFIG_PATH" ]]; then
+  echo "config.json not found at: $CONFIG_PATH"
+  exit 1
+fi
+
+# --- Paths ---
 BUILD_DIR="$PROJECT_ROOT/build-$PLATFORM"
 
 # --- CPU cores ---
@@ -121,6 +134,7 @@ for i in "${!EXEC_NAMES[@]}"; do
       --network "$DOCKER_NETWORK" \
       --name "$CONTAINER_NAME" \
       -e LOG_LEVEL=info \
+      -v "$CONFIG_PATH:/app/config.json:ro" \
       "$IMAGE_NAME"
     echo "Dashboard ports: ws://localhost:8080 (WS/telemetry), http://localhost:8081 (commands)"
   else
@@ -129,6 +143,7 @@ for i in "${!EXEC_NAMES[@]}"; do
 	--network "$DOCKER_NETWORK" \
       --name "$CONTAINER_NAME" \
       -e LOG_LEVEL=info \
+      -v "$CONFIG_PATH:/app/config.json:ro" \
       "$IMAGE_NAME"
   fi
 

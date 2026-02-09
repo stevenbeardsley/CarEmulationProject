@@ -83,6 +83,21 @@ namespace SimulationPlatform.Pages
             // TODO 
         }
 
+        private (string, string) getOptionIds()
+        {
+            string transmissionId = string.Empty;
+            switch (m_transmissionSelection)
+            {
+                case "5-speed":
+                    transmissionId = "transmission_5spd";
+                    break;
+                case "7-speed":
+                    transmissionId = "transmission_7spd";
+                    break;
+            }
+            return (transmissionId, "engine_1L");
+        }
+
         private async void DeployButton_Click(object sender, RoutedEventArgs e)
         {
             var scriptPath = "/mnt/c/Users/swbea/source/repos/CarEmulationProject/Neon/deploy.sh";  // adjust path
@@ -90,7 +105,9 @@ namespace SimulationPlatform.Pages
             OnPropertyChanged(nameof(DeployingVisibility));
             OnPropertyChanged(nameof(m_deployButtonEnabled));
             OnPropertyChanged(nameof(m_selectOptionTextVisibility));
-            var output = await m_deploymentController.Deploy(scriptPath);
+            // TODO: parse options and pass them into Deploy 
+            (var transmissionId, var engineId) = getOptionIds(); 
+            var output = await m_deploymentController.Deploy(scriptPath, transmissionId, engineId);
 
             // TODO - Try and just connect if deployment fails 
 
@@ -134,6 +151,7 @@ namespace SimulationPlatform.Pages
         private void TransmissionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var selected = (ComboBoxItem)((ComboBox)sender).SelectedItem;
+            m_transmissionSelection = selected.Content.ToString();
             switch (selected.Content.ToString())
             {
                 case "5-speed":

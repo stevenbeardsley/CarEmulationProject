@@ -51,3 +51,23 @@ target_link_libraries(CanTests
 
 set_target_properties(CanTests PROPERTIES FOLDER "tests")
 
+# Config tests
+set(test_config_SOURCE
+    TestConfig.cpp
+)
+
+add_executable(ConfigTests 
+    ${test_config_SOURCE}
+)
+
+target_include_directories(ConfigTests PUBLIC
+    ${PROJECT_SOURCE_DIR}
+)
+target_link_libraries(ConfigTests
+    PRIVATE 
+        gtest
+        gtest_main
+        Config
+)
+
+set_target_properties(ConfigTests PROPERTIES FOLDER "tests")

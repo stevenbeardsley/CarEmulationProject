@@ -52,8 +52,8 @@ int main()
         0,      // ephemeral bind
         15000   // default peer destination
     );
-    canTx.AddPeer("dashboard");
-    canTx.AddPeer("tcm");
+    canTx.AddPeer("dashboard", 15000);
+    canTx.AddPeer("tcm", 15000);
 
     //Start Engine
     ecm::engine::Engine engine;

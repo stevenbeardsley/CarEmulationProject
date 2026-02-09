@@ -1,0 +1,22 @@
+{
+  "engine": {
+    "id": "engine_1L",
+    "displacement_l": 1,
+    "idle_rpm": 850,
+    "max_rpm": 6000,
+    "max_torque_nm": 110
+  },
+  "transmission": {
+    "id": "transmission_5spd",
+    "gears": 5,
+    "final_drive": 3.9,
+    "gear_ratios": [
+      3.91,
+      2.14,
+      1.36,
+      1.03,
+      0.84
+    ],
+    "reverse_ratio": -3.54
+  }
+}

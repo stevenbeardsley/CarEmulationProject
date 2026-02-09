@@ -6,16 +6,21 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Boost CONFIG REQUIRED COMPONENTS system json)
 
+find_package(nlohmann_json CONFIG REQUIRED)
+
 add_subdirectory(ecm)
 add_subdirectory(ecm/engine)
 add_subdirectory(tcm)
 add_subdirectory(tcm/transmission)
 
 add_subdirectory(dashboard)
-add_subdirectory(shared/logging)
+
+add_subdirectory(shared)
 add_subdirectory(shared/bit_parser)
 add_subdirectory(shared/can)
-add_subdirectory(shared)
+add_subdirectory(shared/config)
+add_subdirectory(shared/logging)
+
 
 add_subdirectory(tests)
 
