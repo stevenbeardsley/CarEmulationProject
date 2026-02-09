@@ -57,7 +57,7 @@ if ! docker network ls --format '{{.Name}}' | grep -Eq "^${DOCKER_NETWORK}\$"; t
 	echo "Creating Docker network: $DOCKER_NETWORK"
 	docker network create "$DOCKER_NETWORK" > /dev/null
 else 
-	echo "Docker netowkr already exists: $DOCKER_NETWORK"
+	echo "Docker network already exists: $DOCKER_NETWORK"
 fi
 
 
