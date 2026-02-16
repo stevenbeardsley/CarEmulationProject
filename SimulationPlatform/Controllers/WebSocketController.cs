@@ -34,14 +34,13 @@ namespace SimulationPlatform.Controllers
             _ws = new ClientWebSocket();
             _cts = new CancellationTokenSource();
 
-            string path = _isCommandSocket ? "carCommands" : "carData";
+            var path = _isCommandSocket ? "carCommands" : "carData";
 
-            // ✅ Fix: only append port if host doesn’t already include one
-            string baseUrl = host.Contains(":") && !host.EndsWith("localhost")
+            var baseUrl = host.Contains(":") && !host.EndsWith("localhost")
                 ? host
                 : $"{host}:{port}";
 
-            string url = $"{baseUrl}/{path}";
+            var url = $"{baseUrl}/{path}";
 
             try
             {
@@ -51,7 +50,9 @@ namespace SimulationPlatform.Controllers
                 LogMessage?.Invoke($" Connected to {_isCommandSocket switch { true => "command", false => "data" }} socket.");
 
                 if (!_isCommandSocket)
+                {
                     _ = Task.Run(() => ReceiveLoopAsync(_cts.Token));
+                }
             }
             catch (Exception ex)
             {

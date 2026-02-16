@@ -7,6 +7,7 @@
 #include "shared/can/Bus.h"
 #include "shared/can/Message.h"
 #include "shared/can/Receiver.h"
+#include "shared/config/Config.h"
 
 #include <atomic>
 #include <boost/asio/ip/tcp.hpp>
@@ -99,11 +100,22 @@ int main()
         std::signal(SIGINT, signalHandler);
         std::signal(SIGTERM, signalHandler);
 
+
+        // =========================
+        // Config file data 
+        // =========================
+        shared::config::Config config;
+        config.LoadFromFile("config.json");
+        const auto engineConfig = config.getEngineConfig();
+        const auto transmissionConfig = config.getTransmissionConfig();
+
+
         // =========================
         // Shared dashboard data
         // =========================
-        dashboard::UiData uiData{ 0, 0, 0, true };
+        dashboard::UiData uiData{ 0, 0, 0, 0, true };
         dashboard::DashboardDataSource dataSource{ uiData };
+        dataSource.SetMaxRpms(engineConfig.max_rpm);
 
         // =========================
         // Optional background process
@@ -286,7 +298,6 @@ int main()
         // =========================
         LogFile::Info("Shutting down dashboard...");
 
-        // Wake the CAN consumer if it's waiting.
         inboxCv.notify_all();
 
         if (commandThread.joinable()) commandThread.join();

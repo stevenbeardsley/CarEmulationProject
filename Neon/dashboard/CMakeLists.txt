@@ -29,6 +29,7 @@ target_link_libraries(
         Boost::system
         Boost::json
         Can
+        Config
         shared
 )
 

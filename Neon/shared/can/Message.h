@@ -14,7 +14,7 @@ public:
 	Message() = delete; // Can't make an empty message 
 	
 	Message(MessageType type,
-		std::uint32_t value); // Constructor which writes the messages to the buffer using bit parser 
+		std::uint32_t value);  
 
 	MessageType getMessageType() const;
 

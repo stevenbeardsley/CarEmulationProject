@@ -11,6 +11,7 @@ namespace SimulationPlatform.Pages
         private string m_speed = string.Empty;
         private string m_gear = string.Empty;
         private string m_rpm = string.Empty;
+        private string m_maxRpms = string.Empty;
         private string m_status = string.Empty;
         
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -62,6 +63,19 @@ namespace SimulationPlatform.Pages
             }
         }
 
+        public string MaxRpms
+        {
+            get => m_maxRpms;
+            set
+            {
+                if (m_maxRpms != value)
+                {
+                    m_maxRpms = value;
+                    OnPropertyChanged(nameof(MaxRpms));
+                }
+            }
+        }
+
         public string Status
         {
             get => m_status;
@@ -87,11 +101,13 @@ namespace SimulationPlatform.Pages
                 Speed = carData.Speed.ToString();
                 Status = carData.Status.ToString();
                 Rpm = carData.Rpms.ToString();
+                MaxRpms = carData.MaxRpms.ToString();
                 Gear = carData.Gear.ToString();
                 OnPropertyChanged(nameof(Speed));
                 OnPropertyChanged(nameof(Status));
                 OnPropertyChanged(nameof(Gear));
                 OnPropertyChanged(nameof(Rpm));
+                OnPropertyChanged(nameof(MaxRpms));
             });
         }
 
@@ -102,6 +118,7 @@ namespace SimulationPlatform.Pages
             Status = App.m_model.m_carData.Status.ToString();
             Gear = App.m_model.m_carData.Gear.ToString();
             Rpm = App.m_model.m_carData.Rpms.ToString();
+            MaxRpms = App.m_model.m_carData.MaxRpms.ToString();
             App.m_model.m_webSocketController.CarDataReceived += UpdateCarData;
         }
 

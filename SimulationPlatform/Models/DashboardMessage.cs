@@ -23,6 +23,13 @@ namespace SimulationPlatform.Models
             get; set;
         }
 
+        [JsonPropertyName("maxRpms")]
+        public int MaxRpms
+        {
+            get; set;
+        }
+
+
         [JsonPropertyName("status")]
         public bool Status
         {
@@ -43,7 +50,7 @@ namespace SimulationPlatform.Models
 
         public CarData ToCarData()
         {
-            return new CarData(Speed, Gear, Rpms, Status);
+            return new CarData(Speed, Gear, Rpms, MaxRpms, Status);
         }
 
     }

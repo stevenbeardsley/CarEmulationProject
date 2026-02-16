@@ -64,12 +64,20 @@
                     Grid.Row="3"
                     Grid.Column="3"/>
                 <TextBlock
-                    Text="Status:"
+                    Text="Max RPMS:"
                     Grid.Row="4"
                     Grid.Column="0"/>
                 <TextBlock 
-                    Text="{x:Bind Status, Mode=OneWay}"
+                    Text="{x:Bind MaxRpms, Mode=OneWay}"
                     Grid.Row="4"
+                    Grid.Column="3"/>
+                <TextBlock
+                    Text="Status:"
+                    Grid.Row="5"
+                    Grid.Column="0"/>
+                <TextBlock 
+                    Text="{x:Bind Status, Mode=OneWay}"
+                    Grid.Row="5"
                     Grid.Column="2"/>
 
             </Grid>

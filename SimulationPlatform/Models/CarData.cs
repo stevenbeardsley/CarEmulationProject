@@ -12,11 +12,14 @@ namespace SimulationPlatform.Models
         private bool _status;
         private int _gear;
         private int _rpms;
-        public CarData(int speed, int gear, int rpms, bool status)
+        private int _maxRpms;
+
+        public CarData(int speed, int gear, int rpms, int maxRpms, bool status)
         {
             _speed = speed;
             _gear = gear;
             _rpms = rpms;
+            _maxRpms = maxRpms;
             _status = status;
         }
 
@@ -25,6 +28,7 @@ namespace SimulationPlatform.Models
             _speed = 0;
             _gear = 0;
             _rpms = 0;
+            _maxRpms = 0;
             _status = true;
         }
 
@@ -82,6 +86,24 @@ namespace SimulationPlatform.Models
             }
         }
 
+        public int MaxRpms
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    return _maxRpms;
+                }
+            }
+            set
+            {
+                lock (_lock)
+                {
+                    _maxRpms = value;
+                }
+            }
+        }
+
         public bool Status
         {
             get
@@ -97,32 +119,6 @@ namespace SimulationPlatform.Models
                 {
                     _status = value;
                 }
-            }
-        }
-
-        /// <summary>
-        /// Atomically update all fields together
-        /// (important to avoid mixed-state reads)
-        /// </summary>
-        public void Update(int speed, int gear, int rpms, bool status)
-        {
-            lock (_lock)
-            {
-                _speed = speed;
-                _gear = gear;
-                _rpms = rpms;
-                _status = status;
-            }
-        }
-
-        /// <summary>
-        /// Atomically read a consistent snapshot
-        /// </summary>
-        public (int Speed, int Gear, int Rpms, bool Status) Snapshot()
-        {
-            lock (_lock)
-            {
-                return (_speed, _gear, _rpms, _status);
             }
         }
     }

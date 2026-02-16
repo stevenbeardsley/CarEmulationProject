@@ -6,7 +6,7 @@
 namespace dashboard
 {
     DashboardDataSource::DashboardDataSource()
-        : m_data{ 0, 0, 0, true } // assumes UiData has fields: m_gear, m_speed, m_rpm, m_status
+        : m_data{ 0, 0, 0, 0, true } 
     {
     }
 
@@ -33,6 +33,12 @@ namespace dashboard
         m_data.m_rpm = rpm;
     }
 
+    void DashboardDataSource::SetMaxRpms(std::uint32_t maxRpm)
+    {
+        std::lock_guard<std::mutex> lk(m_mtx);
+        m_data.m_maxRpms = maxRpm;
+    }
+
     void DashboardDataSource::SetStatus(bool status)
     {
         std::lock_guard<std::mutex> lk(m_mtx);
@@ -56,14 +62,14 @@ namespace dashboard
 
     std::string DashboardDataSource::GetDataJson() const
     {
-        const UiData d = Snapshot();
+        const auto d = Snapshot();
 
-        // Simple JSON (no external deps). Adjust keys to match your C# parser.
         std::ostringstream oss;
         oss << "{"
             << "\"speed\":" << d.m_speed << ","
             << "\"gear\":" << d.m_gear << ","
             << "\"rpms\":" << d.m_rpm << ","
+            << "\"maxRpms\":" << d.m_maxRpms<< ","
             << "\"status\":" << (d.m_status ? "true" : "false")
             << "}";
 
