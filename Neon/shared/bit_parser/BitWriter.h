@@ -2,10 +2,10 @@
 #define SHARED_BIT_PARSER_BITWRITER_H
 
 #include "BitOrder.h"
-#include "Error.h"
 #include "ByteOrder.h"
 #include "ByteBuffer.h"
 #include "BitReader.h"
+#include "Error.h"
 #include "Span.h"
 #include <cstdint>
 #include <vector>

@@ -33,9 +33,10 @@ namespace shared::can
             unsigned short port);
 
         // Add peer using defaultPeerPort_
+        [[nodiscard]]
         bool AddPeer(const std::string& host);
 
-        // Thread-safe send
+        //[[nodiscard]]
         bool Send(const Message& msg);
 
         // Optional debug helper

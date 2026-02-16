@@ -122,8 +122,15 @@ int main()
             0,      // ephemeral bind
             15000   // default peer destination
         );     
-        canBus.AddPeer("ecm", 15000);
-        canBus.AddPeer("tcm", 15000);
+        
+        if (!canBus.AddPeer("ecm", 15000))
+        {
+            LogFile::Error("Error: ecm was not added as a peer");
+        }
+        if (!canBus.AddPeer("tcm", 15000))
+        {
+            LogFile::Error("Error: tcm was not added as a peer");
+        }
 
         shared::can::Receiver canRx(running, /*listenPort=*/15000);
 

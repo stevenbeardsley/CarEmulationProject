@@ -1,5 +1,5 @@
 #include "Bus.h"
-
+#include "LogFile.h"
 #include <iostream>
 
 namespace shared::can
@@ -44,6 +44,7 @@ namespace shared::can
     bool Bus::AddPeer(const std::string& host,
         unsigned short port)
     {
+        auto allOk = true;
         if (port == 0)
             port = defaultPeerPort_;
 
@@ -57,10 +58,8 @@ namespace shared::can
 
         if (ec)
         {
-            std::cerr << "Bus: resolve failed for "
-                << host << ":" << port
-                << " : " << ec.message() << "\n";
-            return false;
+            LogFile::Error("CAN BUS: Failed to AddPeer: host");
+            allOk = false;
         }
 
         udp::endpoint endpoint = *results.begin();
@@ -70,12 +69,8 @@ namespace shared::can
             peers_.push_back(endpoint);
         }
 
-        std::cout << "Bus: added peer "
-            << endpoint.address().to_string()
-            << ":" << endpoint.port()
-            << "\n";
-
-        return true;
+        LogFile::Info("CAN BUS: Added peer: host, " + endpoint.address().to_string());
+        return allOk;
     }
 
     bool Bus::AddPeer(const std::string& host)
@@ -104,6 +99,8 @@ namespace shared::can
 
         for (const auto& ep : peersCopy)
         {
+            LogFile::Info("Sending datagram to: "
+                + ep.address().to_string());
             boost::system::error_code ec;
 
             const std::size_t sent =
@@ -118,15 +115,13 @@ namespace shared::can
             {
                 allOk = false;
 
-                std::cerr << "Bus: send_to failed to "
-                    << ep.address().to_string()
-                    << ":" << ep.port()
-                    << " : "
-                    << (ec ? ec.message() : "short send")
-                    << "\n";
+                LogFile::Info("Bus: send_to failed to "
+                    + ep.address().to_string()
+                    + " : "
+                    + (ec ? ec.message() : "short send")
+                    + "\n");
             }
         }
-
         return allOk;
     }
 

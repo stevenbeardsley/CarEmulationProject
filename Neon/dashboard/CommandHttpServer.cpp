@@ -126,7 +126,7 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
     const auto msg = shared::can::Message
     {
         messageType,
-        static_cast<std::uint32_t>(69)
+        static_cast<std::uint32_t>(value)
     };
 
     const bool messageSent = m_bus.Send(msg);

@@ -26,7 +26,6 @@ namespace shared::config
         j.at("gear_ratios").get_to(t.gear_ratios);
         j.at("reverse_ratio").get_to(t.reverse_ratio);
 
-        // tiny sanity check (optional)
         if (static_cast<int>(t.gear_ratios.size()) != t.gears)
             throw std::runtime_error("Config: transmission.gear_ratios length must equal transmission.gears");
     }

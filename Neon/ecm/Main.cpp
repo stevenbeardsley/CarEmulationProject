@@ -52,8 +52,16 @@ int main()
         0,      // ephemeral bind
         15000   // default peer destination
     );
-    canTx.AddPeer("dashboard", 15000);
-    canTx.AddPeer("tcm", 15000);
+
+    if (!canTx.AddPeer("dashboard", 15000))
+    {
+        LogFile::Error("Error: dashboard was unable to add as a peer.");
+    }
+
+    if (!canTx.AddPeer("tcm", 15000))
+    {
+        LogFile::Error("Error: tcm was unable to add as a peer.");
+    }
 
     //Start Engine
     ecm::engine::Engine engine;
