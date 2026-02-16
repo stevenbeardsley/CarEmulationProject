@@ -30,20 +30,26 @@ void LogFile::setLevel(LogLevel level)
 
 void LogFile::log(LogLevel level, const std::string& message)
 {
-    if (level < level_) return;
+    if (level < level_)
+        return;
 
     std::ostringstream oss;
     oss << timestamp() << " [" << levelToString(level) << "] " << message << "\n";
+    const std::string line = oss.str();
 
     std::lock_guard<std::mutex> lock(mutex_);
-    if (ofs_.is_open())
+
+    // 1) Docker logs path (stdout/stderr)
+    // Use stderr for errors, stdout otherwise.
+    if (level >= LogLevel::ERROR)
     {
-        ofs_ << oss.str();
-        ofs_.flush();
+        std::cerr << line;
+        std::cerr.flush();
     }
-    else 
+    else
     {
-        std::cerr << oss.str();
+        std::cout << line;
+        std::cout.flush();
     }
 }
 

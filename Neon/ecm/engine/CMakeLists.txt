@@ -14,8 +14,9 @@ add_library(Engine
 target_link_libraries(
     Engine
     PUBLIC 
-        LogFile
         Can
+        Config
+        LogFile
 )
 
 source_group("Source Files" FILES ${engine_SOURCE})

@@ -4,6 +4,13 @@
 namespace tcm::transmission
 {
 
+Transmission::Transmission(const shared::config::Engine& engineConfig, const shared::config::Transmission& transmissionConfig):
+	m_engineConfig(engineConfig),
+	m_transmissionConfig(transmissionConfig)
+{
+	LogFile::Info("Transmission: Transmission system created with id: " + m_transmissionConfig.m_id);
+}
+
 std::uint32_t Transmission::getGear() const
 {
 	std::lock_guard<std::mutex> lk(m_lock); // Lock so the value cannot change
@@ -12,14 +19,21 @@ std::uint32_t Transmission::getGear() const
 
 void Transmission::gearUp()
 {
-	LogFile::Info("Gear has been shifted up."); // TODO: Logging shouldn't really be here as such 
 	m_gear++;
+	LogFile::Info("Transmission: Gear has been shifted up."); 
 }
 
 void Transmission::gearDown()
 {
-	LogFile::Info("Gear has been shifted down");
-	m_gear--;
+	if (m_gear == 0)
+	{
+		LogFile::Error("Transmission: Gear is at the bottom gear, cannot be shifted lower.");
+	}
+	else
+	{
+		m_gear--;
+		LogFile::Info("Transmission: Gear has been shifted down");
+	}
 }
 
 }

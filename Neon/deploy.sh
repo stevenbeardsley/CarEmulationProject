@@ -24,6 +24,8 @@ if [[ ! -f "$CONFIG_PATH" ]]; then
   exit 1
 fi
 
+cd "$PROJECT_ROOT"
+
 # --- Paths ---
 BUILD_DIR="$PROJECT_ROOT/build-$PLATFORM"
 

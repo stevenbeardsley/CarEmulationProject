@@ -1,38 +1,47 @@
-#ifndef ECM_ENGINE_H
-#define ECM_ENGINE_H
+#pragma once
 
 #include <cstdint>
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
 #include <thread>
+#include <vector>
+
+#include "shared/config/Engine.h"
+#include "shared/config/Transmission.h"
 
 namespace ecm::engine
 {
     class Engine
     {
     public:
-        Engine();
+        // Engine must be created with config (read from JSON elsewhere)
+        Engine(const shared::config::Engine& engineCfg,
+            const shared::config::Transmission& transCfg);
+
         ~Engine();
 
         Engine(const Engine&) = delete;
         Engine& operator=(const Engine&) = delete;
 
-        // Starts/stops the internal engine simulation thread.
+        // Thread control
         void start();
         void stop();
         bool isRunning() const;
 
-        // Driver input (0..100)
-        void setThrottle(std::uint32_t throttlePercent);
-        std::uint32_t getThrottle() const;
+        // Driver inputs
+        void setThrottle(std::uint32_t throttlePercent); // 0..100
 
-        // Optional drivetrain knobs (set by TCM or fixed)
-        void setGearRatio(double ratio);
-        void setFinalDrive(double ratio);
+        // Gear selection:
+        //   0 = neutral (no drive)
+        //   1..N = forward gears (uses m_gearRatios[gear-1])
+        //  -1 = reverse (uses m_reverseRatio)
+        void setSelectedGear(int gear);
+
+        // Vehicle parameters (optional overrides)
         void setMassKg(double kg);
         void setWheelRadiusM(double meters);
 
-        // Telemetry (safe to call from any thread)
+        // Telemetry
         std::uint32_t getSpeedMph() const;
         std::uint32_t getRpm() const;
         double getAccelerationMps2() const;
@@ -42,9 +51,19 @@ namespace ecm::engine
         void step(double dtSeconds);
 
         // Helpers
-        static double mpsToMph(double mps);
-        double maxTorqueNm(double rpm) const;
         static double clampd(double v, double lo, double hi);
+        static double mpsToMph(double mps);
+
+        // Torque curve using config
+        double torqueAtRpmNm(double rpm) const;
+
+        // Compute max speed at redline for current gear (locked driveline).
+        // Returns <= 0 if no cap applies (neutral, invalid ratios, etc.)
+        double computeRedlineSpeedCapMps() const;
+
+        // Config validation/sanity
+        static shared::config::Engine sanitizeEngineCfg(shared::config::Engine cfg);
+        static shared::config::Transmission sanitizeTransCfg(shared::config::Transmission cfg);
 
     private:
         // Threading
@@ -54,33 +73,37 @@ namespace ecm::engine
         bool m_running{ false };
         bool m_stopRequested{ false };
 
-        // --- Inputs (shared) ---
-        std::uint32_t m_throttlePercent{ 0 }; // 0..100
-        double m_gearRatio{ 3.50 }; // How many times the engine rotates for one rotation of the wheel
-        double m_finalDrive{ 3.90 };
+        // Tick
+        double m_tickHz{ 60.0 };
 
-        // --- State (shared) ---
-        double m_speedMps{ 0.0 };
-        double m_accelMps2{ 0.0 };
-        double m_rpm{ 900.0 };
-        double m_effectiveThrottle{ 0.0 }; // smoothed 0..1
+        // Inputs / state
+        std::uint32_t m_throttlePercent{ 0 };
+        double m_effectiveThrottle{ 0.0 };
+        double m_throttleResponse{ 6.0 }; // higher = faster response
 
-        // --- Parameters (shared) ---
+        // Config copies (constructed with these)
+        shared::config::Engine m_engineCfg{};
+        shared::config::Transmission m_transCfg{};
+
+        // Selected gear & active ratio
+        int m_selectedGear{ 0 };     // 0 neutral, 1..N, -1 reverse
+        double m_gearRatio{ 0.0 };   // active gear ratio (0 = neutral)
+        double m_finalDrive{ 1.0 };
+
+        // Vehicle constants / params
         double m_massKg{ 1400.0 };
-        double m_wheelRadiusM{ 0.32 };
-        double m_drivetrainEff{ 0.85 };
+        double m_wheelRadiusM{ 0.30 };
 
-        double m_idleRpm{ 900.0 };
-        double m_redlineRpm{ 6500.0 };
+        // Simple resistances
+        double m_cRolling{ 180.0 };  // N
+        double m_cDrag{ 0.35 };      // N/(m/s)^2
 
-        double m_cRolling{ 160.0 };
-        double m_cDrag{ 0.42 };
+        // Drivetrain
+        double m_drivetrainEff{ 0.90 };
 
-        double m_throttleResponse{ 6.0 }; // 1/sec (higher = snappier)
-
-        // Tick period for internal loop
-        double m_tickHz{ 50.0 }; // default 50Hz
+        // Dynamic state
+        double m_speedMps{ 0.0 };
+        double m_rpm{ 0.0 };
+        double m_accelMps2{ 0.0 };
     };
 }
-
-#endif

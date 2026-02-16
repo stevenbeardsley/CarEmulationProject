@@ -115,16 +115,16 @@ TEST(ConfigTests, LoadFromFile_ParsesEngineAndTransmission)
     EXPECT_DOUBLE_EQ(e.max_torque_nm, 110.0);
 
     const auto& t = cfg.getTransmissionConfig();
-    EXPECT_EQ(t.id, "transmission_5spd");
-    EXPECT_EQ(t.gears, 5);
-    EXPECT_DOUBLE_EQ(t.final_drive, 3.9);
-    ASSERT_EQ(t.gear_ratios.size(), 5u);
-    EXPECT_DOUBLE_EQ(t.gear_ratios[0], 3.91);
-    EXPECT_DOUBLE_EQ(t.gear_ratios[1], 2.14);
-    EXPECT_DOUBLE_EQ(t.gear_ratios[2], 1.36);
-    EXPECT_DOUBLE_EQ(t.gear_ratios[3], 1.03);
-    EXPECT_DOUBLE_EQ(t.gear_ratios[4], 0.84);
-    EXPECT_DOUBLE_EQ(t.reverse_ratio, -3.54);
+    EXPECT_EQ(t.m_id, "transmission_5spd");
+    EXPECT_EQ(t.m_gears, 5);
+    EXPECT_DOUBLE_EQ(t.m_finalDrive, 3.9);
+    ASSERT_EQ(t.m_gearRatios.size(), 5u);
+    EXPECT_DOUBLE_EQ(t.m_gearRatios[0], 3.91);
+    EXPECT_DOUBLE_EQ(t.m_gearRatios[1], 2.14);
+    EXPECT_DOUBLE_EQ(t.m_gearRatios[2], 1.36);
+    EXPECT_DOUBLE_EQ(t.m_gearRatios[3], 1.03);
+    EXPECT_DOUBLE_EQ(t.m_gearRatios[4], 0.84);
+    EXPECT_DOUBLE_EQ(t.m_reverseRatio, -3.54);
 
     // cleanup
     std::error_code ec;

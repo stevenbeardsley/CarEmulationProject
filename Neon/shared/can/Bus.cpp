@@ -1,7 +1,8 @@
 #include "Bus.h"
 #include "LogFile.h"
 #include <iostream>
-
+#include <chrono>
+#include <thread>
 namespace shared::can
 {
 
@@ -41,36 +42,56 @@ namespace shared::can
             << GetLocalPort() << "\n";
     }
 
-    bool Bus::AddPeer(const std::string& host,
-        unsigned short port)
+    bool Bus::AddPeer(const std::string& host, unsigned short port)
     {
-        auto allOk = true;
         if (port == 0)
             port = defaultPeerPort_;
 
-        boost::system::error_code ec;
+        // Retry settings (tune as you like)
+        constexpr auto maxAttempts = 25;                     // ~5s total
+        const auto delay = std::chrono::milliseconds(200);  // 0.2s between tries
 
-        auto results =
-            resolver_.resolve(udp::v4(),
+        for (auto attempt = 1; attempt <= maxAttempts; ++attempt)
+        {
+            boost::system::error_code ec;
+
+            auto results = resolver_.resolve(
+                udp::v4(),
                 host,
                 std::to_string(port),
-                ec);
+                ec
+            );
 
-        if (ec)
-        {
-            LogFile::Error("CAN BUS: Failed to AddPeer: host");
-            allOk = false;
+            if (!ec && !results.empty())
+            {
+                udp::endpoint endpoint = *results.begin();
+
+                {
+                    std::lock_guard<std::mutex> lock(peersMutex_);
+
+                    // Optional: de-dupe
+                    if (std::find(peers_.begin(), peers_.end(), endpoint) == peers_.end())
+                        peers_.push_back(endpoint);
+                }
+
+                LogFile::Info("CAN BUS: Added peer: " + host + " -> "
+                    + endpoint.address().to_string() + ":" + std::to_string(endpoint.port()));
+                return true;
+            }
+
+            // Don’t spam too hard; log first + last (or every N attempts)
+            if (attempt == 1 || attempt == maxAttempts)
+            {
+                LogFile::Warn("CAN BUS: AddPeer resolve failed for " + host + ":"
+                    + std::to_string(port) + " (attempt "
+                    + std::to_string(attempt) + "/" + std::to_string(maxAttempts)
+                    + ") : " + ec.message());
+            }
+
+            std::this_thread::sleep_for(delay);
         }
 
-        udp::endpoint endpoint = *results.begin();
-
-        {
-            std::lock_guard<std::mutex> lock(peersMutex_);
-            peers_.push_back(endpoint);
-        }
-
-        LogFile::Info("CAN BUS: Added peer: host, " + endpoint.address().to_string());
-        return allOk;
+        return false;
     }
 
     bool Bus::AddPeer(const std::string& host)

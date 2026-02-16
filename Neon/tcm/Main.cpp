@@ -27,8 +27,18 @@ int main()
     LogFile::Instance().setLogFile("tcm.log");
     LogFile::Instance().setLevel(LogLevel::DEBUG);
 
+    // Get Config details 
+    shared::config::Config config;
+    config.LoadFromFile("config.json");
+
+    const auto engineConfig = config.getEngineConfig();
+    const auto transmissionConfig = config.getTransmissionConfig();
     // Create Transmission object 
-    tcm::transmission::Transmission transmission;
+    tcm::transmission::Transmission transmission
+    {
+        engineConfig,
+        transmissionConfig
+    };
     LogFile::Info("Transmission is running!");
 
     std::mutex m;
@@ -95,6 +105,7 @@ int main()
             case shared::can::MessageType::RPM:
             case shared::can::MessageType::ThrottleRequest:
             case shared::can::MessageType::Speed:
+                // Do nothing, message is not subscribed to.
                 break;
             default:
                 LogFile::Info("Unaccounted for message received.");

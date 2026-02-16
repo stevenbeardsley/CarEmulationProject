@@ -15,7 +15,6 @@
 #include <ctime>
 #include <mutex>
 
-
 enum class LogLevel 
 {
     DEBUG,

@@ -1,6 +1,8 @@
 #ifndef TCM_TRANSMISSION_TRANSMISSION_H
 #define TCM_TRANSMISSION_TRANSMISSION_H
 
+#include "Config.h"
+
 #include <cstdint>
 #include <mutex>
 
@@ -10,7 +12,8 @@ namespace tcm::transmission
 class Transmission
 {
 public:
-	Transmission() = default;
+	Transmission(const shared::config::Engine& engineConfig, 
+		const shared::config::Transmission& transmissionConfig);
 	
 	void gearUp();
 
@@ -22,6 +25,8 @@ public:
 private:
 	mutable std::mutex m_lock;
 	std::uint32_t m_gear{ 0 };
+	const shared::config::Engine m_engineConfig;
+	const shared::config::Transmission m_transmissionConfig;
 };
 }
 

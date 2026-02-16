@@ -5,7 +5,12 @@
 #include "shared/can/Message.h"
 #include "shared/can/MessageType.h"
 
-#include "ecm/engine/Engine.h"   
+#include "ecm/engine/Engine.h"
+
+// Config structs
+#include "shared/config/Engine.h"
+#include "shared/config/Transmission.h"
+#include "shared/config/Config.h"
 
 #include <atomic>
 #include <csignal>
@@ -54,17 +59,26 @@ int main()
     );
 
     if (!canTx.AddPeer("dashboard", 15000))
-    {
         LogFile::Error("Error: dashboard was unable to add as a peer.");
-    }
 
     if (!canTx.AddPeer("tcm", 15000))
-    {
         LogFile::Error("Error: tcm was unable to add as a peer.");
-    }
 
-    //Start Engine
-    ecm::engine::Engine engine;
+    // ---------------------------------------------------------------------
+    // CONFIG: Replace this section with your actual JSON config loader.
+    // ---------------------------------------------------------------------
+    shared::config::Config config;
+    config.LoadFromFile("config.json");
+
+    const auto engineConfig = config.getEngineConfig();
+    const auto transmissionConfig = config.getTransmissionConfig();
+    // ---------------------------------------------------------------------
+
+    ecm::engine::Engine engine(engineConfig, transmissionConfig);
+
+    // Optional: start in 1st gear or neutral.
+    // If TCM will always send CurrentGear soon, neutral is fine.
+    engine.setSelectedGear(0);
     engine.start();
 
     // Receiver thread: enqueue + notify
@@ -86,14 +100,13 @@ int main()
         using clock = std::chrono::steady_clock;
 
         // Telemetry rates
-        constexpr auto tickPeriod = std::chrono::milliseconds(20);  // 50 Hz loop
+        constexpr auto tickPeriod = std::chrono::milliseconds(20);      // 50 Hz loop
         constexpr auto telemetryPeriod = std::chrono::milliseconds(50); // 20 Hz telemetry broadcast
         auto nextTick = clock::now();
         auto nextTelemetry = clock::now();
 
         while (running)
         {
-            // Wait until either messages arrive OR next tick time
             nextTick += tickPeriod;
 
             {
@@ -120,37 +133,28 @@ int main()
                 case shared::can::MessageType::ThrottleRequest:
                 {
                     LogFile::Info("Throttle Request received.");
-                    // Value expected 0..100
-                    const auto thr = msg.getValue();
-                    engine.setThrottle(thr);
+                    const auto thr = msg.getValue(); // expected 0..100
+                    engine.setThrottle(static_cast<std::uint32_t>(thr));
                     break;
                 }
 
                 case shared::can::MessageType::CurrentGear:
                 {
-                    // If your TCM sends gear number, you can map to ratios here.
-                    // Example mapping (tune later):
-                    // 1->3.50, 2->2.10, 3->1.40, 4->1.00, 5->0.83
-                    const auto gear = msg.getValue();
-                    double ratio = 1.0;
-                    switch (gear)
-                    {
-                    case 1: ratio = 3.50; break;
-                    case 2: ratio = 2.10; break;
-                    case 3: ratio = 1.40; break;
-                    case 4: ratio = 1.00; break;
-                    case 5: ratio = 0.83; break;
-                    default: ratio = 1.00; break;
-                    }
-                    engine.setGearRatio(ratio);
-                    LogFile::Debug("ECM: CurrentGear=" + std::to_string(gear) +
-                        " ratio=" + std::to_string(ratio));
+                    // NEW: Use gear number directly (ratios come from transCfg)
+                    // Expecting: 0 neutral, 1..N forward, -1 reverse (if you use it)
+                    const int gear = msg.getValue();
+
+                    engine.setSelectedGear(gear);
+
+                    LogFile::Debug("ECM: CurrentGear=" + std::to_string(gear));
                     break;
                 }
+
                 case shared::can::MessageType::GearDownRequest:
                 case shared::can::MessageType::GearUpRequest:
-                    LogFile::Info("Message received that the ecm is not subscribed to.");
+                    LogFile::Info("Message received that the ECM is not subscribed to.");
                     break;
+
                 default:
                     LogFile::Info("Unaccounted for message type received.");
                     break;
@@ -167,12 +171,11 @@ int main()
                 const auto speed = engine.getSpeedMph();
                 const auto accel = scaleAccel(engine.getAccelerationMps2());
 
-                // These require MessageType::Speed and MessageType::Acceleration to exist.
-                // If you don't have them yet, add them, or temporarily re-use existing types.
-                try {
+                try
+                {
                     canTx.Send(shared::can::Message(shared::can::MessageType::RPM, (int)rpm));
                     canTx.Send(shared::can::Message(shared::can::MessageType::Speed, (int)speed));
-                    //canTx.Send(shared::can::Message(shared::can::MessageType::Acceleration, accel)); // Acceleration not yet cared about
+                    // canTx.Send(shared::can::Message(shared::can::MessageType::Acceleration, accel));
 
                     LogFile::Info(
                         "ECM Telemetry | "
@@ -180,13 +183,9 @@ int main()
                         " | Speed=" + std::to_string(speed) + " mph"
                         " | Accel=" + std::to_string(accel) + " (m/s^2 * 1000)"
                     );
-
-                    // Optional heartbeat:
-                    // canTx.Send(shared::can::Message(shared::can::MessageType::Heartbeat, 1));
                 }
                 catch (...)
                 {
-                    // If your Bus can throw, log it. Keeping it simple here.
                     LogFile::Warn("ECM: telemetry send failed");
                 }
             }

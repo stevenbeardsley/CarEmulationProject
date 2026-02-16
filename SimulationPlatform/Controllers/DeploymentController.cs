@@ -76,7 +76,7 @@ namespace SimulationPlatform.Controllers
             var error = await errorTask;
 
             await Task.Delay(4000);
-            return (process.ExitCode, output, error); // TODO: Needs breakpoint here for some reason, threading issue?
+            return (process.ExitCode, output, error); 
         }
 
 

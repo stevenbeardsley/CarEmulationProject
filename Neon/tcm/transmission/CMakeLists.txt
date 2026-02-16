@@ -15,6 +15,7 @@ target_link_libraries(
     Transmission
     PUBLIC 
         LogFile
+        Config
 )
 
 source_group("Source Files" FILES ${transmission_SOURCE})
