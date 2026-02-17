@@ -35,12 +35,11 @@ namespace SimulationPlatform.Pages
         // =========================
         // RPM DIAL (tachometer)
         // =========================
-        private const double MaxRpm = 6000.0;
+        private const double MaxRpm = 6000.0; // TODO: change
         private bool _rpmDialBuilt = false;
 
-        // Dial sweep: -135° .. +135° (270° total)
-        private const double StartAngleDeg = 180.0;  // left
-        private const double SweepDeg = 180.0;       // sweep across top
+        private const double StartAngleDeg = 180.0;  
+        private const double SweepDeg = 180.0;       
 
         // Redline begins at 85% of max
         private const double RedlineStartRatio = 0.85;
@@ -325,19 +324,19 @@ namespace SimulationPlatform.Pages
                 var center = new Point(95, 78);
                 double radius = 70;
 
-                double start = StartAngleDeg;
-                double endFull = StartAngleDeg + SweepDeg;
+                var start = StartAngleDeg;
+                var endFull = StartAngleDeg + SweepDeg;
 
                 RpmTrackPath.Data = CreateArcPolylineGeometry(center, radius, start, endFull);
 
-                double redStart = StartAngleDeg + SweepDeg * RedlineStartRatio;
+                var redStart = StartAngleDeg + SweepDeg * RedlineStartRatio;
                 RpmRedlinePath.Data = CreateArcPolylineGeometry(center, radius, redStart, endFull);
 
                 _rpmDialBuilt = true;
             }
 
-            double rpm = Math.Clamp(rpmValue, 0.0, MaxRpm);
-            double ratio = rpm / MaxRpm;
+            var rpm = Math.Clamp(rpmValue, 0.0, MaxRpm);
+            var ratio = rpm / MaxRpm;
 
             // FULL 270° sweep, no negative angles, no wrap.
             RpmNeedleRotate.Angle = 180.0 * ratio;
@@ -350,15 +349,18 @@ namespace SimulationPlatform.Pages
             // More points = smoother arc
             const int segments = 120;
 
-            double startRad = DegToRad(startAngleDeg);
-            double endRad = DegToRad(endAngleDeg);
+            var startRad = DegToRad(startAngleDeg);
+            var endRad = DegToRad(endAngleDeg);
 
-            double total = endRad - startRad;
-            if (total < 0) total = 0;
+            var total = endRad - startRad;
+            if (total < 0)
+            {
+                total = 0;
+            }
 
-            Point p0 = new Point(
-                center.X + radius * Math.Cos(startRad),
-                center.Y + radius * Math.Sin(startRad));
+            var p0 = new Point(
+            center.X + radius * Math.Cos(startRad),
+            center.Y + radius * Math.Sin(startRad));
 
             var figure = new PathFigure
             {
@@ -369,10 +371,10 @@ namespace SimulationPlatform.Pages
 
             var poly = new PolyLineSegment();
 
-            for (int i = 1; i <= segments; i++)
+            for (var i = 1; i <= segments; i++)
             {
-                double t = (double)i / segments;
-                double a = startRad + total * t;
+                var t = (double)i / segments;
+                var a = startRad + total * t;
 
                 poly.Points.Add(new Point(
                     center.X + radius * Math.Cos(a),
