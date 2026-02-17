@@ -29,11 +29,19 @@ void signalHandler(int)
     running = false;
 }
 
-static inline std::int32_t scaleAccel(double accelMps2)
+static inline std::int32_t scaleAccel(double accelMps2) // TODO: Not used 
 {
     // m/s^2 -> milli-(m/s^2)
     return static_cast<std::int32_t>(std::llround(accelMps2 * 1000.0));
 }
+
+
+static inline std::int32_t scaleTemp(double tempC) // TODO: Support floating point in CAN 
+{
+    // °C -> deci-degrees (0.1°C resolution)
+    return static_cast<std::int32_t>(std::llround(tempC * 10.0));
+}
+
 
 int main()
 {
@@ -169,19 +177,19 @@ int main()
 
                 const auto rpm = engine.getRpm();
                 const auto speed = engine.getSpeedMph();
-                const auto accel = scaleAccel(engine.getAccelerationMps2());
+                const auto temp =  scaleTemp(engine.getCoolantTempC());
 
                 try
                 {
                     canTx.Send(shared::can::Message(shared::can::MessageType::RPM, (int)rpm));
                     canTx.Send(shared::can::Message(shared::can::MessageType::Speed, (int)speed));
-                    // canTx.Send(shared::can::Message(shared::can::MessageType::Acceleration, accel));
+                    canTx.Send(shared::can::Message(shared::can::MessageType::EngineTemperature, temp));
 
                     LogFile::Info(
                         "ECM Telemetry | "
                         "RPM=" + std::to_string(rpm) +
                         " | Speed=" + std::to_string(speed) + " mph"
-                        " | Accel=" + std::to_string(accel) + " (m/s^2 * 1000)"
+                        " | Temp=" + std::to_string(temp) + " C"
                     );
                 }
                 catch (...)

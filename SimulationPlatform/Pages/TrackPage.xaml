@@ -485,7 +485,9 @@
                                 Padding="14">
                             <StackPanel>
                                 <TextBlock Text="TEMP" Foreground="DarkGray" FontWeight="SemiBold"/>
-                                <TextBlock Text="92*C" FontSize="28" FontWeight="Bold"/>
+                                <TextBlock Text="{x:Bind EngineTemp, Mode=OneWay}"
+                                           FontSize="28" 
+                                           FontWeight="Bold"/>
                             </StackPanel>
                         </Border>
 

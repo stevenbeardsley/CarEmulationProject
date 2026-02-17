@@ -13,6 +13,7 @@ enum class MessageType
     CurrentGear,
     ThrottleRequest,
     Acceleration,
+    EngineTemperature,
 	RPM, // TODO: Implement
     Speed // TODO: Implement
 };

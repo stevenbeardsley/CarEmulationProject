@@ -20,6 +20,7 @@ namespace SimulationPlatform.Pages
         private string m_speed = string.Empty;
         private int m_gear;
         private string m_rpms = string.Empty;
+        private string m_engineTemp = string.Empty;
 
         private double _acceleration = 25;
         private double _speedValue;
@@ -128,6 +129,19 @@ namespace SimulationPlatform.Pages
             }
         }
 
+        public string EngineTemp
+        {
+            get => m_engineTemp;
+            set
+            {
+                if (m_engineTemp != value)
+                {
+                    m_engineTemp = value;
+                    OnPropertyChanged(nameof(EngineTemp));
+                }
+            }
+        }
+
         public TrackPage()
         {
             InitializeComponent();
@@ -195,7 +209,7 @@ namespace SimulationPlatform.Pages
             {
                 SpeedValue = carData.Speed;           // drives animation + raises property changed
                 Speed = carData.Speed.ToString();
-
+                EngineTemp = carData.EngineTemp.ToString();
                 // Keep string binding for text readout
                 Rpm = carData.Rpms.ToString();
 

@@ -191,6 +191,18 @@ namespace ecm::engine
         return m_accelMps2;
     }
 
+    double Engine::getCoolantTempC() const
+    {
+        std::lock_guard<std::mutex> lk(m_mutex);
+        return m_thermal.getCoolantTempC();
+    }
+
+    bool Engine::isOverheating() const
+    {
+        std::lock_guard<std::mutex> lk(m_mutex);
+        return m_thermal.isOverheating();
+    }
+
     double Engine::clampd(double v, double lo, double hi)
     {
         return std::max(lo, std::min(v, hi));
@@ -287,6 +299,12 @@ namespace ecm::engine
         m_effectiveThrottle = m_effectiveThrottle + (targetThrottle - m_effectiveThrottle) * alpha;
         m_effectiveThrottle = clampd(m_effectiveThrottle, 0.0, 1.0);
 
+        // Limp mode if overheating
+        if (m_thermal.isOverheating())
+        {
+            m_effectiveThrottle *= 0.5;
+        }
+
         // Resistances
         const double resistForce = m_cRolling + (m_cDrag * m_speedMps * m_speedMps);
 
@@ -360,6 +378,15 @@ namespace ecm::engine
 
         // Clamp overshoot due to dt
         if (speedCapMps > 0.0 && m_speedMps > speedCapMps)
+        {
             m_speedMps = speedCapMps;
+        }
+
+        m_thermal.update(
+            m_rpm,
+            m_effectiveThrottle,
+            static_cast<double>(m_engineCfg.idle_rpm),
+            static_cast<double>(m_engineCfg.max_rpm),
+            dtSeconds);
     }
 }

@@ -39,6 +39,12 @@ namespace dashboard
         m_data.m_maxRpms = maxRpm;
     }
 
+    void DashboardDataSource::SetEngineTemp(std::uint32_t temp)
+    {
+        std::lock_guard<std::mutex> lk(m_mtx);
+        m_data.m_engineTemp = temp;
+    }
+
     void DashboardDataSource::SetStatus(bool status)
     {
         std::lock_guard<std::mutex> lk(m_mtx);
@@ -70,6 +76,7 @@ namespace dashboard
             << "\"gear\":" << d.m_gear << ","
             << "\"rpms\":" << d.m_rpm << ","
             << "\"maxRpms\":" << d.m_maxRpms<< ","
+            << "\"engineTemp\":" << d.m_engineTemp << ","
             << "\"status\":" << (d.m_status ? "true" : "false")
             << "}";
 

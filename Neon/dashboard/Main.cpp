@@ -187,12 +187,14 @@ int main()
                             return m0;
                         }();
 
-                    if (!running) break;
+                    if (!running)
+                    {
+                        break;
+                    }
 
                     switch (msg.getMessageType())
                     {
                     case shared::can::MessageType::CurrentGear:
-                        LogFile::Info("Current gear is: " + std::to_string(msg.getValue()));
                         dataSource.SetGear(msg.getValue());
                         break;
                     case shared::can::MessageType::Speed:
@@ -201,7 +203,8 @@ int main()
                     case shared::can::MessageType::RPM:
                         dataSource.SetRpm(msg.getValue());
                         break;
-                    default:
+                    case shared::can::MessageType::EngineTemperature:
+                        dataSource.SetEngineTemp(msg.getValue());
                         break;
                     }
                 }

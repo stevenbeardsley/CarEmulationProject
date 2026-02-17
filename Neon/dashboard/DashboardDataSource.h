@@ -21,6 +21,7 @@ namespace dashboard
         void SetSpeed(std::int32_t speed);
         void SetRpm(std::int32_t rpm);
         void SetMaxRpms(std::uint32_t maxRpms);
+        void SetEngineTemp(std::uint32_t temp);
         void SetStatus(bool status);
 
         // Convenience: update multiple fields atomically

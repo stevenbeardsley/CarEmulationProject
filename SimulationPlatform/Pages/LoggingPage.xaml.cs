@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using SimulationPlatform.Models;
 using Microsoft.UI.Dispatching;
+using System.Runtime.CompilerServices;
 
 namespace SimulationPlatform.Pages
 {
@@ -12,6 +13,7 @@ namespace SimulationPlatform.Pages
         private string m_gear = string.Empty;
         private string m_rpm = string.Empty;
         private string m_maxRpms = string.Empty;
+        private string m_engineTemp = string.Empty;
         private string m_status = string.Empty;
         
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -76,6 +78,19 @@ namespace SimulationPlatform.Pages
             }
         }
 
+        public string EngineTemp
+        {
+            get => m_engineTemp;
+            set
+            {
+                if (m_engineTemp != value)
+                {
+                    m_engineTemp = value;
+                    OnPropertyChanged(nameof(EngineTemp));
+                }
+            }
+        }
+
         public string Status
         {
             get => m_status;
@@ -102,12 +117,14 @@ namespace SimulationPlatform.Pages
                 Status = carData.Status.ToString();
                 Rpm = carData.Rpms.ToString();
                 MaxRpms = carData.MaxRpms.ToString();
+                EngineTemp = carData.EngineTemp.ToString(); // TODO: Are the property raisers needed?
                 Gear = carData.Gear.ToString();
                 OnPropertyChanged(nameof(Speed));
                 OnPropertyChanged(nameof(Status));
                 OnPropertyChanged(nameof(Gear));
                 OnPropertyChanged(nameof(Rpm));
                 OnPropertyChanged(nameof(MaxRpms));
+                OnPropertyChanged(nameof(EngineTemp));
             });
         }
 
@@ -119,6 +136,7 @@ namespace SimulationPlatform.Pages
             Gear = App.m_model.m_carData.Gear.ToString();
             Rpm = App.m_model.m_carData.Rpms.ToString();
             MaxRpms = App.m_model.m_carData.MaxRpms.ToString();
+            EngineTemp = App.m_model.m_carData.EngineTemp.ToString();
             App.m_model.m_webSocketController.CarDataReceived += UpdateCarData;
         }
 

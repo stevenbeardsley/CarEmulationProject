@@ -3,12 +3,22 @@ set(engine_HEADERS
 )
 
 set(engine_SOURCE
-    Engine.cpp    
+    Engine.cpp
+)
+
+set(engine_models_HEADERS
+    models/ThermalModel.h
+)
+
+set(engine_models_SOURCE
+    models/ThermalModel.cpp
 )
 
 add_library(Engine 
     ${engine_SOURCE}
     ${engine_HEADERS}
+    ${engine_models_SOURCE}
+    ${engine_models_HEADERS}
 )
 
 target_link_libraries(
@@ -21,5 +31,8 @@ target_link_libraries(
 
 source_group("Source Files" FILES ${engine_SOURCE})
 source_group("Header Files" FILES ${engine_HEADERS})
+
+source_group("Source Files\\models" FILES ${engine_models_SOURCE})
+source_group("Header Files\\models" FILES ${engine_models_HEADERS})
 
 set_target_properties(Engine PROPERTIES FOLDER "components/ecm")

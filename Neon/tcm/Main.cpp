@@ -105,6 +105,7 @@ int main()
             case shared::can::MessageType::RPM:
             case shared::can::MessageType::ThrottleRequest:
             case shared::can::MessageType::Speed:
+            case shared::can::MessageType::EngineTemperature:
                 // Do nothing, message is not subscribed to.
                 break;
             default:
