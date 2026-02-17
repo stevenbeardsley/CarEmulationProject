@@ -1,11 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using SimulationPlatform.Models;
+using Windows.Foundation;
+using Microsoft.UI.Xaml.Media;
 
 namespace SimulationPlatform.Pages
 {
@@ -24,10 +27,23 @@ namespace SimulationPlatform.Pages
 
         public Brush m_colour
         {
-            get;set;
+            get; set;
         }
 
         private bool _laneScrollStarted = false;
+
+        // =========================
+        // RPM DIAL (tachometer)
+        // =========================
+        private const double MaxRpm = 6000.0;
+        private bool _rpmDialBuilt = false;
+
+        // Dial sweep: -135° .. +135° (270° total)
+        private const double StartAngleDeg = 180.0;  // left
+        private const double SweepDeg = 180.0;       // sweep across top
+
+        // Redline begins at 85% of max
+        private const double RedlineStartRatio = 0.85;
 
         public double SpeedValue
         {
@@ -58,29 +74,30 @@ namespace SimulationPlatform.Pages
         }
 
         public string AccelerationText => $"{Acceleration:0}%";
-        
+
         public bool m_downShiftEnabled => m_gear != 0;
+
         public bool m_upShiftEnabled
         {
             get => m_gear < m_model.CarConfig.GearsCount;
         }
 
         public int GearValue
+        {
+            get => m_gear;
+            set
+            {
+                if (m_gear != value)
                 {
-                    get => m_gear;
-                    set
-                    {
-                        if (m_gear != value)
-                        {
-                            m_gear = value;
+                    m_gear = value;
 
-                            OnPropertyChanged(nameof(GearValue));   
-                            OnPropertyChanged(nameof(Gear));        
-                            OnPropertyChanged(nameof(m_downShiftEnabled));
-                            OnPropertyChanged(nameof(m_upShiftEnabled));
-                        }
-                    }
+                    OnPropertyChanged(nameof(GearValue));
+                    OnPropertyChanged(nameof(Gear));
+                    OnPropertyChanged(nameof(m_downShiftEnabled));
+                    OnPropertyChanged(nameof(m_upShiftEnabled));
                 }
+            }
+        }
 
         // UI-facing string
         public string Gear => m_gear.ToString();
@@ -98,6 +115,7 @@ namespace SimulationPlatform.Pages
             }
         }
 
+        // Keep your existing binding mechanics: RPM is still a string property.
         public string Rpm
         {
             get => m_rpms;
@@ -136,6 +154,9 @@ namespace SimulationPlatform.Pages
                 SetupSeamlessLaneScroll();     // sets To = -_oneCopyHeight
                 StartLaneScrollIfNeeded();     // begins storyboard controllably once
                 UpdateRoadScrollSpeed();       // applies correct ratio/pause/resume
+
+                // Draw RPM dial once XAML is ready (uses current model value)
+                UpdateRpmGauge(App.m_model.m_carData.Rpms);
             };
         }
 
@@ -143,7 +164,10 @@ namespace SimulationPlatform.Pages
         {
             SpeedValue = App.m_model.m_carData.Speed;
             Speed = SpeedValue.ToString();
+
             Rpm = App.m_model.m_carData.Rpms.ToString();
+            UpdateRpmGauge(App.m_model.m_carData.Rpms);
+
             GearValue = App.m_model.m_carData.Gear;
 
             App.m_model.m_webSocketController.CarDataReceived += UpdateCarData;
@@ -172,7 +196,13 @@ namespace SimulationPlatform.Pages
             {
                 SpeedValue = carData.Speed;           // drives animation + raises property changed
                 Speed = carData.Speed.ToString();
+
+                // Keep string binding for text readout
                 Rpm = carData.Rpms.ToString();
+
+                // Update dial using numeric value from model/telemetry
+                UpdateRpmGauge(carData.Rpms);
+
                 GearValue = carData.Gear;
             });
         }
@@ -180,7 +210,7 @@ namespace SimulationPlatform.Pages
         private async void GearShiftDown_Click(object sender, RoutedEventArgs e)
         {
             try
-            { 
+            {
                 await m_model.VehicleController.ShiftDownAsync();
             }
             catch (Exception ex)
@@ -191,13 +221,13 @@ namespace SimulationPlatform.Pages
 
         private async void GearShiftUp_Click(object sender, RoutedEventArgs e)
         {
-            try 
+            try
             {
-                await m_model.VehicleController.ShiftUpAsync(); 
+                await m_model.VehicleController.ShiftUpAsync();
             }
-            catch (Exception ex) 
-            { 
-                System.Diagnostics.Debug.WriteLine(ex.Message); 
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
         }
 
@@ -279,5 +309,84 @@ namespace SimulationPlatform.Pages
             LaneScrollStoryboard.SpeedRatio = ratio;
             LaneScrollStoryboard.Resume();
         }
+
+        // =========================
+        // RPM DIAL helpers
+        // (expects these XAML names exist: RpmTrackPath, RpmRedlinePath, RpmValuePath, RpmNeedleRotate)
+        // =========================
+        private void UpdateRpmGauge(double rpmValue)
+        {
+            if (RpmTrackPath is null || RpmRedlinePath is null || RpmNeedleRotate is null)
+                return;
+
+            // Build the fixed dial geometry ONCE (so the coloured arcs never change)
+            if (!_rpmDialBuilt)
+            {
+                var center = new Point(95, 78);
+                double radius = 70;
+
+                double start = StartAngleDeg;
+                double endFull = StartAngleDeg + SweepDeg;
+
+                RpmTrackPath.Data = CreateArcPolylineGeometry(center, radius, start, endFull);
+
+                double redStart = StartAngleDeg + SweepDeg * RedlineStartRatio;
+                RpmRedlinePath.Data = CreateArcPolylineGeometry(center, radius, redStart, endFull);
+
+                _rpmDialBuilt = true;
+            }
+
+            double rpm = Math.Clamp(rpmValue, 0.0, MaxRpm);
+            double ratio = rpm / MaxRpm;
+
+            // FULL 270° sweep, no negative angles, no wrap.
+            RpmNeedleRotate.Angle = 180.0 * ratio;
+        }
+
+
+
+        private static Geometry CreateArcPolylineGeometry(Point center, double radius, double startAngleDeg, double endAngleDeg)
+        {
+            // More points = smoother arc
+            const int segments = 120;
+
+            double startRad = DegToRad(startAngleDeg);
+            double endRad = DegToRad(endAngleDeg);
+
+            double total = endRad - startRad;
+            if (total < 0) total = 0;
+
+            Point p0 = new Point(
+                center.X + radius * Math.Cos(startRad),
+                center.Y + radius * Math.Sin(startRad));
+
+            var figure = new PathFigure
+            {
+                StartPoint = p0,
+                IsClosed = false,
+                IsFilled = false
+            };
+
+            var poly = new PolyLineSegment();
+
+            for (int i = 1; i <= segments; i++)
+            {
+                double t = (double)i / segments;
+                double a = startRad + total * t;
+
+                poly.Points.Add(new Point(
+                    center.X + radius * Math.Cos(a),
+                    center.Y + radius * Math.Sin(a)));
+            }
+
+            figure.Segments.Add(poly);
+
+            var geo = new PathGeometry();
+            geo.Figures.Add(figure);
+            return geo;
+        }
+
+        private static double DegToRad(double deg) => (Math.PI / 180.0) * deg;
+
     }
 }
