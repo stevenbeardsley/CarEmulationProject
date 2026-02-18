@@ -60,6 +60,11 @@ public class AppModel : INotifyPropertyChanged
             }
         }
 
+        public bool isConnected()
+        {
+            return m_connected;
+        }
+
         protected void OnPropertyChanged([CallerMemberName] string name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 

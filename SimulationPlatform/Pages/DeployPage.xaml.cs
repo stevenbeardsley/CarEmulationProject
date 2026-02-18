@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -38,13 +39,16 @@ namespace SimulationPlatform.Pages
         public Visibility DeployErrorVisibility = Visibility.Collapsed;
         public Visibility m_selectOptionTextVisibility => m_deployButtonEnabled ? Visibility.Collapsed : Visibility.Visible;
 
+        private bool m_connected = false;
         private bool m_colourChosen = false;
         private bool m_engineTypeChosen = false; // TODO: When engine configurations are implemented.
         private bool m_transmissionTypeChosen = false;
         public bool m_deployButtonEnabled => m_colourChosen && 
             m_transmissionTypeChosen &&
             DeployingVisibility != Visibility.Visible &&
-            DeployErrorVisibility != Visibility.Visible;
+            DeployErrorVisibility != Visibility.Visible &&
+            !m_connected;
+
         public DeployPage()
         {
             this.InitializeComponent();
@@ -56,6 +60,7 @@ namespace SimulationPlatform.Pages
 
         private void OnConnected()
         {
+            m_connected = true;
             DeployingVisibility = Visibility.Collapsed;
             OnPropertyChanged(nameof(DeployingVisibility));
             ConnectedVisibility = Visibility.Visible;
@@ -75,7 +80,11 @@ namespace SimulationPlatform.Pages
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            // Subscribe to message changes 
+            if (App.m_model.isConnected())
+            {
+                m_connected = true;
+                ConnectedVisibility = Visibility.Visible;
+            }
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
