@@ -18,26 +18,32 @@ namespace ecm::engine::models
         if (dtSeconds <= 0.0)
             return;
 
-        const double rpmLoad =
+        const auto rpmLoad =
             clampd((rpm - idleRpm) /
                 std::max(1.0, redlineRpm - idleRpm),
                 0.0, 1.0);
 
-        const double heatInput =
+        const auto heatInput =
             m_heatRate * rpmLoad * throttle;
 
-        const double cooling =
+        const auto cooling =
             m_coolRate * (m_tempC - m_ambientC);
 
         m_tempC += (heatInput - cooling) * dtSeconds;
 
         if (m_tempC < m_ambientC)
+        {
             m_tempC = m_ambientC;
+        }
 
         if (m_tempC >= m_overheatC)
+        {
             m_overheating = true;
+        }
         else if (m_tempC < m_overheatC - 5.0)
+        {
             m_overheating = false;
+        }
     }
 
     double ThermalModel::getCoolantTempC() const

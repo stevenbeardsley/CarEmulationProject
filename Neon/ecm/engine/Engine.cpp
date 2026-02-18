@@ -86,7 +86,9 @@ namespace ecm::engine
         {
             std::lock_guard<std::mutex> lk(m_mutex);
             if (!m_running)
+            {
                 return;
+            }
 
             m_stopRequested = true;
         }

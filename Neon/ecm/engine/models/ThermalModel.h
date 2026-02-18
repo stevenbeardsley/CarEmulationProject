@@ -1,5 +1,5 @@
-#ifndef ECM_ENGINE_MODELS_THERMAL_MODEL
-#define ECM_ENGINE_MODELS_THERMAL_MODEL
+#ifndef ECM_ENGINE_MODELS_THERMAL_MODEL_H
+#define ECM_ENGINE_MODELS_THERMAL_MODEL_H
 
 namespace ecm::engine::models
 {
@@ -18,10 +18,9 @@ class ThermalModel
         double getCoolantTempC() const;
         bool isOverheating() const;
 
-    private:
-        static double clampd(double v, double lo, double hi);
 
     private:
+        static double clampd(double v, double lo, double hi);
         double m_tempC{ 90.0 };
         double m_ambientC{ 20.0 };
 
