@@ -106,7 +106,8 @@
                                             <StackPanel Grid.Row="1"
                                                         Orientation="Vertical"
                                                         HorizontalAlignment="Center"
-                                                        Spacing="14">
+                                                        Spacing="14"
+                                                        Margin="0,14,0,0">
                                                 <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
                                                 <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
                                                 <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
