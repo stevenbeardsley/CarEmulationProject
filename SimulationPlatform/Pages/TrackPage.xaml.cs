@@ -164,7 +164,7 @@ namespace SimulationPlatform.Pages
             Loaded += (_, __) =>
             {
                 ApplyLaneClip();
-                SetupSeamlessLaneScroll();     // sets To = -_oneCopyHeight
+                SetupSeamlessLaneScroll();     // sets To = _oneCopyHeight
                 StartLaneScrollIfNeeded();     // begins storyboard controllably once
                 UpdateRoadScrollSpeed();       // applies correct ratio/pause/resume
 
@@ -277,19 +277,32 @@ namespace SimulationPlatform.Pages
         {
             LaneScrollContent.UpdateLayout();
 
-            if (LaneScrollContent.Children.Count > 0 &&
-                LaneScrollContent.Children[0] is FrameworkElement firstCopy)
-            {
-                _oneCopyHeight = firstCopy.ActualHeight;
+            // Find first StackPanel copy directly
+            FrameworkElement? firstCopy = null;
 
-                if (_oneCopyHeight > 0)
+            foreach (var child in LaneScrollContent.Children)
+            {
+                if (child is FrameworkElement fe)
                 {
-                    LaneScrollAnim.From = 0;
-                    LaneScrollAnim.To = -_oneCopyHeight;
-                    LaneScrollAnim.Duration = new Duration(TimeSpan.FromSeconds(1.0));
+                    firstCopy = fe;
+                    break;
                 }
             }
+
+            if (firstCopy == null)
+                return;
+
+            _oneCopyHeight = firstCopy.ActualHeight;
+
+            if (_oneCopyHeight <= 0)
+                return;
+
+            // DOWNWARD movement (road goes down, car appears up)
+            LaneScrollAnim.From = -_oneCopyHeight;
+            LaneScrollAnim.To = 0;
+            LaneScrollAnim.Duration = new Duration(TimeSpan.FromSeconds(1.0));
         }
+
 
         private void StartLaneScrollIfNeeded()
         {

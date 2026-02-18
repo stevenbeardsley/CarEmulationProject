@@ -69,10 +69,9 @@
                                         CornerRadius="18"
                                         Background="#FF2B2B2B">
 
-                                    <!-- Viewport (we clip this in code via LaneViewport.Clip) -->
                                     <Grid x:Name="LaneViewport">
 
-                                        <!-- This container moves. It holds TWO identical copies -->
+                                        <!-- This container moves. It holds two identical copies -->
                                         <Grid x:Name="LaneScrollContent" VerticalAlignment="Top">
                                             <Grid.RenderTransform>
                                                 <TranslateTransform x:Name="LaneMarkersTransform" Y="0"/>
