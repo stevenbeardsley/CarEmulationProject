@@ -1,5 +1,7 @@
 set(shared_HEADERS
     Peers.h
+    FastUpdate.h
+    SlowUpdate.h
 )
 
 add_library(shared INTERFACE)

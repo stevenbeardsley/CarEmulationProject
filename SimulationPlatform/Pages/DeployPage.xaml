@@ -77,7 +77,8 @@
                                       PlaceholderText="Engine Type"
                                       HorizontalAlignment="Left"
                                       VerticalAlignment="Top"
-                                      Margin="10,460,0,0">
+                                      Margin="10,460,0,0"
+                                      SelectionChanged="EngineComboBox_SelectionChanged">
                                 <ComboBoxItem Content="1.0L"/>
                                 <ComboBoxItem Content="2.0L"/>
                             </ComboBox>

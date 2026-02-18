@@ -4,7 +4,8 @@
 #include "shared/can/Bus.h"
 #include "shared/can/Message.h"
 #include "shared/can/MessageType.h"
-
+#include "shared/FastUpdate.h"
+#include "shared/SlowUpdate.h"
 #include "ecm/engine/Engine.h"
 
 // Config structs
@@ -108,10 +109,13 @@ int main()
         using clock = std::chrono::steady_clock;
 
         // Telemetry rates
-        constexpr auto tickPeriod = std::chrono::milliseconds(20);      // 50 Hz loop
+        constexpr auto tickPeriod = std::chrono::milliseconds(20);      // 50 Hz loop, ideally need to sort this out
         constexpr auto telemetryPeriod = std::chrono::milliseconds(50); // 20 Hz telemetry broadcast
+        const auto fastUpdateTick = std::chrono::milliseconds(shared::fastUpdate);
+        const auto slowUpdateTick = std::chrono::milliseconds(shared::slowUpdate);
         auto nextTick = clock::now();
-        auto nextTelemetry = clock::now();
+        auto nextSlowTelemetry = clock::now();
+        auto nextFastTelemtry = clock::now();
 
         while (running)
         {
@@ -140,57 +144,54 @@ int main()
                 {
                 case shared::can::MessageType::ThrottleRequest:
                 {
-                    LogFile::Info("Throttle Request received.");
+
+                    LogFile::Info("ECM: Throttle Request received.");
                     const auto thr = msg.getValue(); // expected 0..100
                     engine.setThrottle(static_cast<std::uint32_t>(thr));
                     break;
                 }
-
                 case shared::can::MessageType::CurrentGear:
                 {
-                    // NEW: Use gear number directly (ratios come from transCfg)
-                    // Expecting: 0 neutral, 1..N forward, -1 reverse (if you use it)
-                    const int gear = msg.getValue();
-
+                    const auto gear = msg.getValue();
+                    LogFile::Debug("ECM: Received current gear: " + gear);
                     engine.setSelectedGear(gear);
-
-                    LogFile::Debug("ECM: CurrentGear=" + std::to_string(gear));
                     break;
                 }
-
                 case shared::can::MessageType::GearDownRequest:
                 case shared::can::MessageType::GearUpRequest:
-                    LogFile::Info("Message received that the ECM is not subscribed to.");
+                    // Do nothing, not subscribed.
                     break;
-
                 default:
-                    LogFile::Info("Unaccounted for message type received.");
+                    LogFile::Warn("ECM:Unaccounted for message type received.");
                     break;
                 }
             }
 
             // Periodic telemetry broadcast
             const auto now = clock::now();
-            if (now >= nextTelemetry)
+            // Fast telemetry block 
+            if (now >= nextFastTelemtry)
             {
-                nextTelemetry = now + telemetryPeriod;
-
+                nextFastTelemtry += fastUpdateTick;
                 const auto rpm = engine.getRpm();
                 const auto speed = engine.getSpeedMph();
-                const auto temp =  scaleTemp(engine.getCoolantTempC());
-
                 try
                 {
                     canTx.Send(shared::can::Message(shared::can::MessageType::RPM, (int)rpm));
                     canTx.Send(shared::can::Message(shared::can::MessageType::Speed, (int)speed));
+                }
+                catch (...)
+                {
+                    LogFile::Warn("ECM: fast telemetry send failed");
+                }
+            }
+            if (now >= nextSlowTelemetry)
+            {
+                nextSlowTelemetry += slowUpdateTick; // + now 
+                const auto temp = scaleTemp(engine.getCoolantTempC());
+                try
+                {
                     canTx.Send(shared::can::Message(shared::can::MessageType::EngineTemperature, temp));
-
-                    LogFile::Info(
-                        "ECM Telemetry | "
-                        "RPM=" + std::to_string(rpm) +
-                        " | Speed=" + std::to_string(speed) + " mph"
-                        " | Temp=" + std::to_string(temp) + " C"
-                    );
                 }
                 catch (...)
                 {

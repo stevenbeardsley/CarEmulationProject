@@ -203,19 +203,26 @@ namespace SimulationPlatform.Pages
 
         private void UpdateCarData(CarData carData)
         {
-            DispatcherQueue.TryEnqueue(() =>
+            try
             {
-                SpeedValue = carData.Speed;           // drives animation + raises property changed
-                Speed = carData.Speed.ToString();
-                EngineTemp = carData.EngineTemp.ToString();
-                // Keep string binding for text readout
-                Rpm = carData.Rpms.ToString();
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    SpeedValue = carData.Speed;           // drives animation + raises property changed
+                    Speed = carData.Speed.ToString();
+                    EngineTemp = carData.EngineTemp.ToString();
+                    // Keep string binding for text readout
+                    Rpm = carData.Rpms.ToString();
 
-                // Update dial using numeric value from model/telemetry
-                UpdateRpmGauge(carData.Rpms);
+                    // Update dial using numeric value from model/telemetry
+                    UpdateRpmGauge(carData.Rpms);
 
-                GearValue = carData.Gear;
-            });
+                    GearValue = carData.Gear;
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
         }
 
         private async void GearShiftDown_Click(object sender, RoutedEventArgs e)

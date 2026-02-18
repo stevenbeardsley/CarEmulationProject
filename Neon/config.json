@@ -1,22 +1,24 @@
 {
   "engine": {
-    "id": "engine_1L",
-    "displacement_l": 1,
-    "idle_rpm": 850,
-    "max_rpm": 6000,
-    "max_torque_nm": 110
+    "id": "engine_2L",
+    "displacement_l": 2,
+    "idle_rpm": 900,
+    "max_rpm": 6500,
+    "max_torque_nm": 190
   },
   "transmission": {
-    "id": "transmission_5spd",
-    "gears": 5,
-    "final_drive": 3.9,
+    "id": "transmission_7spd",
+    "gears": 7,
+    "final_drive": 3.42,
     "gear_ratios": [
-      3.91,
-      2.14,
-      1.36,
-      1.03,
-      0.84
+      4.38,
+      2.86,
+      1.92,
+      1.37,
+      1,
+      0.82,
+      0.64
     ],
-    "reverse_ratio": -3.54
+    "reverse_ratio": -3.2
   }
 }

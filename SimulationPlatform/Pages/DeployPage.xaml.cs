@@ -27,7 +27,11 @@ namespace SimulationPlatform.Pages
         {
             get; private set;
         } = string.Empty;
-        
+        public string m_engineSelection
+        {
+            get; private set;
+        } = string.Empty;
+
         private readonly DeploymentController m_deploymentController = new("Ubuntu"); // TODO: Move to the model?
 
         private readonly AppModel m_model; // reference to the base model
@@ -94,7 +98,7 @@ namespace SimulationPlatform.Pages
 
         private (string, string) getOptionIds()
         {
-            string transmissionId = string.Empty;
+            var transmissionId = string.Empty;
             switch (m_transmissionSelection)
             {
                 case "5-speed":
@@ -104,7 +108,18 @@ namespace SimulationPlatform.Pages
                     transmissionId = "transmission_7spd";
                     break;
             }
-            return (transmissionId, "engine_1L");
+            var engineId = string.Empty;
+            switch (m_engineSelection)
+            {
+                case "1.0L":
+                    engineId = "engine_1L";
+                    break;
+                case "2.0L":
+                    engineId = "engine_2L";
+                    break;
+            }
+
+            return (transmissionId, engineId);
         }
 
         private async void DeployButton_Click(object sender, RoutedEventArgs e)
@@ -173,7 +188,15 @@ namespace SimulationPlatform.Pages
             m_transmissionTypeChosen = true;
             OnPropertyChanged(nameof(m_deployButtonEnabled));
             OnPropertyChanged(nameof(m_selectOptionTextVisibility));
+        }
 
+        private void EngineComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selected = (ComboBoxItem)((ComboBox)sender).SelectedItem;
+            m_engineSelection = selected.Content.ToString();
+            m_engineTypeChosen = true;
+            OnPropertyChanged(nameof(m_deployButtonEnabled));
+            OnPropertyChanged(nameof(m_selectOptionTextVisibility));
         }
     }
 }
