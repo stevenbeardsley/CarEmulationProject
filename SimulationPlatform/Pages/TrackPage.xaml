@@ -96,6 +96,10 @@
                                                 <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
                                                 <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
                                                 <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
+                                                <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
+                                                <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
+                                                <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
+                                                <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
                                             </StackPanel>
 
                                             <!-- Copy B (identical) -->
@@ -103,6 +107,10 @@
                                                         Orientation="Vertical"
                                                         HorizontalAlignment="Center"
                                                         Spacing="14">
+                                                <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
+                                                <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
+                                                <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
+                                                <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
                                                 <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
                                                 <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
                                                 <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
