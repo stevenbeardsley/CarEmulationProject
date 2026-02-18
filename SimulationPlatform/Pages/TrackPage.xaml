@@ -383,7 +383,8 @@
                         </Border>
 
                         <!-- RPM (DIAL) -->
-                        <Border Grid.Row="1" Grid.Column="0"
+                        <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                                Height="170"
                                 CornerRadius="12"
                                 Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
                                 BorderThickness="1"
@@ -448,18 +449,7 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- Gear -->
-                        <Border Grid.Row="1" Grid.Column="1"
-                                CornerRadius="12"
-                                Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
-                                BorderThickness="1"
-                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
-                                Padding="14">
-                            <StackPanel>
-                                <TextBlock Text="GEAR" Foreground="DarkGray" FontWeight="SemiBold"/>
-                                <TextBlock Text="{x:Bind Gear, Mode=OneWay}" FontSize="34" FontWeight="Bold"/>
-                            </StackPanel>
-                        </Border>
+
 
                         <!-- Throttle -->
                         <Border Grid.Row="2" Grid.Column="0"
