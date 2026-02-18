@@ -279,7 +279,6 @@ namespace SimulationPlatform.Pages
 
             // Find first StackPanel copy directly
             FrameworkElement? firstCopy = null;
-
             foreach (var child in LaneScrollContent.Children)
             {
                 if (child is FrameworkElement fe)
@@ -288,7 +287,6 @@ namespace SimulationPlatform.Pages
                     break;
                 }
             }
-
             if (firstCopy == null)
                 return;
 
@@ -296,8 +294,6 @@ namespace SimulationPlatform.Pages
 
             if (_oneCopyHeight <= 0)
                 return;
-
-            // DOWNWARD movement (road goes down, car appears up)
             LaneScrollAnim.From = -_oneCopyHeight;
             LaneScrollAnim.To = 0;
             LaneScrollAnim.Duration = new Duration(TimeSpan.FromSeconds(1.0));
@@ -329,7 +325,7 @@ namespace SimulationPlatform.Pages
                 return;
             }
 
-            double ratio = SpeedValue / 60.0;
+            var ratio = SpeedValue / 60.0;
             ratio = Math.Clamp(ratio, 0.15, 8.0);
 
             LaneScrollStoryboard.SpeedRatio = ratio;
