@@ -96,7 +96,22 @@ namespace SimulationPlatform.Pages
                 }
             }
         }
+        private string m_fuelText = "100%";
+        private double m_fuelValue = 100.0;
+        private bool _fuelDialBuilt = false;
 
+        public string FuelPercentageText
+        {
+            get => m_fuelText;
+            set
+            {
+                if (m_fuelText != value)
+                {
+                    m_fuelText = value;
+                    OnPropertyChanged(nameof(FuelPercentageText));
+                }
+            }
+        }
         // UI-facing string
         public string Gear => m_gear.ToString();
 
@@ -215,7 +230,7 @@ namespace SimulationPlatform.Pages
 
                     // Update dial using numeric value from model/telemetry
                     UpdateRpmGauge(carData.Rpms);
-
+                    UpdateFuelGauge(carData.Fuel); 
                     GearValue = carData.Gear;
                 });
             }
@@ -414,6 +429,36 @@ namespace SimulationPlatform.Pages
             var geo = new PathGeometry();
             geo.Figures.Add(figure);
             return geo;
+        }
+
+        private void UpdateFuelGauge(double fuelPercent)
+        {
+            if (FuelTrackPath is null || FuelLowPath is null || FuelNeedleRotate is null)
+                return;
+
+            if (!_fuelDialBuilt)
+            {
+                var center = new Point(95, 78);
+                double radius = 70;
+                var start = StartAngleDeg;
+                var endFull = StartAngleDeg + SweepDeg;
+
+                // Background track
+                FuelTrackPath.Data = CreateArcPolylineGeometry(center, radius, start, endFull);
+
+                // Low fuel indicator (last 15% of the gauge, but since 0% is at the start 180deg, 
+                // we draw from 180 to 180 + (180 * 0.15))
+                var lowEnd = StartAngleDeg + SweepDeg * 0.15;
+                FuelLowPath.Data = CreateArcPolylineGeometry(center, radius, start, lowEnd);
+
+                _fuelDialBuilt = true;
+            }
+
+            m_fuelValue = Math.Clamp(fuelPercent, 0.0, 100.0);
+            FuelPercentageText = $"{m_fuelValue:0}%";
+
+            // Needle rotation (0% = 0 degrees rotation (pointing left), 100% = 180 degrees (pointing right))
+            FuelNeedleRotate.Angle = 180.0 * (m_fuelValue / 100.0);
         }
 
         private static double DegToRad(double deg) => (Math.PI / 180.0) * deg;

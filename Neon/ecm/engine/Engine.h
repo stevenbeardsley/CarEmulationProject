@@ -8,6 +8,7 @@
 
 #include "shared/config/Engine.h"
 #include "shared/config/Transmission.h"
+#include "models/FuelTank.h"
 #include "models/ThermalModel.h"
 
 namespace ecm::engine
@@ -40,6 +41,10 @@ namespace ecm::engine
         // Temperature telemetry (delegated)
         double getCoolantTempC() const;
         bool isOverheating() const;
+
+        // Fuel system 
+        double getFuelPercentage() const;
+        bool isOutOfFuel() const; // TODO: Use 
 
     private:
         void runLoop();
@@ -87,5 +92,6 @@ namespace ecm::engine
 
         // Extracted subsystem
         models::ThermalModel m_thermal;
+        models::FuelTank m_fuel;
     };
 }

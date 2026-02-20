@@ -14,14 +14,16 @@ namespace SimulationPlatform.Models
         private int _rpms;
         private int _maxRpms;
         private int _engineTemp;
+        private int _fuel;
 
-        public CarData(int speed, int gear, int rpms, int maxRpms, int engineTemp, bool status)
+        public CarData(int speed, int gear, int rpms, int maxRpms, int engineTemp, int fuel, bool status)
         {
             _speed = speed;
             _gear = gear;
             _rpms = rpms;
             _maxRpms = maxRpms;
             _engineTemp = engineTemp;
+            _fuel = fuel;
             _status = status;
         }
 
@@ -32,6 +34,7 @@ namespace SimulationPlatform.Models
             _rpms = 0;
             _maxRpms = 0;
             _engineTemp = 0;
+            _fuel = 0;
             _status = true;
         }
 
@@ -124,6 +127,25 @@ namespace SimulationPlatform.Models
                 }
             }
         }
+
+        public int Fuel
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    return _fuel;
+                }
+            }
+            set
+            {
+                lock (_lock)
+                {
+                    _fuel = value;
+                }
+            }
+        }
+
 
         public bool Status
         {

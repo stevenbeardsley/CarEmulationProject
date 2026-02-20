@@ -49,6 +49,7 @@ namespace SimulationPlatform.Pages
         private bool m_transmissionTypeChosen = false;
         public bool m_deployButtonEnabled => m_colourChosen && 
             m_transmissionTypeChosen &&
+            m_engineTypeChosen &&
             DeployingVisibility != Visibility.Visible &&
             DeployErrorVisibility != Visibility.Visible &&
             !m_connected;

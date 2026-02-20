@@ -7,10 +7,12 @@ set(engine_SOURCE
 )
 
 set(engine_models_HEADERS
+    models/FuelTank.h
     models/ThermalModel.h
 )
 
 set(engine_models_SOURCE
+    models/FuelTank.cpp
     models/ThermalModel.cpp
 )
 

@@ -14,6 +14,7 @@ enum class MessageType
     ThrottleRequest,
     Acceleration,
     EngineTemperature,
+    Fuel,
 	RPM, // TODO: Implement
     Speed // TODO: Implement
 };

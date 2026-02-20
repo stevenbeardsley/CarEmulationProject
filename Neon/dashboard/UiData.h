@@ -13,6 +13,7 @@ struct UiData
     std::uint32_t m_rpm;
     std::uint32_t m_maxRpms; // TODO: Should be const really  
     std::uint32_t m_engineTemp; 
+    std::uint32_t m_fuel;
     bool m_status;
 };
 

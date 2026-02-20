@@ -368,6 +368,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -392,13 +393,13 @@
 
                         <!-- RPM (DIAL) -->
                         <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
-                                Height="170"
+                                Height="160"
                                 CornerRadius="12"
                                 Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
                                 BorderThickness="1"
                                 BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
                                 Padding="14">
-                            <StackPanel Spacing="10">
+                            <StackPanel Spacing="5">
                                 <TextBlock Text="RPM" Foreground="DarkGray" FontWeight="SemiBold"/>
 
                                 <Grid Width="190" Height="155" HorizontalAlignment="Center">
@@ -452,15 +453,66 @@
                                            HorizontalAlignment="Center"/>
                                     </StackPanel>
                                 </Grid>
+                            </StackPanel>
+                        </Border>
 
+                        <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                            Height="160"
+                            CornerRadius="12"
+                            Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
+                            BorderThickness="1"
+                            BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                            Padding="14">
+                            <StackPanel Spacing="5">
+                                <TextBlock Text="FUEL" Foreground="DarkGray" FontWeight="SemiBold"/>
 
+                                <Grid Width="190" Height="155" HorizontalAlignment="Center">
+                                    <Path x:Name="FuelTrackPath"
+                                      StrokeThickness="12"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      Stroke="{ThemeResource SystemControlForegroundBaseLowBrush}"/>
+
+                                    <Path x:Name="FuelLowPath"
+                                      StrokeThickness="12"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      Stroke="OrangeRed"/>
+
+                                    <Grid Width="190" Height="155">
+                                        <Grid.RenderTransform>
+                                            <RotateTransform x:Name="FuelNeedleRotate"
+                                                 Angle="0"
+                                                 CenterX="95"
+                                                 CenterY="78"/>
+                                        </Grid.RenderTransform>
+
+                                        <Line X1="95" Y1="78" X2="25" Y2="78"
+                                              Stroke="White"
+                                              StrokeThickness="3"
+                                              StrokeStartLineCap="Round"
+                                              StrokeEndLineCap="Round"/>
+
+                                        <Ellipse Width="12" Height="12"
+                                             Fill="White"
+                                             HorizontalAlignment="Left"
+                                             VerticalAlignment="Top"
+                                             Margin="89,72,0,0"/>
+                                    </Grid>
+
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="0">
+                                        <TextBlock Text="{x:Bind FuelPercentageText, Mode=OneWay}"
+                                           FontSize="22"
+                                           FontWeight="Bold"
+                                           HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Grid>
                             </StackPanel>
                         </Border>
 
 
-
                         <!-- Throttle -->
-                        <Border Grid.Row="2" Grid.Column="0"
+                        <Border Grid.Row="3" Grid.Column="0"
                                 CornerRadius="12"
                                 Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
                                 BorderThickness="1"
@@ -475,7 +527,7 @@
                         </Border>
 
                         <!-- Temp -->
-                        <Border Grid.Row="2" Grid.Column="1"
+                        <Border Grid.Row="3" Grid.Column="1"
                                 CornerRadius="12"
                                 Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
                                 BorderThickness="1"
@@ -490,7 +542,7 @@
                         </Border>
 
                         <!-- Notes / alerts -->
-                        <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                        <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
                                 CornerRadius="12"
                                 Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
                                 BorderThickness="1"

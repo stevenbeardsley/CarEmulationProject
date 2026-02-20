@@ -3,7 +3,6 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using SimulationPlatform.Models;
 using Microsoft.UI.Dispatching;
-using System.Runtime.CompilerServices;
 
 namespace SimulationPlatform.Pages
 {
@@ -14,6 +13,7 @@ namespace SimulationPlatform.Pages
         private string m_rpm = string.Empty;
         private string m_maxRpms = string.Empty;
         private string m_engineTemp = string.Empty;
+        private string m_fuel = string.Empty;
         private string m_status = string.Empty;
         
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -91,6 +91,20 @@ namespace SimulationPlatform.Pages
             }
         }
 
+
+        public string Fuel
+        {
+            get => m_fuel;
+            set
+            {
+                if (m_fuel != value)
+                {
+                    m_fuel = value;
+                    OnPropertyChanged(nameof(Fuel));
+                }
+            }
+        }
+
         public string Status
         {
             get => m_status;
@@ -118,11 +132,13 @@ namespace SimulationPlatform.Pages
                 Rpm = carData.Rpms.ToString();
                 MaxRpms = carData.MaxRpms.ToString();
                 EngineTemp = carData.EngineTemp.ToString(); // TODO: Are the property raisers needed?
+                Fuel = carData.Fuel.ToString();
                 Gear = carData.Gear.ToString();
                 OnPropertyChanged(nameof(Speed));
                 OnPropertyChanged(nameof(Status));
                 OnPropertyChanged(nameof(Gear));
                 OnPropertyChanged(nameof(Rpm));
+                OnPropertyChanged(nameof(Fuel));
                 OnPropertyChanged(nameof(MaxRpms));
                 OnPropertyChanged(nameof(EngineTemp));
             });
@@ -137,6 +153,7 @@ namespace SimulationPlatform.Pages
             Rpm = App.m_model.m_carData.Rpms.ToString();
             MaxRpms = App.m_model.m_carData.MaxRpms.ToString();
             EngineTemp = App.m_model.m_carData.EngineTemp.ToString();
+            Fuel = App.m_model.m_carData.Fuel.ToString();
             App.m_model.m_webSocketController.CarDataReceived += UpdateCarData;
         }
 

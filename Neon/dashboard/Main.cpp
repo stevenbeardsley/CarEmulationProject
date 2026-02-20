@@ -206,6 +206,9 @@ int main()
                     case shared::can::MessageType::EngineTemperature:
                         dataSource.SetEngineTemp(msg.getValue());
                         break;
+                    case shared::can::MessageType::Fuel:
+                        dataSource.SetEngineFuel(msg.getValue());
+                        break;
                     }
                 }
             });

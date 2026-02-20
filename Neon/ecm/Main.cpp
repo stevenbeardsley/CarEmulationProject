@@ -175,10 +175,12 @@ int main()
                 nextFastTelemtry += fastUpdateTick;
                 const auto rpm = engine.getRpm();
                 const auto speed = engine.getSpeedMph();
+                const auto fuel = (int)engine.getFuelPercentage();
                 try
                 {
                     canTx.Send(shared::can::Message(shared::can::MessageType::RPM, (int)rpm));
                     canTx.Send(shared::can::Message(shared::can::MessageType::Speed, (int)speed));
+                    canTx.Send(shared::can::Message(shared::can::MessageType::Fuel, fuel));
                 }
                 catch (...)
                 {

@@ -60,6 +60,7 @@ namespace ecm::engine
         // Start in neutral by default; caller should setSelectedGear()
         m_selectedGear = 0;
         m_gearRatio = 0.0;
+        m_fuel.initialize(m_engineCfg.displacement_l);
 
         // Initialize RPM at idle
         m_rpm = static_cast<double>(m_engineCfg.idle_rpm);
@@ -108,6 +109,18 @@ namespace ecm::engine
     {
         std::lock_guard<std::mutex> lk(m_mutex);
         return m_running;
+    }
+
+    double Engine::getFuelPercentage() const
+    {
+        std::lock_guard<std::mutex> lk(m_mutex);
+        return m_fuel.getFuelPercent();
+    }
+
+    bool Engine::isOutOfFuel() const
+    {
+        std::lock_guard<std::mutex> lk(m_mutex);
+        return m_fuel.isEmpty();
     }
 
     void Engine::setThrottle(std::uint32_t throttlePercent)
@@ -294,6 +307,21 @@ namespace ecm::engine
 
         if (dtSeconds <= 0.0)
             return;
+        m_fuel.update(
+            m_rpm,
+            m_effectiveThrottle,
+            static_cast<double>(m_engineCfg.idle_rpm),
+            static_cast<double>(m_engineCfg.max_rpm),
+            dtSeconds);
+
+        if (m_fuel.isEmpty()) // Stall if fuel tank is empty 
+        {
+            m_effectiveThrottle = 0.0;
+            m_rpm = 0.0;
+            m_speedMps = 0.0;
+            m_accelMps2 = 0.0;
+            return;
+        }
 
         // Smooth throttle
         const double targetThrottle = static_cast<double>(m_throttlePercent) / 100.0;
@@ -390,5 +418,6 @@ namespace ecm::engine
             static_cast<double>(m_engineCfg.idle_rpm),
             static_cast<double>(m_engineCfg.max_rpm),
             dtSeconds);
+
     }
 }
