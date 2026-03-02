@@ -3,28 +3,28 @@
 
 namespace ecm::engine::models
 {
-    class FuelTank
-    {
-    public:
-        FuelTank() = default;
-        void initialize(double displacementLitres);
-        void update(double rpm,
-            double throttle01,
-            double idleRpm,
-            double maxRpm,
-            double dtSeconds);
-        bool isEmpty() const;
-        double getFuelLitres() const;
-        double getFuelPercent() const;
-        double getCapacityLitres() const;
-        void refuelFull();
-        void addFuelLitres(double litres);
+class FuelTank
+{
+public:
+    FuelTank() = default;
+    void initialize(double displacementLitres);
+    void update(double rpm,
+        double throttle01,
+        double idleRpm,
+        double maxRpm,
+        double dtSeconds);
+    bool isEmpty() const;
+    double getFuelLitres() const;
+    double getFuelPercent() const;
+    double getCapacityLitres() const;
+    void refuelFull();
+    void addFuelLitres(double litres);
 
-    private:
-        double m_displacementL{ 1.0 };
-        double m_capacityL{ 50.0 };
-        double m_fuelLevelL{ 50.0 };
-    };
+private:
+    double m_displacementL{ 1.0 };
+    double m_capacityL{ 50.0 };
+    double m_fuelLevelL{ 50.0 };
+};
 }
 
 #endif 

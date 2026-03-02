@@ -1,5 +1,5 @@
-#ifndef CONFIG_ENGINE_H
-#define CONFIG_ENGINE_H
+#ifndef SHARED_CONFIG_ENGINE_H
+#define SHARED_CONFIG_ENGINE_H
 
 #include <string>
 

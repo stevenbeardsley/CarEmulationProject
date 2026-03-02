@@ -1,5 +1,5 @@
-#ifndef CONFIG_TRANSMISSION_H
-#define CONFIG_TRANSMISSION_H
+#ifndef SHARED_CONFIG_TRANSMISSION_H
+#define SHARED_CONFIG_TRANSMISSION_H
 
 #include <string>
 #include <vector>

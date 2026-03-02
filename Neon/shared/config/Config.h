@@ -1,5 +1,5 @@
-#ifndef SHARED_CONFIG_H
-#define SHARED_CONFIG_H
+#ifndef SHARED_CONFIG_CONFIG_H
+#define SHARED_CONFIG_CONFIG_H
 
 #include "VehicleConfig.h"
 

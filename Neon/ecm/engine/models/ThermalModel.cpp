@@ -26,10 +26,13 @@ namespace ecm::engine::models
         const auto heatInput =
             m_heatRate * rpmLoad * throttle;
 
-        const auto cooling =
-            m_coolRate * (m_tempC - m_ambientC);
+        // 1. Calculate heat gain normally
+        m_tempC += heatInput * dtSeconds;
 
-        m_tempC += (heatInput - cooling) * dtSeconds;
+        // 2. Apply cooling using an exponential decay formula
+        // This ensures cooling never pushes temp below ambient
+        double coolingFactor = std::exp(-m_coolRate * dtSeconds);
+        m_tempC = m_ambientC + (m_tempC - m_ambientC) * coolingFactor;
 
         if (m_tempC < m_ambientC)
         {

@@ -10,17 +10,28 @@ namespace ecm::engine
 
     shared::config::Engine Engine::sanitizeEngineCfg(shared::config::Engine cfg)
     {
-        if (cfg.idle_rpm < 500)  cfg.idle_rpm = 500;
-        if (cfg.max_rpm < 1500) cfg.max_rpm = 1500;
+        if (cfg.idle_rpm < 500)
+        {
+            cfg.idle_rpm = 500;
+        }
+        if (cfg.max_rpm < 1500)
+        {
+            cfg.max_rpm = 1500;
+        }
         if (cfg.idle_rpm >= cfg.max_rpm)
+        {
             cfg.idle_rpm = std::max(500, cfg.max_rpm - 1000);
+        }
 
         if (cfg.max_torque_nm < 10.0)
+        {
             cfg.max_torque_nm = 10.0;
+        }
 
         if (cfg.displacement_l < 0.1)
+        {
             cfg.displacement_l = 0.1;
-
+        }
         return cfg;
     }
 
