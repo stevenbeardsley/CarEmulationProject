@@ -4,6 +4,17 @@
 
 namespace ecm::engine::models
 {
+    // Initialize the engine at ambient temperature, not overheating
+    ThermalModel::ThermalModel(double ambientC, double heatRate, double coolRate, double overheatC)
+        : m_ambientC(ambientC),
+        m_heatRate(heatRate),
+        m_coolRate(coolRate),
+        m_overheatC(overheatC),
+        m_tempC(ambientC),
+        m_overheating(false)
+    {
+    }
+
     double ThermalModel::clampd(double v, double lo, double hi)
     {
         return std::max(lo, std::min(v, hi));
@@ -23,6 +34,7 @@ namespace ecm::engine::models
                 std::max(1.0, redlineRpm - idleRpm),
                 0.0, 1.0);
 
+        // m_heatRate is now realistically scaled (e.g., max 4.5 C/sec)
         const auto heatInput =
             m_heatRate * rpmLoad * throttle;
 

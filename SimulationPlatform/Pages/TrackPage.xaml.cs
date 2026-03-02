@@ -149,7 +149,7 @@ namespace SimulationPlatform.Pages
             {
                 if (m_engineTemp != value)
                 {
-                    m_engineTemp = value;
+                    m_engineTemp = value + "°C";
                     OnPropertyChanged(nameof(EngineTemp));
                 }
             }
@@ -220,7 +220,7 @@ namespace SimulationPlatform.Pages
         {
             try
             {
-                                        DispatcherQueue.TryEnqueue(() =>
+                DispatcherQueue.TryEnqueue(() =>
                 {
                     SpeedValue = carData.Speed;           // drives animation + raises property changed
                     Speed = carData.Speed.ToString();

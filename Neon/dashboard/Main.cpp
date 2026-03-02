@@ -10,6 +10,7 @@
 #include "shared/config/Config.h"
 
 #include <atomic>
+#include <cmath>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio.hpp>
 #include <boost/beast/core.hpp>
@@ -204,7 +205,7 @@ int main()
                         dataSource.SetRpm(msg.getValue());
                         break;
                     case shared::can::MessageType::EngineTemperature:
-                        dataSource.SetEngineTemp(msg.getValue());
+                        dataSource.SetEngineTemp(static_cast<std::uint32_t>(std::round(static_cast<double>(msg.getValue()) / 10.0)));
                         break;
                     case shared::can::MessageType::Fuel:
                         dataSource.SetEngineFuel(msg.getValue());

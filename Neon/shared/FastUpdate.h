@@ -4,7 +4,7 @@
 #include <cstdint>
 namespace shared
 {
-	constexpr std::uint32_t fastUpdate = 25; // milliseconds
+constexpr std::uint32_t fastUpdate = 25; // milliseconds
 }
 
 

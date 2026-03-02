@@ -329,8 +329,14 @@ namespace ecm::engine
         {
             m_effectiveThrottle = 0.0;
             m_rpm = 0.0;
-            m_speedMps = 0.0;
             m_accelMps2 = 0.0;
+            m_thermal.update(
+                m_rpm, // 0.0
+                m_effectiveThrottle, // 0.0
+                static_cast<double>(m_engineCfg.idle_rpm),
+                static_cast<double>(m_engineCfg.max_rpm),
+                dtSeconds);
+
             return;
         }
 

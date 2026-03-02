@@ -5,11 +5,11 @@
 namespace tcm
 {
 
-    class Process
-    {
-    public:
-        Process() = default;
-        void run();
-    };
+class Process
+{
+public:
+    Process() = default;
+    void run();
+};
 
 }
