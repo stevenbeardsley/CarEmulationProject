@@ -1,17 +1,19 @@
-# Use a newer Ubuntu image
+# 1. Use a consistent base
 FROM ubuntu:24.04
 
-
-
-
-WORKDIR /app
-COPY /dashboard/Dashboard /app/
-
-CMD ["./Dashboard"]
-# Install Boost runtime dependencies and stdlib
+# 2. Install dependencies FIRST (This layer will now be cached)
 RUN apt-get update && apt-get install -y \
-    libboost-system-dev \
-    libboost-json-dev \
+    libboost-system1.83.0 \
+    libboost-json1.83.0 \
     libstdc++6 \
     iputils-ping \
     && rm -rf /var/lib/apt/lists/*
+
+# 3. Set up your app directory
+WORKDIR /app
+
+# 4. Copy the executable LAST
+# Only this step and the CMD will rerun when you change your code
+COPY /dashboard/Dashboard /app/
+
+CMD ["./Dashboard"]

@@ -1,8 +1,6 @@
 #ifndef DASHBOARD_COMMANDHTTPSERVER_H
 #define DASHBOARD_COMMANDHTTPSERVER_H
 
-#include "shared/can/MessageType.h"
-#include "shared/can/Message.h"
 #include "CommandMessage.h"
 #include "shared/can/Bus.h"
 #include <boost/asio.hpp>

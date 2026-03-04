@@ -1,37 +1,40 @@
-#ifndef SHARED_CAN_RECEIVER_H
-#define SHARED_CAN_RECEIVER_H
+#pragma once
 
-#include <functional>
 #include <atomic>
 #include <cstdint>
+#include <vector>
+#include <queue>
+#include <mutex>
+#include <condition_variable>
 #include <boost/asio.hpp>
 
-#include "Message.h" // your CANMessage type
-
-namespace shared::can {
-
-    class Receiver {
+namespace shared::can
+{
+    class Receiver
+    {
     public:
-        using Handler = std::function<void(const Message& msg, const boost::asio::ip::udp::endpoint& sender)>;
+        // Type alias to make the constructor cleaner
+        using InboxQueue = std::queue<std::vector<std::uint8_t>>;
 
-        Receiver(std::atomic<bool>& runningFlag, uint16_t listenPort);
+        Receiver(std::atomic<bool>& runningFlag,
+            uint16_t listenPort,
+            InboxQueue& inbox,
+            std::mutex& inboxMutex,
+            std::condition_variable& inboxCv);
 
-        void SetHandler(Handler h) { handler_ = std::move(h); }
-
-        void Run();   // blocking loop
+        void Run();
         void Stop();
 
-
     private:
-        void handleDatagram(const uint8_t* data, std::size_t n,
-            const boost::asio::ip::udp::endpoint& sender);
-        using udp = boost::asio::ip::udp;
+        void handleDatagram(const uint8_t* data, std::size_t n, const boost::asio::ip::udp::endpoint& sender);
+
         std::atomic<bool>& running_;
         boost::asio::io_context io_;
-        udp::socket socket_;
-        Handler handler_;
+        boost::asio::ip::udp::socket socket_;
+
+        // Shared state with the consumer thread
+        InboxQueue& inbox_;
+        std::mutex& inboxMutex_;
+        std::condition_variable& inboxCv_;
     };
-
-} // namespace shared::can
-
-#endif
+}

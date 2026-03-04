@@ -18,6 +18,10 @@ target_link_libraries(
         Config
 )
 
+target_include_directories(Transmission PUBLIC
+    ${PROJECT_SOURCE_DIR}
+)
+
 source_group("Source Files" FILES ${transmission_SOURCE})
 source_group("Header Files" FILES ${transmission_HEADERS})
 

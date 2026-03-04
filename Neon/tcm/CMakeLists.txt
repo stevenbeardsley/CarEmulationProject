@@ -21,6 +21,10 @@ target_link_libraries(
         Transmission
 )
 
+target_include_directories(Tcm PUBLIC
+    ${PROJECT_SOURCE_DIR}
+)
+
 source_group("Source Files" FILES ${tcm_SOURCE})
 source_group("Header Files" FILES ${tcm_HEADERS})
 

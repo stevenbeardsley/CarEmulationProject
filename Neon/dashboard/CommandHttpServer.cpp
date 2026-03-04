@@ -1,6 +1,10 @@
 #include "CommandHttpServer.h"
 #include "LogFile.h"
 
+#include "shared/can/MessageCategory.h"
+#include "shared/can/messages/GearChange.h"
+#include "shared/can/messages/Throttle.h"
+
 
 namespace dashboard
 {
@@ -103,41 +107,59 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
     
     // Extract JSON values 
     auto [command, value] = ParseSingleCommandJson(body);
-    auto messageType = shared::can::MessageType::CurrentGear;
+    auto messageSent = false;
     switch (command)
     {
         case Command::GearUp:
+        {
             LogFile::Info("Gear up request received.");
-            messageType = shared::can::MessageType::GearUpRequest; // TODO support other message types and define an icd
+            shared::can::message::GearChange msg
+            {
+                shared::can::MessageCategory::Control,
+                shared::can::headers::Control::GearUpRequest
+            };
+            messageSent = m_bus.Send(msg);
             break;
+        }
         case Command::GearDown:
+        {
             LogFile::Info("Gear down request received.");
-            messageType = shared::can::MessageType::GearDownRequest;
+            shared::can::message::GearChange msg
+            {
+                shared::can::MessageCategory::Control,
+                shared::can::headers::Control::GearDownRequest
+            };
+            messageSent = m_bus.Send(msg);
             break;
+        }
         case Command::Throttle:
+        {
             LogFile::Info("Throttle change received.");
-            messageType = shared::can::MessageType::ThrottleRequest;
+            shared::can::message::Throttle msg
+            {
+                shared::can::MessageCategory::Control,
+                shared::can::headers::Control::ThrottleRequest,
+                static_cast<std::uint32_t>(value)
+            };
+            messageSent = m_bus.Send(msg);
             break;
+        }
         default:
+        {
             LogFile::Info("Unknown command type received.");
             break;
+        }
     }
     
-    const auto msg = shared::can::Message
-    {
-        messageType,
-        static_cast<std::uint32_t>(value)
-    };
-
-    const bool messageSent = m_bus.Send(msg);
     if (messageSent)
     {
         LogFile::Info("CommandHttpServer: CAN message sent.");
     }
     else
     {
-        LogFile::Info("CommandHttpServer: CAN message failed to send.");
+        LogFile::Error("CommandHttpServer: CAN message failed to send.");
     }
+
     http::response<http::string_body> res{ http::status::ok, req.version() };
     res.set(http::field::content_type, "application/json");
     res.body() = std::string("{\"ok\":true,\"command\":\"") +" TODO" +  "\"}";

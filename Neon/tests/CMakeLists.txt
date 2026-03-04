@@ -32,7 +32,10 @@ set_target_properties(BitParserTests PROPERTIES FOLDER "tests")
 
 # CAN TESTS 
 set(test_can_SOURCE
-    TestCan.cpp
+    TestErrorMessage.cpp
+    TestGearChangeMessage.cpp
+    TestStatusMessage.cpp
+    TestThrottleMessage.cpp
 )
 
 add_executable(CanTests 

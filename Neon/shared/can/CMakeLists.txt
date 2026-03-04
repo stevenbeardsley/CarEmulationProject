@@ -1,29 +1,48 @@
 find_package(Boost REQUIRED COMPONENTS system)
 
+set(can_message_HEADERS
+    messages/ErrorMessage.h
+    messages/GearChange.h
+    messages/ICanMessage.h
+    messages/StatusMessage.h
+    messages/Throttle.h
+)
+
+set(can_message_SOURCE
+    messages/ErrorMessage.cpp
+    messages/GearChange.cpp
+    messages/StatusMessage.cpp
+    messages/Throttle.cpp
+)
+
+set(can_headers_HEADERS
+    headers/Control.h
+    headers/Error.h
+    headers/Status.h
+)
+
 set(can_HEADERS
     Bus.h
-    MessageType.h
-    Message.h
+    MessageCategory.h
     Receiver.h
 )
 
 set(can_SOURCE
     Bus.cpp
-    Message.cpp
     Receiver.cpp
 )
 
 add_library(Can STATIC 
     ${can_SOURCE}
     ${can_HEADERS}
+    ${can_headers_HEADERS}
+    ${can_message_HEADERS}
+    ${can_message_SOURCE}
 )
 
 target_include_directories(Can PUBLIC
-    ${PROJECT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
-
-# --- Boost.Asio deps ---
-find_package(Boost REQUIRED COMPONENTS system)
 
 # Threads is commonly needed on Linux with Boost.System / Asio setups
 find_package(Threads REQUIRED)
@@ -35,5 +54,14 @@ target_link_libraries(Can
     PRIVATE 
         BitParser
         LogFile
+        shared
 )
+
+source_group("Source Files" FILES ${can_SOURCE})
+source_group("Header Files" FILES ${can_HEADERS})
+
+source_group("Header Files\\headers" FILES ${can_headers_HEADERS})
+source_group("Header Files\\message" FILES ${can_message_HEADERS})
+source_group("Source Files\\message" FILES ${can_message_SOURCE})
+
 set_target_properties(Can PROPERTIES FOLDER "shared/can")

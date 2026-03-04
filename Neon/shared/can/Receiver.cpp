@@ -1,21 +1,23 @@
 #include "Receiver.h"
-#include "LogFile.h"
+#include "LogFile.h" // Assuming this is your custom logging class
 
 #include <array>
 
 namespace shared::can
 {
-    static inline std::uint32_t read_u32_be(const std::uint8_t* p)
-    {
-        return (static_cast<std::uint32_t>(p[0]) << 24) |
-            (static_cast<std::uint32_t>(p[1]) << 16) |
-            (static_cast<std::uint32_t>(p[2]) << 8) |
-            (static_cast<std::uint32_t>(p[3]) << 0);
-    }
+    using boost::asio::ip::udp;
 
-    Receiver::Receiver(std::atomic<bool>& runningFlag, uint16_t listenPort)
+    Receiver::Receiver(std::atomic<bool>& runningFlag,
+        uint16_t listenPort,
+        InboxQueue& inbox,
+        std::mutex& inboxMutex,
+        std::condition_variable& inboxCv)
         : running_(runningFlag)
+        , io_()
         , socket_(io_)
+        , inbox_(inbox)
+        , inboxMutex_(inboxMutex)
+        , inboxCv_(inboxCv)
     {
         boost::system::error_code ec;
 
@@ -44,21 +46,19 @@ namespace shared::can
 
     void Receiver::handleDatagram(const uint8_t* data, std::size_t n, const udp::endpoint& sender)
     {
-        // Expect exactly 5 bytes: [u8 id][u32 value BE]
-        if (n < 5)
+        if (n == 0) return; // Ignore empty packets
+
+        // 1. Copy the raw network data into a vector
+        std::vector<std::uint8_t> rawData(data, data + n);
+
+        // 2. Lock the mutex and push to the inbox
         {
-            LogFile::Warn("CAN RX: datagram too small (n=" + std::to_string(n) + ")");
-            return;
+            std::lock_guard<std::mutex> lock(inboxMutex_);
+            inbox_.push(std::move(rawData));
         }
 
-        const std::uint8_t canIdRaw = data[0];
-        const std::uint32_t value = read_u32_be(data + 1);
-        const auto type = static_cast<MessageType>(canIdRaw);
-
-        Message msg{ type, value };
-
-        if (handler_)
-            handler_(msg, sender);
+        // 3. Wake up your consumer thread!
+        inboxCv_.notify_one();
     }
 
     void Receiver::Run()
@@ -84,6 +84,7 @@ namespace shared::can
                 ec
             );
 
+            // Check if we were told to stop while waiting for a packet
             if (!running_)
                 break;
 

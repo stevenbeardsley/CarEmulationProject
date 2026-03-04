@@ -1,54 +1,28 @@
-#ifndef SHARED_CAN_BUS_H
-#define SHARED_CAN_BUS_H
+#pragma once
 
-#include "Message.h"
-
-#include <boost/asio.hpp>
+#include <string>
 #include <vector>
 #include <mutex>
-#include <cstdint>
-#include <string>
+#include <boost/asio.hpp>
 
 namespace shared::can
 {
+    using boost::asio::ip::udp;
 
     class Bus
     {
     public:
+        Bus(unsigned short bindPort, unsigned short defaultPeerPort);
 
-        using udp = boost::asio::ip::udp;
-
-        // bindPort:
-        //    Local port to bind socket to (0 = ephemeral, recommended)
-        //
-        // defaultPeerPort:
-        //    Port used when AddPeer(host) is called without specifying port.
-        //    This should be the Receiver listen port (e.g. 15000).
-        //
-        Bus(unsigned short bindPort,
-            unsigned short defaultPeerPort);
-
-        // Add peer with explicit port
-        bool AddPeer(const std::string& host,
-            unsigned short port);
-
-        // Add peer using defaultPeerPort_
-        [[nodiscard]]
+        bool AddPeer(const std::string& host, unsigned short port);
         bool AddPeer(const std::string& host);
 
-        //[[nodiscard]]
-        bool Send(const Message& msg);
+        // Send now just takes a raw byte buffer!
+        bool Send(const std::vector<std::uint8_t>& datagram);
 
-        // Optional debug helper
         unsigned short GetLocalPort() const;
 
     private:
-
-        void PackMessage(const Message& msg,
-            std::vector<std::uint8_t>& datagram);
-
-    private:
-
         boost::asio::io_context ioc_;
         udp::socket socket_;
         udp::resolver resolver_;
@@ -56,12 +30,9 @@ namespace shared::can
         unsigned short bindPort_;
         unsigned short defaultPeerPort_;
 
+        std::mutex peersMutex_;
         std::vector<udp::endpoint> peers_;
-        mutable std::mutex peersMutex_;
 
         std::mutex sendMutex_;
     };
-
-} // namespace shared::can
-
-#endif
+}

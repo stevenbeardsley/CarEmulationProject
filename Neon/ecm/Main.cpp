@@ -2,15 +2,18 @@
 #include "Process.h"
 #include "shared/can/Receiver.h"
 #include "shared/can/Bus.h"
-#include "shared/can/Message.h"
-#include "shared/can/MessageType.h"
+// Updated includes to match your new message structure
+#include "shared/can/messages/StatusMessage.h"
+#include "shared/can/messages/ErrorMessage.h"
+#include "shared/can/messages/Throttle.h"
+#include "shared/can/headers/Status.h"
+#include "shared/can/headers/Control.h"
+#include "shared/can/headers/Error.h"
+#include "shared/bit_parser/BitReader.h"
+
 #include "shared/FastUpdate.h"
 #include "shared/SlowUpdate.h"
 #include "ecm/engine/Engine.h"
-
-// Config structs
-#include "shared/config/Engine.h"
-#include "shared/config/Transmission.h"
 #include "shared/config/Config.h"
 
 #include <atomic>
@@ -24,28 +27,16 @@
 
 std::atomic<bool> running(true);
 
-void signalHandler(int)
-{
+void signalHandler(int) {
     LogFile::Info("Received stop signal, shutting down...");
     running = false;
 }
 
-static inline std::int32_t scaleAccel(double accelMps2) // TODO: Not used 
-{
-    // m/s^2 -> milli-(m/s^2)
-    return static_cast<std::int32_t>(std::llround(accelMps2 * 1000.0));
-}
-
-
-static inline std::int32_t scaleTemp(double tempC) // TODO: Support floating point in CAN 
-{
-    // °C -> deci-degrees (0.1°C resolution)
+static inline std::int32_t scaleTemp(double tempC) {
     return static_cast<std::int32_t>(std::llround(tempC * 10.0));
 }
 
-
-int main()
-{
+int main() {
     std::signal(SIGINT, signalHandler);
     std::signal(SIGTERM, signalHandler);
 
@@ -53,170 +44,143 @@ int main()
     LogFile::Instance().setLevel(LogLevel::DEBUG);
     LogFile::Info("ECM starting...");
 
-    // Thread-safe inbox from CAN RX -> processing loop
+    // 1. Thread-safe inbox now stores raw bits
     std::mutex m;
     std::condition_variable cv;
-    std::queue<shared::can::Message> inbox;
+    std::queue<std::vector<std::uint8_t>> inbox;
 
-    // CAN receiver (UDP)
-    shared::can::Receiver canRx(running, /*listenPort=*/15000);
+    // 2. New Receiver: Injecting the shared state
+    shared::can::Receiver canRx(running, 15000, inbox, m, cv);
 
-    // CAN transmitter (UDP broadcast)
-    shared::can::Bus canTx(
-        0,      // ephemeral bind
-        15000   // default peer destination
-    );
+    shared::can::Bus canTx(0, 15000);
+    canTx.AddPeer("dashboard", 15000);
+    canTx.AddPeer("tcm", 15000);
 
-    if (!canTx.AddPeer("dashboard", 15000))
-        LogFile::Error("Error: dashboard was unable to add as a peer.");
-
-    if (!canTx.AddPeer("tcm", 15000))
-        LogFile::Error("Error: tcm was unable to add as a peer.");
-
-    // ---------------------------------------------------------------------
-    // CONFIG: Replace this section with your actual JSON config loader.
-    // ---------------------------------------------------------------------
     shared::config::Config config;
     config.LoadFromFile("config.json");
-
     const auto engineConfig = config.getEngineConfig();
     const auto transmissionConfig = config.getTransmissionConfig();
-    // ---------------------------------------------------------------------
 
     ecm::engine::Engine engine(engineConfig, transmissionConfig);
-
-    // Optional: start in 1st gear or neutral.
-    // If TCM will always send CurrentGear soon, neutral is fine.
     engine.setSelectedGear(0);
     engine.start();
 
-    // Receiver thread: enqueue + notify
-    canRx.SetHandler([&](shared::can::Message msg, const auto& sender) {
-        (void)sender;
-        {
-            std::lock_guard<std::mutex> lk(m);
-            inbox.push(std::move(msg));
-        }
-        cv.notify_one();
-        });
-
+    // 3. Start Receiver Thread
     std::thread rxThread([&]() {
-        canRx.Run(); // blocking loop inside receiver
+        canRx.Run();
         });
 
-    // ECM control loop (process commands + periodic telemetry)
     std::thread processThread([&]() {
         using clock = std::chrono::steady_clock;
-
-        // Telemetry rates
-        constexpr auto tickPeriod = std::chrono::milliseconds(20);      // 50 Hz loop, ideally need to sort this out
-        constexpr auto telemetryPeriod = std::chrono::milliseconds(50); // 20 Hz telemetry broadcast
         const auto fastUpdateTick = std::chrono::milliseconds(shared::fastUpdate);
         const auto slowUpdateTick = std::chrono::milliseconds(shared::slowUpdate);
-        auto nextTick = clock::now();
+
         auto nextSlowTelemetry = clock::now();
-        auto nextFastTelemtry = clock::now();
+        auto nextFastTelemetry = clock::now();
 
-        while (running)
-        {
-            nextTick += tickPeriod;
-
+        while (running) {
+            std::vector<std::uint8_t> rawData;
             {
+                // Wait for work or timeout to handle periodic telemetry
                 std::unique_lock<std::mutex> lk(m);
-                cv.wait_until(lk, nextTick, [&]() { return !running || !inbox.empty(); });
+                cv.wait_for(lk, std::chrono::milliseconds(10), [&]() {
+                    return !running || !inbox.empty();
+                    });
+
+                if (!running) break;
+                if (inbox.empty()) goto telemetry; // Skip to telemetry if no message
+
+                rawData = std::move(inbox.front());
+                inbox.pop();
             }
 
-            if (!running)
-                break;
+            if (!rawData.empty()) {
+                shared::bit_parser::BitReader reader(
+                    shared::bit_parser::Span<const std::uint8_t>(rawData.data(), rawData.size())
+                );
 
-            // Drain inbox quickly (don’t hold lock while acting)
-            for (;;)
-            {
-                shared::can::Message msg(shared::can::MessageType::RPM, 0);
-                {
-                    std::lock_guard<std::mutex> lk(m);
-                    if (inbox.empty()) break;
-                    msg = std::move(inbox.front());
-                    inbox.pop();
-                }
+                auto category = static_cast<shared::can::MessageCategory>(reader.readU8());
+                auto typeHeader = reader.readU8();
 
-                switch (msg.getMessageType())
-                {
-                case shared::can::MessageType::ThrottleRequest:
-                {
-
-                    LogFile::Info("ECM: Throttle Request received.");
-                    const auto thr = msg.getValue(); // expected 0..100
-                    engine.setThrottle(static_cast<std::uint32_t>(thr));
-                    break;
+                // ECM cares about CONTROL messages (from Dashboard/TCM)
+                if (category == shared::can::MessageCategory::Control) {
+                    switch (static_cast<shared::can::headers::Control>(typeHeader)) {
+                    case shared::can::headers::Control::ThrottleRequest: {
+                        // Re-wrap raw data into the Throttle class to parse value
+                        shared::can::message::Throttle msg(std::move(rawData));
+                        engine.setThrottle(msg.getValue());
+                        break;
+                    }
+                    default:
+                        break;
+                    }
                 }
-                case shared::can::MessageType::CurrentGear:
-                {
-                    const auto gear = msg.getValue();
-                    LogFile::Debug("ECM: Received current gear: " + gear);
-                    engine.setSelectedGear(gear);
-                    break;
-                }
-                case shared::can::MessageType::GearDownRequest:
-                case shared::can::MessageType::GearUpRequest:
-                    // Do nothing, not subscribed.
-                    break;
-                default:
-                    LogFile::Warn("ECM:Unaccounted for message type received.");
-                    break;
+                // ECM also tracks CurrentGear from the TCM (which is a Status message)
+                else if (category == shared::can::MessageCategory::Status) {
+                    if (static_cast<shared::can::headers::Status>(typeHeader) == shared::can::headers::Status::CurrentGear) {
+                        shared::can::message::StatusMessage msg(std::move(rawData));
+                        engine.setSelectedGear(msg.getValue());
+                    }
                 }
             }
 
-            // Periodic telemetry broadcast
+        telemetry:
             const auto now = clock::now();
-            // Fast telemetry block 
-            if (now >= nextFastTelemtry)
-            {
-                nextFastTelemtry += fastUpdateTick;
-                const auto rpm = engine.getRpm();
-                const auto speed = engine.getSpeedMph();
-                const auto fuel = (int)engine.getFuelPercentage();
-                try
-                {
-                    canTx.Send(shared::can::Message(shared::can::MessageType::RPM, (int)rpm));
-                    canTx.Send(shared::can::Message(shared::can::MessageType::Speed, (int)speed));
-                    canTx.Send(shared::can::Message(shared::can::MessageType::Fuel, fuel));
-                }
-                catch (...)
-                {
-                    LogFile::Warn("ECM: fast telemetry send failed");
+
+            // Fast Telemetry: RPM, Speed, Fuel
+            if (now >= nextFastTelemetry) {
+                nextFastTelemetry += fastUpdateTick;
+
+                // Using the new message classes + Implicit Conversion in Bus::Send
+                canTx.Send(shared::can::message::StatusMessage(
+                    shared::can::MessageCategory::Status,
+                    shared::can::headers::Status::RPM,
+                    static_cast<std::uint32_t>(engine.getRpm())
+                ));
+
+                canTx.Send(shared::can::message::StatusMessage(
+                    shared::can::MessageCategory::Status,
+                    shared::can::headers::Status::Speed,
+                    static_cast<std::uint32_t>(engine.getSpeedMph())
+                ));
+
+                uint32_t fuel = static_cast<uint32_t>(engine.getFuelPercentage());
+                canTx.Send(shared::can::message::StatusMessage(
+                    shared::can::MessageCategory::Status,
+                    shared::can::headers::Status::Fuel,
+                    fuel
+                ));
+
+                if (fuel == 0) {
+                    canTx.Send(shared::can::message::ErrorMessage(
+                        shared::can::MessageCategory::Error,
+                        shared::can::headers::Error::NoFuel,
+                        "Empty fuel!"
+                    ));
                 }
             }
-            if (now >= nextSlowTelemetry)
-            {
-                nextSlowTelemetry += slowUpdateTick; // + now 
-                const auto temp = scaleTemp(engine.getCoolantTempC());
-                try
-                {
-                    canTx.Send(shared::can::Message(shared::can::MessageType::EngineTemperature, temp));
-                }
-                catch (...)
-                {
-                    LogFile::Warn("ECM: telemetry send failed");
-                }
+
+            // Slow Telemetry: Engine Temp
+            if (now >= nextSlowTelemetry) {
+                nextSlowTelemetry += slowUpdateTick;
+                canTx.Send(shared::can::message::StatusMessage(
+                    shared::can::MessageCategory::Status,
+                    shared::can::headers::Status::EngineTemperature,
+                    scaleTemp(engine.getCoolantTempC())
+                ));
             }
         }
-
-        LogFile::Info("ECM process thread exiting...");
         });
 
-    // Main thread blocks; container stays alive until processThread exits
     processThread.join();
 
-    // Shutdown order
+    // Shutdown sequence
     running = false;
     engine.stop();
-
     canRx.Stop();
     cv.notify_all();
 
-    if (rxThread.joinable())
-        rxThread.join();
+    if (rxThread.joinable()) rxThread.join();
 
     LogFile::Info("All threads stopped cleanly.");
     return 0;

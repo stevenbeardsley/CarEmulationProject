@@ -26,6 +26,10 @@ target_link_libraries(
         shared
 )
 
+target_include_directories(Ecm PUBLIC
+    ${PROJECT_SOURCE_DIR}
+)
+
 source_group("Source Files" FILES ${ecm_SOURCE})
 source_group("Header Files" FILES ${ecm_HEADERS})
 source_group("Header Files\\can" FILES ${ecm_can_HEADERS}) 

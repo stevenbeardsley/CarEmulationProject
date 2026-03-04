@@ -21,17 +21,23 @@ add_executable(Dashboard
     ${dashboard_HEADERS}
 )
 
+target_include_directories(Dashboard PUBLIC
+    ${PROJECT_SOURCE_DIR}
+)
+
 target_link_libraries(
     Dashboard
     PUBLIC 
         LogFile
     PRIVATE
+        BitParser
+        Can
         Boost::system
         Boost::json
-        Can
         Config
         shared
 )
+
 
 source_group("Source Files" FILES ${dashboard_SOURCE})
 source_group("Header Files" FILES ${dashboard_HEADERS})

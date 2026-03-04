@@ -31,6 +31,10 @@ target_link_libraries(
         LogFile
 )
 
+target_include_directories(Engine PUBLIC
+    ${PROJECT_SOURCE_DIR}
+)
+
 source_group("Source Files" FILES ${engine_SOURCE})
 source_group("Header Files" FILES ${engine_HEADERS})
 
