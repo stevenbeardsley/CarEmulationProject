@@ -63,6 +63,7 @@ void handleCarData(websocket::stream<tcp::socket> ws, dashboard::DashboardDataSo
         {
             std::string currentData = dataSource.GetDataJson();
             ws.write(net::buffer(currentData));
+            dataSource.ClearErrors();
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
     }
@@ -189,8 +190,9 @@ int main()
                     }
                     case shared::can::MessageCategory::Error:
                     {
-                        shared::can::message::ErrorMessage errMsg(std::move(rawData));
-                        LogFile::Error("CAN Error: " + errMsg.getErrorMessage());
+                        shared::can::message::ErrorMessage msg(std::move(rawData));
+                        dataSource.AddError(msg.getErrorType(), msg.getErrorMessage());
+                        LogFile::Warn("Error received: " + msg.getErrorMessage()); // TODO: Clear all errors every tick
                         break;
                     }
                     default:

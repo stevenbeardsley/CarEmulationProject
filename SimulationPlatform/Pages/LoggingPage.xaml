@@ -2,103 +2,113 @@
     x:Class="SimulationPlatform.Pages.LoggingPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:SimulationPlatform.Pages">
+    xmlns:local="using:SimulationPlatform.Pages"
+    xmlns:models="using:SimulationPlatform.Models">
+
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="Auto"/>
-		</Grid.RowDefinitions>
-		<StackPanel Grid.Row="0" Margin="10,0,0,0">
-			<TextBlock Text="Logging Page"
-                   HorizontalAlignment="Left"
-                   VerticalAlignment="Top"
-                   FontSize="32"/>
-			<TextBlock Text="Feedback from the Networked ECU Orchestration Nodes (NEON)."
-					   FontSize="14"
-					   Foreground="DarkGray"/>
-		</StackPanel>
-        
-        <StackPanel  Grid.Row="1" Spacing="10" Margin="10,10,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="10,0,0,0">
+            <TextBlock Text="Logging Page"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top"
+                       FontSize="32"/>
+            <TextBlock Text="Feedback from the Networked ECU Orchestration Nodes (NEON)."
+                       FontSize="14"
+                       Foreground="DarkGray"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Spacing="10" Margin="10,10,0,0">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"></ColumnDefinition>
-                    <ColumnDefinition Width="10"></ColumnDefinition>
-                    <ColumnDefinition></ColumnDefinition>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition></RowDefinition>
-                    <RowDefinition></RowDefinition>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <TextBlock 
-                    Text="Car data"
-                    FontWeight="Bold"
-                    Grid.Column="0"
-                    Grid.Row="0"/>
-                <TextBlock
-                    Text="Speed:"
-                    Grid.Row="1"
-                    Grid.Column="0"/>
-                <TextBlock 
-                    Text="{x:Bind Speed, Mode=OneWay}"
-                    Grid.Row="1"
-                    Grid.Column="2"/>
-                <TextBlock
-                    Text="Gear:"
-                    Grid.Row="2"
-                    Grid.Column="0"/>
-                <TextBlock 
-                    Text="{x:Bind Gear, Mode=OneWay}"
-                    Grid.Row="2"
-                    Grid.Column="2"/>
-                <TextBlock
-                    Text="RPM:"
-                    Grid.Row="3"
-                    Grid.Column="0"/>
-                <TextBlock 
-                    Text="{x:Bind Rpm, Mode=OneWay}"
-                    Grid.Row="3"
-                    Grid.Column="3"/>
-                <TextBlock
-                    Text="Max RPMS:"
-                    Grid.Row="4"
-                    Grid.Column="0"/>
-                <TextBlock 
-                    Text="{x:Bind MaxRpms, Mode=OneWay}"
-                    Grid.Row="4"
-                    Grid.Column="3"/>
-                <TextBlock
-                    Text="Engine temperature:"
-                    Grid.Row="5"
-                    Grid.Column="0"/>
-                <TextBlock 
-                    Text="{x:Bind EngineTemp, Mode=OneWay}"
-                    Grid.Row="5"
-                    Grid.Column="3"/>
-                <TextBlock
-                    Text="Fuel:"
-                    Grid.Row="6"
-                    Grid.Column="0"/>
-                <TextBlock 
-                    Text="{x:Bind Fuel, Mode=OneWay}"
-                    Grid.Row="6"
-                    Grid.Column="2"/>
-                <TextBlock
-                    Text="Status:"
-                    Grid.Row="7"
-                    Grid.Column="0"/>
-                <TextBlock 
-                    Text="{x:Bind Status, Mode=OneWay}"
-                    Grid.Row="7"
-                    Grid.Column="2"/>
 
+                <TextBlock Text="Car data"
+                           FontWeight="Bold"
+                           Grid.Column="0"
+                           Grid.Row="0"/>
+
+                <TextBlock Text="Speed:"
+                           Grid.Row="1"
+                           Grid.Column="0"/>
+                <TextBlock Text="{x:Bind Speed, Mode=OneWay}"
+                           Grid.Row="1"
+                           Grid.Column="2"/>
+
+                <TextBlock Text="Gear:"
+                           Grid.Row="2"
+                           Grid.Column="0"/>
+                <TextBlock Text="{x:Bind Gear, Mode=OneWay}"
+                           Grid.Row="2"
+                           Grid.Column="2"/>
+
+                <TextBlock Text="RPM:"
+                           Grid.Row="3"
+                           Grid.Column="0"/>
+                <TextBlock Text="{x:Bind Rpm, Mode=OneWay}"
+                           Grid.Row="3"
+                           Grid.Column="2"/>
+
+                <TextBlock Text="Max RPMS:"
+                           Grid.Row="4"
+                           Grid.Column="0"/>
+                <TextBlock Text="{x:Bind MaxRpms, Mode=OneWay}"
+                           Grid.Row="4"
+                           Grid.Column="2"/>
+
+                <TextBlock Text="Engine temperature:"
+                           Grid.Row="5"
+                           Grid.Column="0"/>
+                <TextBlock Text="{x:Bind EngineTemp, Mode=OneWay}"
+                           Grid.Row="5"
+                           Grid.Column="2"/>
+
+                <TextBlock Text="Fuel:"
+                           Grid.Row="6"
+                           Grid.Column="0"/>
+                <TextBlock Text="{x:Bind Fuel, Mode=OneWay}"
+                           Grid.Row="6"
+                           Grid.Column="2"/>
+
+                <TextBlock Text="Status:"
+                           Grid.Row="7"
+                           Grid.Column="0"/>
+                <TextBlock Text="{x:Bind Status, Mode=OneWay}"
+                           Grid.Row="7"
+                           Grid.Column="2"/>
+
+                <StackPanel Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,20,0,0">
+                    <TextBlock Text="Active Errors:" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <ListView ItemsSource="{x:Bind ActiveErrors, Mode=OneWay}"
+                              SelectionMode="None">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="local:ErrorViewModel">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <TextBlock Text="{x:Bind Code}" Foreground="Red" FontWeight="Bold"/>
+                                    <TextBlock Text="{x:Bind Message, Mode=OneWay}" Foreground="Red"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
             </Grid>
-		</StackPanel>
+        </StackPanel>
     </Grid>
 </Page>

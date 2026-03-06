@@ -25,6 +25,9 @@ namespace dashboard
         void SetStatus(bool status);
         void SetEngineFuel(std::uint32_t fuel);
 
+        void AddError(shared::can::headers::Error code, const std::string& msg);
+        void ClearErrors();
+
         // Convenience: update multiple fields atomically
         void Update(std::int32_t speed, std::int32_t gear, std::int32_t rpm, bool status);
 

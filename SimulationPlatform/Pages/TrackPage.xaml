@@ -534,7 +534,7 @@
                                 BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
                                 Padding="14">
                             <StackPanel>
-                                <TextBlock Text="TEMP" Foreground="DarkGray" FontWeight="SemiBold"/>
+                                <TextBlock Text="ENGINE TEMP" Foreground="DarkGray" FontWeight="SemiBold"/>
                                 <TextBlock Text="{x:Bind EngineTemp, Mode=OneWay}"
                                            FontSize="28" 
                                            FontWeight="Bold"/>

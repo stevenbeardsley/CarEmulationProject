@@ -1,8 +1,21 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Collections.Generic;
 
 namespace SimulationPlatform.Models
 {
+    public class ErrorMessageJson
+    {
+        [JsonPropertyName("code")]
+        public int Code
+        {
+            get; set;
+        }
+
+        [JsonPropertyName("msg")]
+        public string Text { get; set; } = string.Empty;
+    }
+
     public class DashboardMessage
     {
         [JsonPropertyName("speed")]
@@ -41,18 +54,21 @@ namespace SimulationPlatform.Models
             get; set;
         }
 
-
         [JsonPropertyName("status")]
         public bool Status
         {
             get; set;
         }
 
+        [JsonPropertyName("errors")]
+        public List<ErrorMessageJson> Errors { get; set; } = new List<ErrorMessageJson>();
+
         public static DashboardMessage? FromJson(string json)
         {
             try
             {
-                return JsonSerializer.Deserialize<DashboardMessage>(json);
+                var options = new JsonSerializerOptions { AllowTrailingCommas = true };
+                return JsonSerializer.Deserialize<DashboardMessage>(json, options);
             }
             catch (JsonException)
             {
@@ -62,8 +78,12 @@ namespace SimulationPlatform.Models
 
         public CarData ToCarData()
         {
-            return new CarData(Speed, Gear, Rpms, MaxRpms, EngineTemp, Fuel, Status);
+            //var errors = new List<ErrorMessage>();
+            //foreach (var msg in Errors)
+            //{
+            //    errors.Add(new ErrorMessage(msg.Code, msg.Text));
+            //}
+            return new CarData(Speed, Gear, Rpms, MaxRpms, EngineTemp, Fuel, Status, Errors);
         }
-
     }
 }

@@ -3,9 +3,52 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using SimulationPlatform.Models;
 using Microsoft.UI.Dispatching;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace SimulationPlatform.Pages
 {
+    public class ErrorViewModel : INotifyPropertyChanged
+    {
+        private string _code;
+        private string _text = string.Empty;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public string Code
+        {
+            get => _code;
+            set
+            {
+                if (_code != value)
+                {
+                    _code = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Code)));
+                }
+            }
+        }
+
+        public string Message
+        {
+            get => _text;
+            set
+            {
+                if (_text != value)
+                {
+                    _text = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Message)));
+                }
+            }
+        }
+
+        public ErrorViewModel(ErrorMessage model)
+        {
+            _code = model.Code.ToString();
+            _text = model.Message;
+        }
+    }
+
     public sealed partial class LoggingPage : Page, INotifyPropertyChanged
     {
         private string m_speed = string.Empty;
@@ -15,17 +58,16 @@ namespace SimulationPlatform.Pages
         private string m_engineTemp = string.Empty;
         private string m_fuel = string.Empty;
         private string m_status = string.Empty;
-        
+
+        public ObservableCollection<ErrorViewModel> ActiveErrors { get; } = new();
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public LoggingPage()
         {
             this.InitializeComponent();
-            DataContext = App.m_model;
-            // TODO: Bind the updates, so this page updates dynamically 
+            DataContext = this;
         }
 
-        // Property for Speed
         public string Speed
         {
             get => m_speed;
@@ -91,7 +133,6 @@ namespace SimulationPlatform.Pages
             }
         }
 
-
         public string Fuel
         {
             get => m_fuel;
@@ -127,40 +168,71 @@ namespace SimulationPlatform.Pages
         {
             DispatcherQueue.TryEnqueue(() =>
             {
+                // 1. Update standard telemetry
                 Speed = carData.Speed.ToString();
                 Status = carData.Status.ToString();
                 Rpm = carData.Rpms.ToString();
                 MaxRpms = carData.MaxRpms.ToString();
-                EngineTemp = carData.EngineTemp.ToString(); // TODO: Are the property raisers needed?
+                EngineTemp = carData.EngineTemp.ToString();
                 Fuel = carData.Fuel.ToString();
                 Gear = carData.Gear.ToString();
-                OnPropertyChanged(nameof(Speed));
-                OnPropertyChanged(nameof(Status));
-                OnPropertyChanged(nameof(Gear));
-                OnPropertyChanged(nameof(Rpm));
-                OnPropertyChanged(nameof(Fuel));
-                OnPropertyChanged(nameof(MaxRpms));
-                OnPropertyChanged(nameof(EngineTemp));
+
+                // 2. Get snapshot of current errors (Dictionary<int, string>)
+                var latestErrors = carData.Errors;
+
+                // 3. REMOVE: Remove errors that are no longer present
+                for (int i = ActiveErrors.Count - 1; i >= 0; i--)
+                {
+                    // Parse the code back to int to compare with dictionary keys
+                    if (int.TryParse(ActiveErrors[i].Code, out int existingCode))
+                    {
+                        if (!latestErrors.ContainsKey(existingCode))
+                        {
+                            ActiveErrors.RemoveAt(i);
+                        }
+                    }
+                }
+
+                // 4. ADD/UPDATE: Add new or update existing
+                foreach (var kvp in latestErrors)
+                {
+                    string stringCode = kvp.Key.ToString();
+                    var existing = ActiveErrors.FirstOrDefault(e => e.Code == stringCode);
+
+                    if (existing == null)
+                    {
+                        if (existing == null)
+                        {
+                            // 1. Create the Model (The data container)
+                            var model = new ErrorMessage(kvp.Key, kvp.Value);
+
+                            // 2. Create the ViewModel (The UI wrapper)
+                            var vm = new ErrorViewModel(model);
+
+                            // 3. Add to the collection
+                            ActiveErrors.Add(vm);
+                        }
+                    }
+                    else
+                    {
+                        // If message changed, update it. ErrorViewModel handles the notification.
+                        if (existing.Message != kvp.Value)
+                        {
+                            existing.Message = kvp.Value;
+                        }
+                    }
+                }
             });
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            // Example: Pull data from model
-            Speed = App.m_model.m_carData.Speed.ToString();
-            Status = App.m_model.m_carData.Status.ToString();
-            Gear = App.m_model.m_carData.Gear.ToString();
-            Rpm = App.m_model.m_carData.Rpms.ToString();
-            MaxRpms = App.m_model.m_carData.MaxRpms.ToString();
-            EngineTemp = App.m_model.m_carData.EngineTemp.ToString();
-            Fuel = App.m_model.m_carData.Fuel.ToString();
+            UpdateCarData(App.m_model.m_carData);
             App.m_model.m_webSocketController.CarDataReceived += UpdateCarData;
         }
 
-
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            // Unsubscribe from model changes (if you add them later)
             App.m_model.m_webSocketController.CarDataReceived -= UpdateCarData;
         }
     }

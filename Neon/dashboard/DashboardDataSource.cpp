@@ -57,6 +57,19 @@ namespace dashboard
         m_data.m_status = status;
     }
 
+    void DashboardDataSource::AddError(shared::can::headers::Error code,
+        const std::string& message) 
+    {
+        std::lock_guard<std::mutex> lk(m_mtx);
+        m_data.m_activeErrors.push_back({ code, message });
+    }
+
+    void DashboardDataSource::ClearErrors() 
+    {
+        std::lock_guard<std::mutex> lk(m_mtx);
+        m_data.m_activeErrors.clear();
+    }
+
     void DashboardDataSource::Update(std::int32_t speed, std::int32_t gear, std::int32_t rpm, bool status)
     {
         std::lock_guard<std::mutex> lk(m_mtx);
@@ -84,6 +97,20 @@ namespace dashboard
             << "\"maxRpms\":" << d.m_maxRpms<< ","
             << "\"engineTemp\":" << d.m_engineTemp << ","
             << "\"fuel\":" << d.m_fuel << ","
+            << "\"errors\": [";
+        for (size_t i = 0; i < d.m_activeErrors.size(); ++i) {
+            oss << "{" // Start the error object
+                << "\"code\":" << static_cast<std::int32_t>(d.m_activeErrors[i].m_code) << ","
+                << "\"msg\":\"" << d.m_activeErrors[i].m_message << "\""
+                << "}"; // End the error object
+
+            if (i < d.m_activeErrors.size() - 1)
+            {
+                oss << ",";
+            }
+        }
+
+            oss << "],"
             << "\"status\":" << (d.m_status ? "true" : "false")
             << "}";
 
