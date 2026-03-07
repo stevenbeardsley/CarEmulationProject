@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -23,6 +26,7 @@ namespace SimulationPlatform.Pages
         private double _acceleration = 25;
         private double _speedValue;
         private double _oneCopyHeight = 0;
+        public ObservableCollection<ErrorViewModel> ActiveErrors { get; } = new();
 
         public Brush m_colour
         {
@@ -183,6 +187,7 @@ namespace SimulationPlatform.Pages
 
                 // Draw RPM dial once XAML is ready (uses current model value)
                 UpdateRpmGauge(App.m_model.m_carData.Rpms);
+                UpdateErrorList(App.m_model.m_carData.Errors);
             };
         }
 
@@ -230,13 +235,43 @@ namespace SimulationPlatform.Pages
 
                     // Update dial using numeric value from model/telemetry
                     UpdateRpmGauge(carData.Rpms);
-                    UpdateFuelGauge(carData.Fuel); 
+                    UpdateFuelGauge(carData.Fuel);
+                    UpdateErrorList(carData.Errors);
                     GearValue = carData.Gear;
                 });
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
+        }
+
+        private void UpdateErrorList(Dictionary<int, string> latestErrors)
+        {
+            // 1. Remove stale errors
+            for (int i = ActiveErrors.Count - 1; i >= 0; i--)
+            {
+                if (int.TryParse(ActiveErrors[i].Code, out int existingCode))
+                {
+                    if (!latestErrors.ContainsKey(existingCode))
+                    {
+                        ActiveErrors.RemoveAt(i);
+                    }
+                }
+            }
+
+            // 2. Add or Update
+            foreach (var kvp in latestErrors)
+            {
+                var stringCode = kvp.Key.ToString();
+                var existing = ActiveErrors.FirstOrDefault(e => e.Code == stringCode);
+
+                if (existing == null)
+                {
+                    // Create the internal model and wrap in the VM
+                    var model = new ErrorMessage(kvp.Key, kvp.Value);
+                    ActiveErrors.Add(new ErrorViewModel(model));
+                }
             }
         }
 

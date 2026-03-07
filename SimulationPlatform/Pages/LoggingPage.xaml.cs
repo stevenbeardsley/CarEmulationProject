@@ -13,9 +13,20 @@ namespace SimulationPlatform.Pages
     {
         private string _code;
         private string _text = string.Empty;
-
+        private Symbol _icon; 
         public event PropertyChangedEventHandler? PropertyChanged;
-
+        public Symbol Icon
+        {
+            get => _icon;
+            set
+            {
+                if (_icon != value)
+                {
+                    _icon = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Icon)));
+                }
+            }
+        }
         public string Code
         {
             get => _code;
@@ -46,6 +57,7 @@ namespace SimulationPlatform.Pages
         {
             _code = model.Code.ToString();
             _text = model.Message;
+            _icon = ErrorIconMapper.GetIcon(model.Code);
         }
     }
 

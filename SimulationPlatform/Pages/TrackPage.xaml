@@ -312,17 +312,37 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- Extra placeholder buttons -->
-                        <Border CornerRadius="12"
-                                BorderThickness="1"
-                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                        <!-- Throttle -->
+                        <Border Grid.Row="3" Grid.Column="0"
+                                CornerRadius="12"
                                 Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
-                                Padding="12">
-                            <StackPanel Spacing="10">
-                                <TextBlock Text="Controls"
+                                BorderThickness="1"
+                                Height="80"
+                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                                Padding="14">
+                            <StackPanel>
+                                <TextBlock Text="Throttle"
                                            FontWeight="SemiBold"/>
-                                <Button Content="Start / Stop"/>
-                                <Button Content="Reset Position"/>
+                                <TextBlock Text="{x:Bind AccelerationText, Mode=OneWay}"
+                                           FontSize="28"
+                                           FontWeight="Bold"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Temp -->
+                        <Border Grid.Row="3" Grid.Column="1"
+                                CornerRadius="12"
+                                Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
+                                BorderThickness="1"
+                                Height="80"
+                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                                Padding="14">
+                            <StackPanel>
+                                <TextBlock Text="Engine Temperature"
+                                           FontWeight="SemiBold"/>
+                                <TextBlock Text="{x:Bind EngineTemp, Mode=OneWay}"
+                                           FontSize="28" 
+                                           FontWeight="Bold"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -511,49 +531,55 @@
                         </Border>
 
 
-                        <!-- Throttle -->
-                        <Border Grid.Row="3" Grid.Column="0"
-                                CornerRadius="12"
-                                Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
-                                BorderThickness="1"
-                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
-                                Padding="14">
-                            <StackPanel>
-                                <TextBlock Text="THROTTLE" Foreground="DarkGray" FontWeight="SemiBold"/>
-                                <TextBlock Text="{x:Bind AccelerationText, Mode=OneWay}"
-                                           FontSize="28"
-                                           FontWeight="Bold"/>
-                            </StackPanel>
-                        </Border>
 
-                        <!-- Temp -->
-                        <Border Grid.Row="3" Grid.Column="1"
-                                CornerRadius="12"
-                                Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
-                                BorderThickness="1"
-                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
-                                Padding="14">
-                            <StackPanel>
-                                <TextBlock Text="ENGINE TEMP" Foreground="DarkGray" FontWeight="SemiBold"/>
-                                <TextBlock Text="{x:Bind EngineTemp, Mode=OneWay}"
-                                           FontSize="28" 
-                                           FontWeight="Bold"/>
-                            </StackPanel>
-                        </Border>
 
-                        <!-- Notes / alerts -->
-                        <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
-                                CornerRadius="12"
-                                Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
-                                BorderThickness="1"
-                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
-                                Padding="14">
-                            <StackPanel Spacing="6">
-                                <TextBlock Text="INFO" Foreground="DarkGray" FontWeight="SemiBold"/>
-                                <TextBlock Text="Data is received from the Networked ECU Orchestration Nodes (NEON)."
-                                           TextWrapping="Wrap"
-                                           Foreground="DarkGray"/>
-                            </StackPanel>
+                        <!-- Warnings & Alerts -->
+                        <Border Grid.Row="4"
+        Grid.ColumnSpan="2"
+        CornerRadius="12"
+        Background="{ThemeResource SystemControlBackgroundAltMediumBrush}" 
+        BorderThickness="1" 
+        BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+        Padding="14">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Text="WARNINGS &amp; ALERTS" 
+                                   Foreground="DarkGray" 
+                                   FontWeight="Bold" 
+                                   FontSize="12" 
+                                   Margin="0,0,0,8"/>
+
+                                <ListView Grid.Row="1" 
+                                      ItemsSource="{x:Bind ActiveErrors, Mode=OneWay}"
+                                      SelectionMode="None"
+                                      HorizontalAlignment="Stretch">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate x:DataType="local:ErrorViewModel">
+                                            <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,4">
+                                                <SymbolIcon Symbol="{x:Bind Icon, Mode=OneWay}" 
+                                                    Foreground="OrangeRed" 
+                                                    Width="20"/>
+                                                <StackPanel Orientation="Vertical">
+                                                    <TextBlock Text="{x:Bind Message}" 
+                                                       VerticalAlignment="Center"
+                                                       FontSize="14"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem">
+                                            <Setter Property="MinHeight" Value="40"/>
+                                            <Setter Property="Padding" Value="4,0"/>
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
+                                </ListView>
+                            </Grid>
                         </Border>
                     </Grid>
                 </StackPanel>
