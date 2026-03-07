@@ -181,10 +181,10 @@ namespace SimulationPlatform.Pages
                 var latestErrors = carData.Errors;
 
                 // 3. REMOVE: Remove errors that are no longer present
-                for (int i = ActiveErrors.Count - 1; i >= 0; i--)
+                for (var i = ActiveErrors.Count - 1; i >= 0; i--)
                 {
                     // Parse the code back to int to compare with dictionary keys
-                    if (int.TryParse(ActiveErrors[i].Code, out int existingCode))
+                    if (int.TryParse(ActiveErrors[i].Code, out var existingCode))
                     {
                         if (!latestErrors.ContainsKey(existingCode))
                         {
@@ -196,7 +196,7 @@ namespace SimulationPlatform.Pages
                 // 4. ADD/UPDATE: Add new or update existing
                 foreach (var kvp in latestErrors)
                 {
-                    string stringCode = kvp.Key.ToString();
+                    var stringCode = kvp.Key.ToString();
                     var existing = ActiveErrors.FirstOrDefault(e => e.Code == stringCode);
 
                     if (existing == null)
@@ -211,14 +211,6 @@ namespace SimulationPlatform.Pages
 
                             // 3. Add to the collection
                             ActiveErrors.Add(vm);
-                        }
-                    }
-                    else
-                    {
-                        // If message changed, update it. ErrorViewModel handles the notification.
-                        if (existing.Message != kvp.Value)
-                        {
-                            existing.Message = kvp.Value;
                         }
                     }
                 }
