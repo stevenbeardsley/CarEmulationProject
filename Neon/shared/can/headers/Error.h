@@ -6,12 +6,13 @@
 namespace shared::can::headers
 {
 
-enum class Error : std::uint8_t
-{
-    LowFuel = 0,
-    NoFuel = 1
-    // TODO: Add more
-};
+    enum class Error : std::uint8_t
+    {
+        LowFuel = 0,
+        NoFuel = 1,
+        EngineOverheating = 2,
+        EngineStalled = 3
+    };
 
 }
 

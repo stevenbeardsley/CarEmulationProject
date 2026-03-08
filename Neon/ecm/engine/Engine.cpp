@@ -122,6 +122,12 @@ namespace ecm::engine
         return m_running;
     }
 
+    bool Engine::isStalled() const
+    {
+        std::lock_guard<std::mutex> lk(m_mutex);
+        return m_isStalled;
+    }
+
     double Engine::getFuelPercentage() const
     {
         std::lock_guard<std::mutex> lk(m_mutex);
@@ -318,6 +324,7 @@ namespace ecm::engine
 
         if (dtSeconds <= 0.0)
             return;
+
         m_fuel.update(
             m_rpm,
             m_effectiveThrottle,
@@ -325,116 +332,97 @@ namespace ecm::engine
             static_cast<double>(m_engineCfg.max_rpm),
             dtSeconds);
 
-        if (m_fuel.isEmpty()) // Stall if fuel tank is empty 
-        {
-            m_effectiveThrottle = 0.0;
-            m_rpm = 0.0;
-            m_accelMps2 = 0.0;
-            m_thermal.update(
-                m_rpm, // 0.0
-                m_effectiveThrottle, // 0.0
-                static_cast<double>(m_engineCfg.idle_rpm),
-                static_cast<double>(m_engineCfg.max_rpm),
-                dtSeconds);
+        const double idleRpm = static_cast<double>(m_engineCfg.idle_rpm);
+        const double redlineRpm = static_cast<double>(m_engineCfg.max_rpm);
 
-            return;
+        // --- STALL LOGIC: Mechanical Over-rev ---
+        // If RPM exceeds redline by 10%, the engine blows/stalls
+        const double overRevThreshold = redlineRpm * 1.10;
+        if (m_rpm > overRevThreshold)
+        {
+            m_isStalled = true;
         }
 
-        // Smooth throttle
-        const double targetThrottle = static_cast<double>(m_throttlePercent) / 100.0;
-        const double alpha = 1.0 - std::exp(-m_throttleResponse * dtSeconds);
-        m_effectiveThrottle = m_effectiveThrottle + (targetThrottle - m_effectiveThrottle) * alpha;
+        bool hasFuel = !m_fuel.isEmpty();
+        bool canRun = hasFuel && !m_isStalled;
+
+        // Engine only responds to throttle if it has fuel and isn't blown
+        if (!canRun)
+        {
+            m_effectiveThrottle = 0.0;
+        }
+        else
+        {
+            const double targetThrottle = static_cast<double>(m_throttlePercent) / 100.0;
+            const double alpha = 1.0 - std::exp(-m_throttleResponse * dtSeconds);
+            m_effectiveThrottle = m_effectiveThrottle + (targetThrottle - m_effectiveThrottle) * alpha;
+        }
+
         m_effectiveThrottle = clampd(m_effectiveThrottle, 0.0, 1.0);
 
-        // Limp mode if overheating
         if (m_thermal.isOverheating())
         {
             m_effectiveThrottle *= 0.5;
         }
 
-        // Resistances
         const double resistForce = m_cRolling + (m_cDrag * m_speedMps * m_speedMps);
-
-        // Hard speed cap (locked driveline) per gear at redline
         const double speedCapMps = computeRedlineSpeedCapMps();
-        if (speedCapMps > 0.0 && m_speedMps > speedCapMps)
-            m_speedMps = speedCapMps;
 
-        // Wheel rpm from speed
         const double wheelCirc = 2.0 * 3.141592653589793 * m_wheelRadiusM;
         const double wheelRps = (wheelCirc > 1e-6) ? (m_speedMps / wheelCirc) : 0.0;
         const double wheelRpm = wheelRps * 60.0;
 
-        const double idleRpm = static_cast<double>(m_engineCfg.idle_rpm);
-        const double redlineRpm = static_cast<double>(m_engineCfg.max_rpm);
-
-        // Neutral: let engine free-rev a bit; no drive torque
+        // Neutral logic
         if (m_gearRatio <= 0.01)
         {
-            const double freeRev = idleRpm + (redlineRpm - idleRpm) * (0.25 + 0.75 * m_effectiveThrottle);
-            m_rpm = clampd(freeRev, idleRpm, redlineRpm);
+            const double targetNeutralRpm = canRun ? (idleRpm + (redlineRpm - idleRpm) * (0.25 + 0.75 * m_effectiveThrottle)) : 0.0;
+            m_rpm = m_rpm + (targetNeutralRpm - m_rpm) * (1.0 - std::exp(-2.0 * dtSeconds));
 
             double netForce = -resistForce;
             m_accelMps2 = netForce / std::max(1.0, m_massKg);
+        }
+        else
+        {
+            // In-gear: rpm is linked to wheel speed
+            const double rpmFromSpeed = wheelRpm * m_gearRatio * m_finalDrive;
+            const double floorRpm = canRun ? idleRpm : 0.0;
 
-            if (m_speedMps <= 0.01 && m_effectiveThrottle < 0.01)
+            // Allow RPM to physically exceed redline (which triggers the stall check above)
+            m_rpm = std::max(floorRpm, rpmFromSpeed);
+
+            // Cap the RPM used for torque calculation so your curve doesn't break
+            const double generatingRpm = std::min(m_rpm, redlineRpm);
+            const double engTorque = torqueAtRpmNm(generatingRpm) * m_effectiveThrottle;
+            const double wheelTorque = engTorque * m_gearRatio * m_finalDrive * m_drivetrainEff;
+            const double driveForce = (m_wheelRadiusM > 1e-6) ? (wheelTorque / m_wheelRadiusM) : 0.0;
+
+            double netForce = driveForce - resistForce;
+
+            // Engine Braking & Over-Rev Handling
+            if (speedCapMps > 0.0 && m_speedMps > speedCapMps)
             {
-                m_speedMps = 0.0;
-                m_accelMps2 = 0.0;
-                return;
+                const double overSpeedMps = m_speedMps - speedCapMps;
+                netForce -= (overSpeedMps * 500.0);
+
+                if (netForce > 0.0)
+                    netForce = 0.0;
+            }
+            else if (m_effectiveThrottle < 0.05 && rpmFromSpeed > idleRpm)
+            {
+                netForce -= (rpmFromSpeed * 0.1);
             }
 
-            m_speedMps += m_accelMps2 * dtSeconds;
-            if (m_speedMps < 0.0) m_speedMps = 0.0;
-            return;
-        }
+            // Severe mechanical drag if the engine is completely dead/blown
+            if (!canRun) {
+                netForce -= 250.0; // Acts like a heavy mechanical brake
+            }
 
-        // In-gear: rpm is linked to wheel speed
-        const double rpmFromSpeed = wheelRpm * m_gearRatio * m_finalDrive;
-        m_rpm = clampd(rpmFromSpeed, idleRpm, redlineRpm);
-
-        // Torque -> wheel force
-        const double engTorque = torqueAtRpmNm(m_rpm) * m_effectiveThrottle;
-        const double wheelTorque = engTorque * m_gearRatio * m_finalDrive * m_drivetrainEff;
-        const double driveForce = (m_wheelRadiusM > 1e-6) ? (wheelTorque / m_wheelRadiusM) : 0.0;
-
-        double netForce = driveForce - resistForce;
-
-        // Hard cap behaviour: at cap don't allow positive net force
-        if (speedCapMps > 0.0 && m_speedMps >= speedCapMps - 1e-4)
-        {
-            if (netForce > 0.0)
-                netForce = 0.0;
-            m_speedMps = speedCapMps;
-        }
-
-        m_accelMps2 = netForce / std::max(1.0, m_massKg);
-
-        // Prevent negative speed (reverse not simulated here)
-        if (m_speedMps <= 0.01 && m_effectiveThrottle < 0.01)
-        {
-            m_speedMps = 0.0;
-            m_accelMps2 = 0.0;
-            return;
+            m_accelMps2 = netForce / std::max(1.0, m_massKg);
         }
 
         m_speedMps += m_accelMps2 * dtSeconds;
+        if (m_speedMps < 0.0) m_speedMps = 0.0;
 
-        if (m_speedMps < 0.0)
-            m_speedMps = 0.0;
-
-        // Clamp overshoot due to dt
-        if (speedCapMps > 0.0 && m_speedMps > speedCapMps)
-        {
-            m_speedMps = speedCapMps;
-        }
-
-        m_thermal.update(
-            m_rpm,
-            m_effectiveThrottle,
-            static_cast<double>(m_engineCfg.idle_rpm),
-            static_cast<double>(m_engineCfg.max_rpm),
-            dtSeconds);
-
+        m_thermal.update(m_rpm, m_effectiveThrottle, idleRpm, redlineRpm, dtSeconds);
     }
 }

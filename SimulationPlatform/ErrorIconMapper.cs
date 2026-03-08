@@ -9,8 +9,8 @@ namespace SimulationPlatform
         private static readonly Dictionary<int, Symbol> _iconMap = new()
         {
             { 1, Symbol.Important },      // Engine No Fuel
-            { 2, Symbol.Target },         // Overheating
-            { 3, Symbol.Repair },         // Transmission Issue
+            { 2, Symbol.Cancel },         // Engine overheating 
+            { 3, Symbol.Target },         // Overheating
             { 4, Symbol.Setting },        // ECU Malfunction
             { 5, Symbol.World }           // Network/NEON Error
         };

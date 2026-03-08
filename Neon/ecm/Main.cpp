@@ -106,7 +106,6 @@ int main() {
                 if (category == shared::can::MessageCategory::Control) {
                     switch (static_cast<shared::can::headers::Control>(typeHeader)) {
                     case shared::can::headers::Control::ThrottleRequest: {
-                        // Re-wrap raw data into the Throttle class to parse value
                         shared::can::message::Throttle msg(std::move(rawData));
                         engine.setThrottle(msg.getValue());
                         break;
@@ -151,23 +150,44 @@ int main() {
                     fuel
                 ));
 
-                if (fuel == 0) {
+                if (fuel == 0)
+                {
                     canTx.Send(shared::can::message::ErrorMessage(
                         shared::can::MessageCategory::Error,
                         shared::can::headers::Error::NoFuel,
-                        "Empty fuel!"
+                        "Critical: Empty fuel."
                     ));
                 }
+
+                // --- NEW CODE: Stall Warning ---
+                if (engine.isStalled())
+                {
+                    canTx.Send(shared::can::message::ErrorMessage(
+                        shared::can::MessageCategory::Error,
+                        shared::can::headers::Error::EngineStalled, // Make sure EngineStalled exists in your Error header
+                        "Critical: Engine has stalled due to over-rev."
+                    ));
+                }
+                // -------------------------------
             }
 
             // Slow Telemetry: Engine Temp
             if (now >= nextSlowTelemetry) {
                 nextSlowTelemetry += slowUpdateTick;
+                const auto temperature = scaleTemp(engine.getCoolantTempC());
                 canTx.Send(shared::can::message::StatusMessage(
                     shared::can::MessageCategory::Status,
                     shared::can::headers::Status::EngineTemperature,
-                    scaleTemp(engine.getCoolantTempC())
-                ));
+                    temperature));
+
+                if (temperature >= 1000) /// * 10 to scale
+                {
+                    canTx.Send(shared::can::message::ErrorMessage(
+                        shared::can::MessageCategory::Error,
+                        shared::can::headers::Error::EngineOverheating,
+                        "Engine overheating"
+                    ));
+                }
             }
         }
         });

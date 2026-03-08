@@ -42,6 +42,9 @@ namespace ecm::engine
         double getCoolantTempC() const;
         bool isOverheating() const;
 
+        [[nodiscard]]
+        bool isStalled() const;
+
         // Fuel system 
         double getFuelPercentage() const;
         bool isOutOfFuel() const; // TODO: Use 
@@ -65,6 +68,7 @@ namespace ecm::engine
         std::thread m_thread;
         bool m_running{ false };
         bool m_stopRequested{ false };
+        bool m_isStalled{ false };
 
         double m_tickHz{ 60.0 };
 
