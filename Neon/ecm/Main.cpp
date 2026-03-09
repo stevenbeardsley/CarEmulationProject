@@ -2,7 +2,6 @@
 #include "Process.h"
 #include "shared/can/Receiver.h"
 #include "shared/can/Bus.h"
-// Updated includes to match your new message structure
 #include "shared/can/messages/StatusMessage.h"
 #include "shared/can/messages/ErrorMessage.h"
 #include "shared/can/messages/Throttle.h"
@@ -44,12 +43,10 @@ int main() {
     LogFile::Instance().setLevel(LogLevel::DEBUG);
     LogFile::Info("ECM starting...");
 
-    // 1. Thread-safe inbox now stores raw bits
     std::mutex m;
     std::condition_variable cv;
     std::queue<std::vector<std::uint8_t>> inbox;
 
-    // 2. New Receiver: Injecting the shared state
     shared::can::Receiver canRx(running, 15000, inbox, m, cv);
 
     shared::can::Bus canTx(0, 15000);
@@ -65,7 +62,6 @@ int main() {
     engine.setSelectedGear(0);
     engine.start();
 
-    // 3. Start Receiver Thread
     std::thread rxThread([&]() {
         canRx.Run();
         });
@@ -78,17 +74,19 @@ int main() {
         auto nextSlowTelemetry = clock::now();
         auto nextFastTelemetry = clock::now();
 
+        // Track gear locally so we don't recommend shifting in Neutral/Reverse
+        int currentGear = 0;
+
         while (running) {
             std::vector<std::uint8_t> rawData;
             {
-                // Wait for work or timeout to handle periodic telemetry
                 std::unique_lock<std::mutex> lk(m);
                 cv.wait_for(lk, std::chrono::milliseconds(10), [&]() {
                     return !running || !inbox.empty();
                     });
 
                 if (!running) break;
-                if (inbox.empty()) goto telemetry; // Skip to telemetry if no message
+                if (inbox.empty()) goto telemetry;
 
                 rawData = std::move(inbox.front());
                 inbox.pop();
@@ -102,7 +100,6 @@ int main() {
                 auto category = static_cast<shared::can::MessageCategory>(reader.readU8());
                 auto typeHeader = reader.readU8();
 
-                // ECM cares about CONTROL messages (from Dashboard/TCM)
                 if (category == shared::can::MessageCategory::Control) {
                     switch (static_cast<shared::can::headers::Control>(typeHeader)) {
                     case shared::can::headers::Control::ThrottleRequest: {
@@ -114,11 +111,11 @@ int main() {
                         break;
                     }
                 }
-                // ECM also tracks CurrentGear from the TCM (which is a Status message)
                 else if (category == shared::can::MessageCategory::Status) {
                     if (static_cast<shared::can::headers::Status>(typeHeader) == shared::can::headers::Status::CurrentGear) {
                         shared::can::message::StatusMessage msg(std::move(rawData));
-                        engine.setSelectedGear(msg.getValue());
+                        currentGear = static_cast<int>(msg.getValue()); // Update local tracker
+                        engine.setSelectedGear(currentGear);
                     }
                 }
             }
@@ -130,17 +127,19 @@ int main() {
             if (now >= nextFastTelemetry) {
                 nextFastTelemetry += fastUpdateTick;
 
-                // Using the new message classes + Implicit Conversion in Bus::Send
+                std::uint32_t currentRpm = engine.getRpm();
+                std::uint32_t currentSpeed = engine.getSpeedMph();
+
                 canTx.Send(shared::can::message::StatusMessage(
                     shared::can::MessageCategory::Status,
                     shared::can::headers::Status::RPM,
-                    static_cast<std::uint32_t>(engine.getRpm())
+                    currentRpm
                 ));
 
                 canTx.Send(shared::can::message::StatusMessage(
                     shared::can::MessageCategory::Status,
                     shared::can::headers::Status::Speed,
-                    static_cast<std::uint32_t>(engine.getSpeedMph())
+                    currentSpeed
                 ));
 
                 uint32_t fuel = static_cast<uint32_t>(engine.getFuelPercentage());
@@ -159,16 +158,35 @@ int main() {
                     ));
                 }
 
-                // --- NEW CODE: Stall Warning ---
                 if (engine.isStalled())
                 {
                     canTx.Send(shared::can::message::ErrorMessage(
                         shared::can::MessageCategory::Error,
-                        shared::can::headers::Error::EngineStalled, // Make sure EngineStalled exists in your Error header
+                        shared::can::headers::Error::EngineStalled,
                         "Critical: Engine has stalled due to over-rev."
                     ));
                 }
-                // -------------------------------
+
+                // Only recommend shifting if we are in a forward driving gear
+                if (currentGear > 0 && !engine.isStalled())
+                {
+                    if (currentRpm > static_cast<std::uint32_t>(engineConfig.max_rpm * 0.85))
+                    {
+                        canTx.Send(shared::can::message::ErrorMessage(
+                            shared::can::MessageCategory::Error,
+                            shared::can::headers::Error::ShiftUpReccommended,
+                            "Warning: Shift up recommended."
+                        ));
+                    }
+                    else if (currentGear > 1 && currentSpeed > 5 && currentRpm < static_cast<std::uint32_t>(engineConfig.idle_rpm * 1.25))
+                    {
+                        canTx.Send(shared::can::message::ErrorMessage(
+                            shared::can::MessageCategory::Error,
+                            shared::can::headers::Error::ShiftDownRecommended,
+                            "Warning: Shift down recommended."
+                        ));
+                    }
+                }
             }
 
             // Slow Telemetry: Engine Temp
@@ -180,7 +198,7 @@ int main() {
                     shared::can::headers::Status::EngineTemperature,
                     temperature));
 
-                if (temperature >= 1000) /// * 10 to scale
+                if (temperature >= 1000)
                 {
                     canTx.Send(shared::can::message::ErrorMessage(
                         shared::can::MessageCategory::Error,
@@ -194,7 +212,6 @@ int main() {
 
     processThread.join();
 
-    // Shutdown sequence
     running = false;
     engine.stop();
     canRx.Stop();

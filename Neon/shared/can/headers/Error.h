@@ -11,7 +11,9 @@ namespace shared::can::headers
         LowFuel = 0,
         NoFuel = 1,
         EngineOverheating = 2,
-        EngineStalled = 3
+        EngineStalled = 3,
+        ShiftDownRecommended = 4,
+        ShiftUpReccommended = 5
     };
 
 }

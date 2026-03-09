@@ -362,10 +362,6 @@
                                Foreground="DarkGray"/>
                     <TextBlock Text="Idle"
                                FontWeight="SemiBold"/>
-                    <TextBlock Text="•"
-                               Foreground="DarkGray"/>
-                    <TextBlock Text="Use the slider and gear buttons (no logic yet)."
-                               Foreground="DarkGray"/>
                 </StackPanel>
             </Border>
         </Grid>
@@ -535,12 +531,12 @@
 
                         <!-- Warnings & Alerts -->
                         <Border Grid.Row="4"
-        Grid.ColumnSpan="2"
-        CornerRadius="12"
-        Background="{ThemeResource SystemControlBackgroundAltMediumBrush}" 
-        BorderThickness="1" 
-        BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
-        Padding="14">
+                            Grid.ColumnSpan="2"
+                            CornerRadius="12"
+                            Background="{ThemeResource SystemControlBackgroundAltMediumBrush}" 
+                            BorderThickness="1" 
+                            BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                            Padding="14">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>

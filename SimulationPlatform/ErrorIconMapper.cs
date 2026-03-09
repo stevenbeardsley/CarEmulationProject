@@ -11,8 +11,8 @@ namespace SimulationPlatform
             { 1, Symbol.Important },      // Engine No Fuel
             { 2, Symbol.Cancel },         // Engine overheating 
             { 3, Symbol.Target },         // Overheating
-            { 4, Symbol.Setting },        // ECU Malfunction
-            { 5, Symbol.World }           // Network/NEON Error
+            { 4, Symbol.Download },        // ECU Malfunction
+            { 5, Symbol.Up }            // Network/NEON Error
         };
 
         public static Symbol GetIcon(int code)
