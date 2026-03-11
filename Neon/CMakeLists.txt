@@ -7,6 +7,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Boost CONFIG REQUIRED COMPONENTS system json)
 
 find_package(nlohmann_json CONFIG REQUIRED)
+enable_testing()
+if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    link_libraries(ws2_32 mswsock)
+endif()
 
 add_subdirectory(ecm)
 add_subdirectory(ecm/engine)

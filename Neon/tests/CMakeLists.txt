@@ -9,7 +9,11 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(googletest)
+include(GoogleTest)
 
+# ==========================================
+# BIT PARSER TESTS 
+# ==========================================
 set(test_bit_parser_SOURCE
     TestBitParser.cpp
 )
@@ -30,7 +34,13 @@ target_link_libraries(BitParserTests
 
 set_target_properties(BitParserTests PROPERTIES FOLDER "tests")
 
+# Register with CTest
+gtest_discover_tests(BitParserTests)
+
+
+# ==========================================
 # CAN TESTS 
+# ==========================================
 set(test_can_SOURCE
     TestErrorMessage.cpp
     TestGearChangeMessage.cpp
@@ -54,7 +64,13 @@ target_link_libraries(CanTests
 
 set_target_properties(CanTests PROPERTIES FOLDER "tests")
 
-# Config tests
+# Register with CTest
+gtest_discover_tests(CanTests)
+
+
+# ==========================================
+# CONFIG TESTS
+# ==========================================
 set(test_config_SOURCE
     TestConfig.cpp
 )
@@ -74,3 +90,22 @@ target_link_libraries(ConfigTests
 )
 
 set_target_properties(ConfigTests PROPERTIES FOLDER "tests")
+
+# Register with CTest
+gtest_discover_tests(ConfigTests)
+
+
+# ==========================================
+# GCOV COVERAGE FLAGS
+# ==========================================
+# If coverage is enabled, apply the necessary compiler and linker flags 
+# to all test targets so they can properly interact with gcov.
+if(ENABLE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    # A list of all your test executables
+    set(ALL_TEST_TARGETS BitParserTests CanTests ConfigTests)
+    
+    foreach(TEST_TARGET IN LISTS ALL_TEST_TARGETS)
+        target_compile_options(${TEST_TARGET} PRIVATE --coverage -O0 -g)
+        target_link_options(${TEST_TARGET} PRIVATE --coverage)
+    endforeach()
+endif()

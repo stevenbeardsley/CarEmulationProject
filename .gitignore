@@ -102,3 +102,9 @@ _ReSharper*/
 /Neon/tcm/Tcm
 /Neon/dashboard/Dashboard
 /Neon/ecm/Ecm
+
+# CMake build directories
+build_coverage/
+
+# Generated coverage reports
+coverage_html/
