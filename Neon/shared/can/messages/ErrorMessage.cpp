@@ -16,19 +16,15 @@ namespace shared::can::message
         // encode: [category: u8][type: u8][string_length: varUInt][string_chars: u8...]
         m_buffer.clear();
 
-        // Reserve: 1 byte (category) + 1 byte (type) + up to 9 bytes (max VarUInt64) + string size
         m_buffer.reserve(1u + 1u + 9u + errorMessage.length());
 
         shared::bit_parser::ByteBuffer buf(m_buffer);
         shared::bit_parser::BitWriter w(buf);
 
-        // 1. Write the MessageCategory
         w.writeU8(static_cast<std::uint8_t>(category));
 
-        // 2. Write the ErrorType
         w.writeU8(static_cast<std::uint8_t>(type));
 
-        // 3. Write the string (BitWriter natively handles the VarUInt length prefix and bytes)
         w.writeString(errorMessage);
     }
 
