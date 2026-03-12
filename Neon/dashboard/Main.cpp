@@ -36,15 +36,12 @@ using tcp = net::ip::tcp;
 
 static std::atomic<bool> running(true);
 
-// Used to break a blocking accept() when SIGINT/SIGTERM hits
 static tcp::acceptor* g_acceptor = nullptr;
 
-void signalHandler(int)
+void static signalHandler(int)
 {
     LogFile::Info("Received stop signal, shutting down...");
     running = false;
-
-    // Unblock the accept() call if it's currently waiting.
     if (g_acceptor)
     {
         boost::system::error_code ec;
@@ -52,9 +49,7 @@ void signalHandler(int)
     }
 }
 
-// NOTE: These handlers run on detached threads (one per client).
-// They must not touch shared state unsafely.
-void handleCarData(websocket::stream<tcp::socket> ws, dashboard::DashboardDataSource& dataSource)
+void static handleCarData(websocket::stream<tcp::socket> ws, dashboard::DashboardDataSource& dataSource)
 {
     LogFile::Info("Client subscribed to /carData");
     try
@@ -73,7 +68,7 @@ void handleCarData(websocket::stream<tcp::socket> ws, dashboard::DashboardDataSo
     }
 }
 
-void handleCarCommands(websocket::stream<tcp::socket> ws)
+void static handleCarCommands(websocket::stream<tcp::socket> ws)
 {
     LogFile::Info("Client subscribed to /carCommands");
     try
@@ -106,7 +101,7 @@ int main()
         // === Config ===
         shared::config::Config config;
         config.LoadFromFile("config.json");
-        const auto engineConfig = config.getEngineConfig();
+        const auto& engineConfig = config.getEngineConfig();
 
         dashboard::UiData uiData{ 0, 0, 0, 0, true };
         dashboard::DashboardDataSource dataSource{ uiData };
@@ -185,7 +180,7 @@ int main()
                             break;
                         default:
                             break;
-                        }
+                        } 
                         break;
                     }
                     case shared::can::MessageCategory::Error:
@@ -202,7 +197,7 @@ int main()
             });
 
         // === Command & WebSocket Servers ===
-        net::io_context cmdIoc;
+        net::io_context cmdIoc; // tesskdfh
         dashboard::CommandHttpServer commandServer{ cmdIoc, running, 8081, canBus };
         std::thread commandThread([&]() { commandServer.Run(); });
 
@@ -212,7 +207,8 @@ int main()
 
         while (running)
         {
-            try {
+            try 
+            {
                 tcp::socket socket(wsIoc);
                 boost::system::error_code ec;
                 acceptor.accept(socket, ec);
@@ -228,18 +224,25 @@ int main()
                 const std::string target = std::string(req.target());
                 ws.accept(req);
 
-                if (target == "/carData") {
+                if (target == "/carData") 
+                {
                     std::thread(&handleCarData, std::move(ws), std::ref(dataSource)).detach();
                 }
-                else if (target == "/carCommands") {
+                else if (target == "/carCommands") 
+                {
                     std::thread(&handleCarCommands, std::move(ws)).detach();
                 }
-                else {
+                else
+                {
                     ws.close(websocket::close_code::protocol_error);
                 }
             }
-            catch (const std::exception& e) {
-                if (running) LogFile::Error("Socket error: " + std::string(e.what()));
+            catch (const std::exception& e)
+            {
+                if (running)
+                {
+                    LogFile::Error("Socket error: " + std::string(e.what()));
+                }
             }
         }
 

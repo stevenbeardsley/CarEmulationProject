@@ -8,8 +8,9 @@ namespace SimulationPlatform
         // Dictionary mapping Error Codes (int) to WinUI Symbols
         private static readonly Dictionary<int, Symbol> _iconMap = new()
         {
+            { 0, Symbol.Important },         // Engine Low Fuel
             { 1, Symbol.Important },      // Engine No Fuel
-            { 2, Symbol.Cancel },         // Engine overheating 
+            { 2, Symbol.Import },         // Engine overheating 
             { 3, Symbol.Target },         // Overheating
             { 4, Symbol.Download },        // ECU Malfunction
             { 5, Symbol.Up }            // Network/NEON Error

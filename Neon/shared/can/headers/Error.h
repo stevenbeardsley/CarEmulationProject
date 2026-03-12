@@ -13,7 +13,7 @@ namespace shared::can::headers
         EngineOverheating = 2,
         EngineStalled = 3,
         ShiftDownRecommended = 4,
-        ShiftUpReccommended = 5 // TODOl Fix spelling
+        ShiftUpReccommended = 5 // TODO Fix spelling
     };
 
 }

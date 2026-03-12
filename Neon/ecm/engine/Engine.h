@@ -34,20 +34,20 @@ namespace ecm::engine
         void setMassKg(double kg);
         void setWheelRadiusM(double meters);
 
-        std::uint32_t getSpeedMph() const;
-        std::uint32_t getRpm() const;
-        double getAccelerationMps2() const;
+        [[nodiscard]] std::uint32_t getSpeedMph() const;
+        [[nodiscard]] std::uint32_t getRpm() const;
+        [[nodiscard]] double getAccelerationMps2() const;
 
         // Temperature telemetry (delegated)
-        double getCoolantTempC() const;
-        bool isOverheating() const;
+        [[nodiscard]] double getCoolantTempC() const;
+        [[nodiscard]] bool isOverheating() const;
 
         [[nodiscard]]
         bool isStalled() const;
 
         // Fuel system 
-        double getFuelPercentage() const;
-        bool isOutOfFuel() const; // TODO: Use 
+        [[nodiscard]] double getFuelPercentage() const;
+        [[nodiscard]] bool isOutOfFuel() const; // TODO: Use 
 
     private:
         void runLoop();

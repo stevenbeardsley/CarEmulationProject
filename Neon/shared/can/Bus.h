@@ -14,13 +14,16 @@ namespace shared::can
     public:
         Bus(unsigned short bindPort, unsigned short defaultPeerPort);
 
+        void Send(const std::vector<std::uint8_t>& datagram);
+
+        [[nodiscard]]
         bool AddPeer(const std::string& host, unsigned short port);
+        
+        [[nodiscard]]
         bool AddPeer(const std::string& host);
 
-        // Send now just takes a raw byte buffer!
-        bool Send(const std::vector<std::uint8_t>& datagram);
 
-        unsigned short GetLocalPort() const;
+        [[nodiscard]] unsigned short GetLocalPort() const;
 
     private:
         boost::asio::io_context ioc_;
@@ -28,7 +31,7 @@ namespace shared::can
         udp::resolver resolver_;
 
         unsigned short bindPort_;
-        unsigned short defaultPeerPort_;
+        unsigned short m_defaultPeerPort;
 
         std::mutex peersMutex_;
         std::vector<udp::endpoint> peers_;

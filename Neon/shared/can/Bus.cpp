@@ -12,7 +12,7 @@ namespace shared::can
         , socket_(ioc_)
         , resolver_(ioc_)
         , bindPort_(bindPort)
-        , defaultPeerPort_(defaultPeerPort)
+        , m_defaultPeerPort(defaultPeerPort)
     {
         boost::system::error_code ec;
         udp::endpoint local(udp::v4(), bindPort_);
@@ -40,7 +40,7 @@ namespace shared::can
     bool Bus::AddPeer(const std::string& host, unsigned short port)
     {
         if (port == 0)
-            port = defaultPeerPort_;
+            port = m_defaultPeerPort;
 
         constexpr auto maxAttempts = 25;                    
         const auto delay = std::chrono::milliseconds(200);  
@@ -90,24 +90,23 @@ namespace shared::can
 
     bool Bus::AddPeer(const std::string& host)
     {
-        return AddPeer(host, defaultPeerPort_);
+        return AddPeer(host, m_defaultPeerPort);
     }
 
-    // UPDATE: Send now takes the packed bytes directly
-    bool Bus::Send(const std::vector<std::uint8_t>& datagram)
+    void Bus::Send(const std::vector<std::uint8_t>& datagram)
     {
         std::lock_guard<std::mutex> sendLock(sendMutex_);
 
         if (!socket_.is_open() || datagram.empty())
-            return false;
+        {
+            LogFile::Warn("Bus: Failed to send datagram, datagram is empty or socket was not open");
+        }
 
         std::vector<udp::endpoint> peersCopy;
         {
             std::lock_guard<std::mutex> lock(peersMutex_);
             peersCopy = peers_;
         }
-
-        bool allOk = true;
 
         for (const auto& ep : peersCopy)
         {
@@ -123,13 +122,11 @@ namespace shared::can
 
             if (ec || sent != datagram.size())
             {
-                allOk = false;
                 LogFile::Info("Bus: send_to failed to "
                     + ep.address().to_string() + " : "
                     + (ec ? ec.message() : "short send") + "\n");
             }
         }
-        return allOk;
     }
 
     unsigned short Bus::GetLocalPort() const

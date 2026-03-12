@@ -82,7 +82,7 @@ namespace dashboard
     UiData DashboardDataSource::Snapshot() const
     {
         std::lock_guard<std::mutex> lk(m_mtx);
-        return m_data; // copy
+        return m_data; 
     }
 
     std::string DashboardDataSource::GetDataJson() const

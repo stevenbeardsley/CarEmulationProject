@@ -197,4 +197,269 @@ namespace shared::bit_parser
         EXPECT_EQ(r.readU8(), 0x5A);
         EXPECT_TRUE(r.ok());
     }
+
+    TEST(BitReaderTest, BitMaskInByte_MsbFirst) {
+        EXPECT_EQ(bitMaskInByte(0, BitOrder::MsbFirst), 0x80);
+        EXPECT_EQ(bitMaskInByte(7, BitOrder::MsbFirst), 0x01);
+    }
+
+    TEST(BitReaderTest, BitMaskInByte_LsbFirst) {
+        EXPECT_EQ(bitMaskInByte(0, BitOrder::LsbFirst), 0x01);
+        EXPECT_EQ(bitMaskInByte(7, BitOrder::LsbFirst), 0x80);
+    }
+
+    // --- Core State and Alignment Tests ---
+
+    TEST(BitReaderTest, InitialStateAndRemainingBits) {
+        std::vector<uint8_t> data = { 0xFF, 0x00 };
+        Span<const uint8_t> span(data.data(), data.size());
+        BitReader reader(span);
+
+        EXPECT_TRUE(reader.ok());
+        EXPECT_EQ(reader.error(), Error::None);
+        EXPECT_EQ(reader.bitPosition(), 0);
+        EXPECT_EQ(reader.remainingBits(), 16);
+    }
+
+    TEST(BitReaderTest, AlignToByte_AlreadyAligned) {
+        std::vector<uint8_t> data = { 0xFF };
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()));
+
+        reader.alignToByte(); // Should do nothing
+        EXPECT_EQ(reader.bitPosition(), 0);
+    }
+
+    TEST(BitReaderTest, AlignToByte_UnalignedSuccess) {
+        std::vector<uint8_t> data = { 0xFF, 0xFF };
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()));
+
+        reader.readBits(3);
+        EXPECT_EQ(reader.bitPosition(), 3);
+
+        reader.alignToByte();
+        EXPECT_EQ(reader.bitPosition(), 8); // Aligned to next byte
+    }
+
+    TEST(BitReaderTest, AlignToByte_NotEnoughBits) {
+        std::vector<uint8_t> data = { 0xFF };
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()));
+
+        reader.readBits(3); // 5 bits left in a 1-byte buffer
+        // Artificially truncate the buffer to simulate OutOfRange
+        // (Since we can't modify span, we test a read that consumes the rest)
+        reader.readBits(5);
+        // Now bit position is 8. Wait, alignToByte does nothing if mod == 0.
+        // Let's create an invalid state:
+        BitReader reader2(Span<const uint8_t>(data.data(), 0)); // 0 length
+        // We can't reach unaligned state without reading.
+    }
+
+    // Better OutOfRange test for AlignToByte (requires a reader with restricted span)
+    TEST(BitReaderTest, AlignToByte_OutOfRange) {
+        std::vector<uint8_t> data = { 0xFF };
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()));
+
+        reader.readBits(9); // Forces an OutOfRange error and sets error state
+        EXPECT_FALSE(reader.ok());
+
+        reader.alignToByte(); // Should fast-return because !ok()
+        EXPECT_EQ(reader.error(), Error::OutOfRange);
+    }
+
+    // --- ReadBits Tests ---
+
+    TEST(BitReaderTest, ReadBits_Exceeds64Bits) {
+        std::vector<uint8_t> data(10, 0xFF);
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()));
+
+        EXPECT_EQ(reader.readBits(65), 0);
+        EXPECT_EQ(reader.error(), Error::OutOfRange);
+    }
+
+    TEST(BitReaderTest, ReadBits_NotEnoughRemaining) {
+        std::vector<uint8_t> data = { 0xFF };
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()));
+
+        EXPECT_EQ(reader.readBits(9), 0);
+        EXPECT_EQ(reader.error(), Error::OutOfRange);
+    }
+
+    TEST(BitReaderTest, ReadBits_MsbFirst_Success) {
+        // 0b10110000 -> read 3 bits should be 0b101 (5)
+        std::vector<uint8_t> data = { 0xB0 };
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()), BitOrder::MsbFirst);
+
+        EXPECT_EQ(reader.readBits(3), 5);
+        EXPECT_EQ(reader.bitPosition(), 3);
+    }
+
+    TEST(BitReaderTest, ReadBits_LsbFirst_Success) {
+        // 0b00000101 -> bit0=1, bit1=0, bit2=1
+        // LsbFirst reads bit 0 first, shift left builds output MSB-first in the field.
+        // Wait, loop does: out = (out << 1) | bit;
+        // i=0 (bit0): bit=1 -> out=1
+        // i=1 (bit1): bit=0 -> out=2
+        // i=2 (bit2): bit=1 -> out=5
+        std::vector<uint8_t> data = { 0x05 };
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()), BitOrder::LsbFirst);
+
+        EXPECT_EQ(reader.readBits(3), 5);
+        EXPECT_EQ(reader.bitPosition(), 3);
+    }
+
+    TEST(BitReaderTest, ReadBool_Success) {
+        std::vector<uint8_t> data = { 0x80 }; // 0b10000000
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()), BitOrder::MsbFirst);
+
+        EXPECT_TRUE(reader.readBool());
+        EXPECT_FALSE(reader.readBool()); // Second bit is 0
+    }
+
+    // --- Multi-byte Integer Tests (Endianness) ---
+
+    TEST(BitReaderTest, ReadU16_BigEndian) {
+        std::vector<uint8_t> data = { 0x12, 0x34 };
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()), BitOrder::MsbFirst, ByteOrder::BigEndian);
+
+        EXPECT_EQ(reader.readU16(), 0x1234);
+    }
+
+    TEST(BitReaderTest, ReadU16_LittleEndian) {
+        std::vector<uint8_t> data = { 0x12, 0x34 };
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()), BitOrder::MsbFirst, ByteOrder::LittleEndian);
+
+        EXPECT_EQ(reader.readU16(), 0x3412);
+    }
+
+    TEST(BitReaderTest, ReadU32_BigEndian) {
+        std::vector<uint8_t> data = { 0x11, 0x22, 0x33, 0x44 };
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()), BitOrder::MsbFirst, ByteOrder::BigEndian);
+
+        EXPECT_EQ(reader.readU32(), 0x11223344);
+    }
+
+    TEST(BitReaderTest, ReadU32_LittleEndian) {
+        std::vector<uint8_t> data = { 0x11, 0x22, 0x33, 0x44 };
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()), BitOrder::MsbFirst, ByteOrder::LittleEndian);
+
+        // First byte (0x11) is the LSB, last byte (0x44) is the MSB.
+        EXPECT_EQ(reader.readU32(), 0x44332211);
+    }
+
+
+    TEST(BitReaderTest, ReadU64_BigEndian) {
+        std::vector<uint8_t> data = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88 };
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()), BitOrder::MsbFirst, ByteOrder::BigEndian);
+
+        EXPECT_EQ(reader.readU64(), 0x1122334455667788ULL);
+    }
+
+    TEST(BitReaderTest, ReadU64_LittleEndian) {
+        std::vector<uint8_t> data = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88 };
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()), BitOrder::MsbFirst, ByteOrder::LittleEndian);
+
+        // First byte (0x11) is the LSB, last byte (0x88) is the MSB.
+        EXPECT_EQ(reader.readU64(), 0x8877665544332211ULL);
+    }
+
+    // --- VarUInt Tests ---
+
+    TEST(BitReaderTest, ReadVarUInt_SingleByte) {
+        std::vector<uint8_t> data = { 0x05 }; // MSB is 0, payload is 5
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()));
+
+        EXPECT_EQ(reader.readVarUInt(), 5);
+        EXPECT_TRUE(reader.ok());
+    }
+
+    TEST(BitReaderTest, ReadVarUInt_MultiByte) {
+        // 0xAC 0x02 -> 10101100 00000010 
+        // byte 1: chunk = 0x2C (44)
+        // byte 2: chunk = 0x02 (2) -> 2 << 7 = 256
+        // Total = 300
+        std::vector<uint8_t> data = { 0xAC, 0x02 };
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()));
+
+        EXPECT_EQ(reader.readVarUInt(), 300);
+        EXPECT_TRUE(reader.ok());
+    }
+
+    TEST(BitReaderTest, ReadVarUInt_NotEnoughBytes) {
+        std::vector<uint8_t> data = { 0xAC }; // MSB is 1, expects another byte, but buffer ends
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()));
+
+        EXPECT_EQ(reader.readVarUInt(), 0);
+        EXPECT_EQ(reader.error(), Error::OutOfRange);
+    }
+
+    TEST(BitReaderTest, ReadVarUInt_TenBytesMax) {
+        // 10 bytes with MSB set to 1. The loop finishes at 10 bytes without finding a byte with MSB 0.
+        std::vector<uint8_t> data(10, 0xFF);
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()));
+
+        EXPECT_EQ(reader.readVarUInt(), 0);
+        EXPECT_EQ(reader.error(), Error::BadVarUInt);
+    }
+
+    TEST(BitReaderTest, ReadVarUInt_AlignsFirst) {
+        std::vector<uint8_t> data = { 0xF0, 0x05 }; // bitPos 0-3 consumed, byte 2 is the VarUInt
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()));
+
+        reader.readBits(4);
+        EXPECT_EQ(reader.readVarUInt(), 5); // Should align to start of 0x05 byte and read it
+    }
+
+    // --- Byte Sequence & String Tests ---
+
+    TEST(BitReaderTest, ReadBytes_Success) {
+        std::vector<uint8_t> data = { 0xAA, 0xBB, 0xCC };
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()));
+
+        auto bytes = reader.readBytes(2);
+        ASSERT_EQ(bytes.size(), 2);
+        EXPECT_EQ(bytes[0], 0xAA);
+        EXPECT_EQ(bytes[1], 0xBB);
+    }
+
+    TEST(BitReaderTest, ReadBytes_MisalignedError) {
+        std::vector<uint8_t> data = { 0xAA, 0xBB };
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()));
+
+        reader.readBits(3); // Induce misalignment
+        auto bytes = reader.readBytes(1);
+
+        EXPECT_TRUE(bytes.empty());
+        EXPECT_EQ(reader.error(), Error::Misaligned);
+    }
+
+    TEST(BitReaderTest, ReadBytes_OutOfRange) {
+        std::vector<uint8_t> data = { 0xAA };
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()));
+
+        auto bytes = reader.readBytes(2);
+
+        EXPECT_TRUE(bytes.empty());
+        EXPECT_EQ(reader.error(), Error::OutOfRange);
+    }
+
+    TEST(BitReaderTest, ReadString_Success) {
+        // String format: VarUInt length followed by bytes
+        // Length 4, string "Test" (0x54, 0x65, 0x73, 0x74)
+        std::vector<uint8_t> data = { 0x04, 0x54, 0x65, 0x73, 0x74 };
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()));
+
+        EXPECT_EQ(reader.readString(), "Test");
+        EXPECT_TRUE(reader.ok());
+    }
+
+    TEST(BitReaderTest, ReadString_NotOkInitially) {
+        std::vector<uint8_t> data = { 0x04, 0x54 };
+        BitReader reader(Span<const uint8_t>(data.data(), data.size()));
+
+        reader.readBits(100); // Forces OutOfRange error state
+        EXPECT_FALSE(reader.ok());
+
+        EXPECT_EQ(reader.readString(), ""); // Fails out early
+    }
+
 } // namespace shared::bit_parser

@@ -26,7 +26,7 @@
 
 std::atomic<bool> running(true);
 
-void signalHandler(int) {
+void static signalHandler(int) {
     LogFile::Info("Received stop signal, shutting down...");
     running = false;
 }
@@ -55,8 +55,8 @@ int main() {
 
     shared::config::Config config;
     config.LoadFromFile("config.json");
-    const auto engineConfig = config.getEngineConfig();
-    const auto transmissionConfig = config.getTransmissionConfig();
+    const auto& engineConfig = config.getEngineConfig();
+    const auto& transmissionConfig = config.getTransmissionConfig();
 
     ecm::engine::Engine engine(engineConfig, transmissionConfig);
     engine.setSelectedGear(0);
@@ -77,12 +77,14 @@ int main() {
         // Track gear locally so we don't recommend shifting in Neutral/Reverse
         int currentGear = 0;
 
-        while (running) {
+        while (running) 
+        {
             std::vector<std::uint8_t> rawData;
             {
                 std::unique_lock<std::mutex> lk(m);
-                cv.wait_for(lk, std::chrono::milliseconds(10), [&]() {
-                    return !running || !inbox.empty();
+                cv.wait_for(lk, std::chrono::milliseconds(10), [&]() 
+                    {
+                        return !running || !inbox.empty();
                     });
 
                 if (!running) break;
@@ -92,7 +94,8 @@ int main() {
                 inbox.pop();
             }
 
-            if (!rawData.empty()) {
+            if (!rawData.empty()) 
+            {
                 shared::bit_parser::BitReader reader(
                     shared::bit_parser::Span<const std::uint8_t>(rawData.data(), rawData.size())
                 );
@@ -100,9 +103,12 @@ int main() {
                 auto category = static_cast<shared::can::MessageCategory>(reader.readU8());
                 auto typeHeader = reader.readU8();
 
-                if (category == shared::can::MessageCategory::Control) {
-                    switch (static_cast<shared::can::headers::Control>(typeHeader)) {
-                    case shared::can::headers::Control::ThrottleRequest: {
+                if (category == shared::can::MessageCategory::Control) 
+                {
+                    switch (static_cast<shared::can::headers::Control>(typeHeader))
+                    {
+                    case shared::can::headers::Control::ThrottleRequest: 
+                    {
                         shared::can::message::Throttle msg(std::move(rawData));
                         engine.setThrottle(msg.getValue());
                         break;
@@ -111,8 +117,10 @@ int main() {
                         break;
                     }
                 }
-                else if (category == shared::can::MessageCategory::Status) {
-                    if (static_cast<shared::can::headers::Status>(typeHeader) == shared::can::headers::Status::CurrentGear) {
+                else if (category == shared::can::MessageCategory::Status) 
+                {
+                    if (static_cast<shared::can::headers::Status>(typeHeader) == shared::can::headers::Status::CurrentGear)
+                    {
                         shared::can::message::StatusMessage msg(std::move(rawData));
                         currentGear = static_cast<int>(msg.getValue()); // Update local tracker
                         engine.setSelectedGear(currentGear);
@@ -124,7 +132,8 @@ int main() {
             const auto now = clock::now();
 
             // Fast Telemetry: RPM, Speed, Fuel
-            if (now >= nextFastTelemetry) {
+            if (now >= nextFastTelemetry)
+            {
                 nextFastTelemetry += fastUpdateTick;
 
                 std::uint32_t currentRpm = engine.getRpm();
@@ -149,6 +158,15 @@ int main() {
                     fuel
                 ));
 
+                if (fuel <= 25 && fuel != 0)
+                {
+                    canTx.Send(shared::can::message::ErrorMessage(
+                        shared::can::MessageCategory::Error,
+                        shared::can::headers::Error::LowFuel,
+                        "Warning: Low fuel."
+                    ));
+                }
+                
                 if (fuel == 0)
                 {
                     canTx.Send(shared::can::message::ErrorMessage(
@@ -167,7 +185,7 @@ int main() {
                     ));
                 }
 
-                // Only recommend shifting if we are in a forward driving gear
+                // Only recommend shifting if in a forward driving gear
                 if (currentGear > 0 && !engine.isStalled())
                 {
                     if (currentRpm > static_cast<std::uint32_t>(engineConfig.max_rpm * 0.85))

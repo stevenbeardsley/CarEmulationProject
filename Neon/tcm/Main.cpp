@@ -21,7 +21,7 @@
 
 std::atomic<bool> running(true);
 
-void signalHandler(int)
+void static signalHandler(int)
 {
     LogFile::Info("Stop signal received, shutting down...");
     running = false;
@@ -38,25 +38,22 @@ int main()
     shared::config::Config config;
     config.LoadFromFile("config.json");
 
-    const auto engineConfig = config.getEngineConfig();
-    const auto transmissionConfig = config.getTransmissionConfig();
+    const auto& engineConfig = config.getEngineConfig();
+    const auto& transmissionConfig = config.getTransmissionConfig();
 
     tcm::transmission::Transmission transmission{ engineConfig, transmissionConfig };
     LogFile::Info("Transmission is running!");
 
-    // 1. Inbox now stores raw bytes for polymorphic parsing
     std::mutex m;
     std::condition_variable cv;
     std::queue<std::vector<std::uint8_t>> inbox;
 
-    // 2. New Receiver: Injecting the shared state directly
     shared::can::Receiver canRx(running, 15000, inbox, m, cv);
 
     std::thread rxThread([&]() {
         canRx.Run();
         });
 
-    // 3. Process thread: wait -> peek -> instantiate specialized class
     std::thread processThread([&]() {
         while (running) {
             std::vector<std::uint8_t> rawData;
@@ -80,7 +77,6 @@ int main()
             auto category = static_cast<shared::can::MessageCategory>(reader.readU8());
             auto typeHeader = reader.readU8();
 
-            // TCM specifically listens for CONTROL category Gear requests
             if (category == shared::can::MessageCategory::Control) {
                 switch (static_cast<shared::can::headers::Control>(typeHeader)) {
                 case shared::can::headers::Control::GearUpRequest:
@@ -98,14 +94,12 @@ int main()
         }
         });
 
-    // 4. Current gear broadcast thread using updated Bus and StatusMessage
     shared::can::Bus canBus(0, 15000);
     canBus.AddPeer("ecm", 15000);
     canBus.AddPeer("dashboard", 15000);
 
     std::thread gearPublishThread([&]() {
         while (running) {
-            // Instantiate StatusMessage - Implicit conversion handles the rest
             shared::can::message::StatusMessage msg{
                 shared::can::MessageCategory::Status,
                 shared::can::headers::Status::CurrentGear,

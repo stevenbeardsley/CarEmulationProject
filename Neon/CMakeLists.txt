@@ -12,7 +12,14 @@ if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     link_libraries(ws2_32 mswsock)
 endif()
 
-add_subdirectory(ecm)
+find_program(CLANG_TIDY_EXE NAMES "clang-tidy")
+if(CLANG_TIDY_EXE)
+    set(CMAKE_CXX_CLANG_TIDY 
+        "${CLANG_TIDY_EXE};--quiet;--header-filter=^${CMAKE_SOURCE_DIR}/.*;--checks=bugprone-*,modernize-*,performance-*"
+    )
+endif()
+
+add_subdirectory(ecm) 
 add_subdirectory(ecm/engine)
 add_subdirectory(tcm)
 add_subdirectory(tcm/transmission)

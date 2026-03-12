@@ -107,7 +107,6 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
     
     // Extract JSON values 
     auto [command, value] = ParseSingleCommandJson(body);
-    auto messageSent = false;
     switch (command)
     {
         case Command::GearUp:
@@ -118,7 +117,7 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
                 shared::can::MessageCategory::Control,
                 shared::can::headers::Control::GearUpRequest
             };
-            messageSent = m_bus.Send(msg);
+            m_bus.Send(msg);
             break;
         }
         case Command::GearDown:
@@ -129,7 +128,7 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
                 shared::can::MessageCategory::Control,
                 shared::can::headers::Control::GearDownRequest
             };
-            messageSent = m_bus.Send(msg);
+            m_bus.Send(msg);
             break;
         }
         case Command::Throttle:
@@ -141,7 +140,7 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
                 shared::can::headers::Control::ThrottleRequest,
                 static_cast<std::uint32_t>(value)
             };
-            messageSent = m_bus.Send(msg);
+            m_bus.Send(msg);
             break;
         }
         default:
@@ -151,14 +150,6 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
         }
     }
     
-    if (messageSent)
-    {
-        LogFile::Info("CommandHttpServer: CAN message sent.");
-    }
-    else
-    {
-        LogFile::Error("CommandHttpServer: CAN message failed to send.");
-    }
 
     http::response<http::string_body> res{ http::status::ok, req.version() };
     res.set(http::field::content_type, "application/json");
