@@ -367,7 +367,6 @@
                         <Button x:Name="RefuelBtn" Content="Refuel" Click="Refuel_Click" Width="100"/>
                         <Button x:Name="RedeployBtn" Content="Redeploy" Click="Redeploy_Click" Width="100"/>
                         <Button x:Name="IgnitionBtn" Content="Ignition" Click="Ignition_Click" Width="100"/>
-                        <Button x:Name="ResetBtn" Content="Reset Track" Click="Reset_Click" Width="100"/>
                     </StackPanel>
                 </Grid>
             </Border>

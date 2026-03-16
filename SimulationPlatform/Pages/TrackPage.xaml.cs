@@ -227,18 +227,14 @@ namespace SimulationPlatform.Pages
 
         private void Redeploy_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Implement redeploy logic (e.g., spawn the vehicle at the starting line)
+            // TODO: Run clean script then run deploy script
         }
 
         private void Ignition_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Implement ignition logic (e.g., toggle engine state, enable throttle)
+            // TODO: Maybe implement, could just make this an undeploy 
         }
 
-        private void Reset_Click(object sender, RoutedEventArgs e)
-        {
-            // TODO: Implement track reset logic (e.g., clear telemetry, reset timers)
-        }
 
         private void UpdateCarData(CarData carData)
         {
@@ -268,9 +264,9 @@ namespace SimulationPlatform.Pages
         private void UpdateErrorList(Dictionary<int, string> latestErrors)
         {
             // 1. Remove stale errors
-            for (int i = ActiveErrors.Count - 1; i >= 0; i--)
+            for (var i = ActiveErrors.Count - 1; i >= 0; i--)
             {
-                if (int.TryParse(ActiveErrors[i].Code, out int existingCode))
+                if (int.TryParse(ActiveErrors[i].Code, out var existingCode))
                 {
                     if (!latestErrors.ContainsKey(existingCode))
                     {
@@ -321,7 +317,9 @@ namespace SimulationPlatform.Pages
         private void AccelerationSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
             if (Math.Abs(Acceleration - e.NewValue) > 0.001)
+            {
                 Acceleration = e.NewValue;
+            }
         }
 
         private void AccelerationSlider_PointerReleased(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
