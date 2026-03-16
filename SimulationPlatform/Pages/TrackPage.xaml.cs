@@ -77,6 +77,36 @@ namespace SimulationPlatform.Pages
 
         public string AccelerationText => $"{Acceleration:0}%";
 
+        private double _brake;
+        public double Brake
+        {
+            get => _brake;
+            set
+            {
+                if (Math.Abs(_brake - value) > 0.001)
+                {
+                    _brake = value;
+                    OnPropertyChanged(nameof(Brake));
+
+                    BrakeText = $"{Math.Round(value)}%";
+                }
+            }
+        }
+
+        private string _brakeText = "0%";
+        public string BrakeText
+        {
+            get => _brakeText;
+            set
+            {
+                if (_brakeText != value)
+                {
+                    _brakeText = value;
+                    OnPropertyChanged(nameof(BrakeText));
+                }
+            }
+        }
+
         public bool m_downShiftEnabled => m_gear != 0;
 
         public bool m_upShiftEnabled
@@ -312,6 +342,26 @@ namespace SimulationPlatform.Pages
             {
                 System.Diagnostics.Debug.WriteLine(ex.Message);
             }
+        }
+        private void BrakeSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+        {
+            if (Math.Abs(Brake - e.NewValue) > 0.001)
+            {
+                Brake = e.NewValue;
+            }
+        }
+
+        private void BrakeSlider_PointerReleased(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+            => brakeSelected();
+
+        private void BrakeSlider_PointerCaptureLost(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+            => brakeSelected();
+
+        // Assuming you'll add a method like this to handle the final selection, 
+        // similar to your accelerationSelected() method:
+        private void brakeSelected()
+        {
+            // Logic to send the final brake value to your simulation engine
         }
 
         private void AccelerationSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)

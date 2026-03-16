@@ -26,7 +26,6 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
         <StackPanel Grid.Row="0" Grid.Column="0" Margin="20,0,0,0">
             <TextBlock Text="Track Page"
                        FontSize="32"
@@ -36,14 +35,12 @@
                        Foreground="DarkGray"/>
         </StackPanel>
 
-        <!-- Left column: track view + controls -->
         <Grid Grid.Row="1" Grid.Column="0" Margin="20,10,20,20" MaxHeight="700">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Track / Map area -->
             <Border Grid.Row="0"
                     CornerRadius="12"
                     BorderThickness="1"
@@ -57,21 +54,18 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Simple 2D road "map" placeholder -->
                     <Grid Grid.Column="0">
                         <Border CornerRadius="12"
                                 Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
                                 BorderThickness="1"
                                 BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}">
                             <Grid>
-                                <!-- "Road" -->
                                 <Border Margin="40"
                                         CornerRadius="18"
                                         Background="#FF2B2B2B">
 
                                     <Grid x:Name="LaneViewport">
 
-                                        <!-- This container moves. It holds two identical copies -->
                                         <Grid x:Name="LaneScrollContent" VerticalAlignment="Top">
                                             <Grid.RenderTransform>
                                                 <TranslateTransform x:Name="LaneMarkersTransform" Y="0"/>
@@ -82,7 +76,6 @@
                                                 <RowDefinition Height="Auto"/>
                                             </Grid.RowDefinitions>
 
-                                            <!-- Copy A -->
                                             <StackPanel Grid.Row="0"
                                                         Orientation="Vertical"
                                                         HorizontalAlignment="Center"
@@ -102,7 +95,6 @@
                                                 <Rectangle Width="6" Height="28" Fill="#66FFFFFF" RadiusX="2" RadiusY="2"/>
                                             </StackPanel>
 
-                                            <!-- Copy B (identical) -->
                                             <StackPanel Grid.Row="1"
                                                         Orientation="Vertical"
                                                         HorizontalAlignment="Center"
@@ -126,13 +118,11 @@
                                     </Grid>
                                 </Border>
 
-                                <!-- Top-down car placeholder TODO: Make colour configurable -->
                                 <Grid Width="60"
                                       Height="110"
                                       HorizontalAlignment="Center"
                                       VerticalAlignment="Center">
 
-                                    <!-- Shadow -->
                                     <Border Width="52"
                                             Height="100"
                                             CornerRadius="14"
@@ -141,7 +131,6 @@
                                             VerticalAlignment="Center"
                                             Margin="2,4,0,0"/>
 
-                                    <!-- Car body -->
                                     <Border Width="52"
                                             Height="100"
                                             CornerRadius="14"
@@ -152,7 +141,6 @@
                                             VerticalAlignment="Center">
 
                                         <Grid>
-                                            <!-- Wheels -->
                                             <Rectangle Width="8" Height="20"
                                                        Fill="#FF1E1E1E"
                                                        RadiusX="3" RadiusY="3"
@@ -179,7 +167,6 @@
                                                        VerticalAlignment="Bottom"
                                                        Margin="0,0,-4,14"/>
 
-                                            <!-- Cabin -->
                                             <Border Width="36"
                                                     Height="44"
                                                     CornerRadius="10"
@@ -188,7 +175,6 @@
                                                     VerticalAlignment="Center"
                                                     Margin="0,-6,0,0"/>
 
-                                            <!-- Windscreen -->
                                             <Rectangle Width="26"
                                                        Height="12"
                                                        Fill="#66FFFFFF"
@@ -197,7 +183,6 @@
                                                        VerticalAlignment="Top"
                                                        Margin="0,18,0,0"/>
 
-                                            <!-- Rear window -->
                                             <Rectangle Width="22"
                                                        Height="10"
                                                        Fill="#44FFFFFF"
@@ -206,7 +191,6 @@
                                                        VerticalAlignment="Bottom"
                                                        Margin="0,0,0,20"/>
 
-                                            <!-- Hood detail -->
                                             <Rectangle Width="6"
                                                        Height="18"
                                                        Fill="#33FFFFFF"
@@ -227,52 +211,97 @@
                                    VerticalAlignment="Top"/>
                     </Grid>
 
-                    <!-- Right-side controls within the track panel -->
                     <StackPanel Grid.Column="1"
                                 Margin="16,0,0,0"
                                 Width="180"
                                 Spacing="14">
 
-                        <!-- Acceleration slider -->
                         <Border CornerRadius="12"
                                 BorderThickness="1"
                                 BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
                                 Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
                                 Padding="12">
                             <StackPanel Spacing="10">
-                                <TextBlock Text="Acceleration"
+                                <TextBlock Text="Pedals"
                                            FontWeight="SemiBold"/>
-                                <Grid>
+
+                                <Grid ColumnSpacing="10">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock Text="100%"
-                                               Foreground="DarkGray"
-                                               HorizontalAlignment="Left"
-                                               VerticalAlignment="Top"/>
+                                    <StackPanel Grid.Column="0" Spacing="5" HorizontalAlignment="Center">
+                                        <TextBlock Text="Throttle" 
+                                                   FontWeight="SemiBold" 
+                                                   FontSize="12" 
+                                                   Foreground="DarkGray"
+                                                   HorizontalAlignment="Center"/>
 
-                                    <TextBlock Grid.Column="0"
-                                               Text="0%"
-                                               Foreground="DarkGray"
-                                               VerticalAlignment="Bottom"
-                                               Margin="0,0,10,0"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
 
-                                    <Slider x:Name="AccelerationSlider"
-                                            Grid.Column="1"
-                                            Minimum="0"
-                                            Maximum="100"
-                                            Value="{x:Bind Acceleration, Mode=TwoWay}"
-                                            ValueChanged="AccelerationSlider_ValueChanged"
-                                            Orientation="Vertical"
-                                            Height="220"
-                                            VerticalAlignment="Center"/>
+                                            <TextBlock Text="100%" Foreground="DarkGray" FontSize="10" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                            <TextBlock Grid.Column="0" Text="0%" Foreground="DarkGray" FontSize="10" VerticalAlignment="Bottom" Margin="0,0,5,0"/>
+
+                                            <Slider x:Name="AccelerationSlider"
+                                                    Grid.Column="1"
+                                                    Minimum="0" Maximum="100"
+                                                    Value="{x:Bind Acceleration, Mode=TwoWay}"
+                                                    ValueChanged="AccelerationSlider_ValueChanged"
+                                                    PointerReleased="AccelerationSlider_PointerReleased"
+                                                    PointerCaptureLost="AccelerationSlider_PointerCaptureLost"
+                                                    Orientation="Vertical"
+                                                    Height="200"
+                                                    VerticalAlignment="Center"/>
+                                        </Grid>
+
+                                        <TextBlock Text="{x:Bind AccelerationText, Mode=OneWay}"
+                                                   FontSize="18"
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" Spacing="5" HorizontalAlignment="Center">
+                                        <TextBlock Text="Brake" 
+                                                   FontWeight="SemiBold" 
+                                                   FontSize="12" 
+                                                   Foreground="DarkGray"
+                                                   HorizontalAlignment="Center"/>
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Text="100%" Foreground="DarkGray" FontSize="10" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                            <TextBlock Grid.Column="0" Text="0%" Foreground="DarkGray" FontSize="10" VerticalAlignment="Bottom" Margin="0,0,5,0"/>
+
+                                            <Slider x:Name="BrakeSlider"
+                                                    Grid.Column="1"
+                                                    Minimum="0" Maximum="100"
+                                                    Value="{x:Bind Brake, Mode=TwoWay}"
+                                                    ValueChanged="BrakeSlider_ValueChanged"
+                                                    PointerReleased="BrakeSlider_PointerReleased"
+                                                    PointerCaptureLost="BrakeSlider_PointerCaptureLost"
+                                                    Orientation="Vertical"
+                                                    Height="200"
+                                                    VerticalAlignment="Center"/>
+                                        </Grid>
+
+                                        <TextBlock Text="{x:Bind BrakeText, Mode=OneWay}"
+                                                   FontSize="18"
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
                                 </Grid>
                             </StackPanel>
                         </Border>
 
-                        <!-- Gear controls -->
                         <Border CornerRadius="12"
                                 BorderThickness="1"
                                 BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
@@ -312,26 +341,7 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- Throttle -->
-                        <Border Grid.Row="3" Grid.Column="0"
-                                CornerRadius="12"
-                                Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
-                                BorderThickness="1"
-                                Height="80"
-                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
-                                Padding="14">
-                            <StackPanel>
-                                <TextBlock Text="Throttle"
-                                           FontWeight="SemiBold"/>
-                                <TextBlock Text="{x:Bind AccelerationText, Mode=OneWay}"
-                                           FontSize="28"
-                                           FontWeight="Bold"/>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- Temp -->
-                        <Border Grid.Row="3" Grid.Column="1"
-                                CornerRadius="12"
+                        <Border CornerRadius="12"
                                 Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
                                 BorderThickness="1"
                                 Height="80"
@@ -349,7 +359,6 @@
                 </Grid>
             </Border>
 
-            <!-- Bottom hint/status bar -->
             <Border Grid.Row="1"
                     Margin="0,12,0,0"
                     CornerRadius="10"
@@ -372,7 +381,6 @@
             </Border>
         </Grid>
 
-        <!-- Right column: dashboard -->
         <Grid Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Margin="0,20,20,20">
             <Border CornerRadius="12"
                     BorderThickness="1"
@@ -397,7 +405,6 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Speed -->
                         <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
                                 CornerRadius="12"
                                 Background="{ThemeResource SystemControlBackgroundAltMediumBrush}"
@@ -413,7 +420,6 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- RPM (DIAL) -->
                         <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
                                 Height="160"
                                 CornerRadius="12"
@@ -425,51 +431,45 @@
                                 <TextBlock Text="RPM" Foreground="DarkGray" FontWeight="SemiBold"/>
 
                                 <Grid Width="190" Height="155" HorizontalAlignment="Center">
-                                    <!-- Track arc (fixed) -->
                                     <Path x:Name="RpmTrackPath"
                                       StrokeThickness="12"
                                       StrokeStartLineCap="Round"
                                       StrokeEndLineCap="Round"
                                       Stroke="{ThemeResource SystemControlForegroundBaseLowBrush}"/>
 
-                                    <!-- Redline arc (fixed, last part of sweep) -->
                                     <Path x:Name="RpmRedlinePath"
                                       StrokeThickness="12"
                                       StrokeStartLineCap="Round"
                                       StrokeEndLineCap="Round"
                                       Stroke="OrangeRed"/>
 
-                            <!-- Needle -->
-                            <Grid Width="190" Height="155">
-                                <Grid.RenderTransform>
-                                    <RotateTransform x:Name="RpmNeedleRotate"
+                                    <Grid Width="190" Height="155">
+                                        <Grid.RenderTransform>
+                                            <RotateTransform x:Name="RpmNeedleRotate"
                                                      Angle="0"
                                                      CenterX="95"
                                                      CenterY="78"/>
-                                </Grid.RenderTransform>
+                                        </Grid.RenderTransform>
 
-                                         <!-- Needle line-->
                                         <Line X1="95" Y1="78" X2="25" Y2="78"
                                               Stroke="White"
                                               StrokeThickness="3"
                                               StrokeStartLineCap="Round"
                                               StrokeEndLineCap="Round"/>
 
-                                        <!-- Hub: explicitly positioned at the center -->
-                                            <Ellipse Width="12" Height="12"
+                                        <Ellipse Width="12" Height="12"
                                                      Fill="White"
                                                      HorizontalAlignment="Left"
                                                      VerticalAlignment="Top"
                                                      Margin="89,72,0,0"/>
-                                        </Grid>
+                                    </Grid>
 
-                                    <!-- Center readout -->
                                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="0" Margin="0,0,0,0">
                                         <TextBlock Text="{x:Bind Rpm, Mode=OneWay}"
                                            FontSize="22"
                                            FontWeight="Bold"
                                            HorizontalAlignment="Center"/>
-                                                                <TextBlock Text="rpm"
+                                        <TextBlock Text="rpm"
                                            Foreground="DarkGray"
                                            FontSize="12"
                                            HorizontalAlignment="Center"/>
@@ -532,10 +532,6 @@
                             </StackPanel>
                         </Border>
 
-
-
-
-                        <!-- Warnings & Alerts -->
                         <Border Grid.Row="4"
                             Grid.ColumnSpan="2"
                             CornerRadius="12"
