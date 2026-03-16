@@ -37,7 +37,7 @@ static tcp::acceptor* g_acceptor = nullptr;
 
 void static signalHandler(int)
 {
-    LogFile::Info("Received stop signal, shutting down...");
+    LogFile::info("Received stop signal, shutting down...");
     running = false;
     if (g_acceptor)
     {
@@ -48,7 +48,7 @@ void static signalHandler(int)
 
 void static handleCarData(websocket::stream<tcp::socket> ws, dashboard::DashboardDataSource& dataSource)
 {
-    LogFile::Info("Client subscribed to /carData");
+    LogFile::info("Client subscribed to /carData");
     try
     {
         while (running)
@@ -61,13 +61,13 @@ void static handleCarData(websocket::stream<tcp::socket> ws, dashboard::Dashboar
     }
     catch (const std::exception& e)
     {
-        LogFile::Error("Error in /carData connection: " + std::string(e.what()));
+        LogFile::error("Error in /carData connection: " + std::string(e.what()));
     }
 }
 
 void static handleCarCommands(websocket::stream<tcp::socket> ws)
 {
-    LogFile::Info("Client subscribed to /carCommands");
+    LogFile::info("Client subscribed to /carCommands");
     try
     {
         beast::flat_buffer buffer;
@@ -75,13 +75,13 @@ void static handleCarCommands(websocket::stream<tcp::socket> ws)
         {
             ws.read(buffer);
             std::string message = beast::buffers_to_string(buffer.data());
-            LogFile::Info("Received command: " + message);
+            LogFile::info("Received command: " + message);
             buffer.consume(buffer.size());
         }
     }
     catch (const std::exception& e)
     {
-        LogFile::Error("Error in /carCommands connection: " + std::string(e.what()));
+        LogFile::error("Error in /carCommands connection: " + std::string(e.what()));
     }
 }
 
@@ -90,8 +90,8 @@ int main()
     try
     {
         // === Logging & Signals ===
-        LogFile::Instance().setLogFile("dashboard.log");
-        LogFile::Instance().setLevel(LogLevel::DEBUG);
+        LogFile::instance().setLogFile("dashboard.log");
+        LogFile::instance().setLevel(LogLevel::DEBUG);
         std::signal(SIGINT, signalHandler);
         std::signal(SIGTERM, signalHandler);
 
@@ -184,7 +184,7 @@ int main()
                     {
                         shared::can::message::ErrorMessage msg(std::move(rawData));
                         dataSource.addError(msg.getErrorType(), msg.getErrorMessage());
-                        LogFile::Warn("Error received: " + msg.getErrorMessage()); // TODO: Clear all errors every tick
+                        LogFile::warn("Error received: " + msg.getErrorMessage()); // TODO: Clear all errors every tick
                         break;
                     }
                     default:
@@ -238,13 +238,13 @@ int main()
             {
                 if (running)
                 {
-                    LogFile::Error("Socket error: " + std::string(e.what()));
+                    LogFile::error("Socket error: " + std::string(e.what()));
                 }
             }
         }
 
         // === Shutdown ===
-        LogFile::Info("Shutting down...");
+        LogFile::info("Shutting down...");
         canRx.Stop(); // Ensure the receiver socket closes
         inboxCv.notify_all();
 

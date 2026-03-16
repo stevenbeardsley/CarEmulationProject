@@ -15,7 +15,7 @@ enum class Command
 };
 
 
-static Command toCommand(std::string command)
+static Command toCommand(const std::string& command)
 {
     auto commandType = Command::Unknown;
     if (command == "gear_up")

@@ -27,7 +27,7 @@
 std::atomic<bool> running(true);
 
 void static signalHandler(int) {
-    LogFile::Info("Received stop signal, shutting down...");
+    LogFile::info("Received stop signal, shutting down...");
     running = false;
 }
 
@@ -39,9 +39,9 @@ int main() {
     std::signal(SIGINT, signalHandler);
     std::signal(SIGTERM, signalHandler);
 
-    LogFile::Instance().setLogFile("ecm.log");
-    LogFile::Instance().setLevel(LogLevel::DEBUG);
-    LogFile::Info("ECM starting...");
+    LogFile::instance().setLogFile("ecm.log");
+    LogFile::instance().setLevel(LogLevel::DEBUG);
+    LogFile::info("ECM starting...");
 
     std::mutex m;
     std::condition_variable cv;
@@ -237,6 +237,6 @@ int main() {
 
     if (rxThread.joinable()) rxThread.join();
 
-    LogFile::Info("All threads stopped cleanly.");
+    LogFile::info("All threads stopped cleanly.");
     return 0;
 }

@@ -68,14 +68,14 @@ namespace shared::can
                         peers_.push_back(endpoint);
                 }
 
-                LogFile::Info("CAN BUS: Added peer: " + host + " -> "
+                LogFile::info("CAN BUS: Added peer: " + host + " -> "
                     + endpoint.address().to_string() + ":" + std::to_string(endpoint.port()));
                 return true;
             }
 
             if (attempt == 1 || attempt == maxAttempts)
             {
-                LogFile::Warn("CAN BUS: AddPeer resolve failed for " + host + ":"
+                LogFile::warn("CAN BUS: AddPeer resolve failed for " + host + ":"
                     + std::to_string(port) + " (attempt "
                     + std::to_string(attempt) + "/" + std::to_string(maxAttempts)
                     + ") : " + ec.message());
@@ -98,7 +98,7 @@ namespace shared::can
 
         if (!socket_.is_open() || datagram.empty())
         {
-            LogFile::Warn("Bus: Failed to send datagram, datagram is empty or socket was not open");
+            LogFile::warn("Bus: Failed to send datagram, datagram is empty or socket was not open");
         }
 
         std::vector<udp::endpoint> peersCopy;
@@ -109,7 +109,7 @@ namespace shared::can
 
         for (const auto& ep : peersCopy)
         {
-            LogFile::Info("Sending datagram to: " + ep.address().to_string());
+            LogFile::info("Sending datagram to: " + ep.address().to_string());
             boost::system::error_code ec;
 
             const std::size_t sent = socket_.send_to(
@@ -121,7 +121,7 @@ namespace shared::can
 
             if (ec || sent != datagram.size())
             {
-                LogFile::Info("Bus: send_to failed to "
+                LogFile::info("Bus: send_to failed to "
                     + ep.address().to_string() + " : "
                     + (ec ? ec.message() : "short send") + "\n");
             }

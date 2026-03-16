@@ -18,7 +18,7 @@ CommandHttpServer::CommandHttpServer(net::io_context& ioc,
     , m_running(runningFlag)
     , m_bus(bus)
 {
-    LogFile::Info("CommandHttpServer listening on port " + std::to_string(listenPort));
+    LogFile::info("CommandHttpServer listening on port " + std::to_string(listenPort));
 }
 
 void CommandHttpServer::SetCommandHandler(CommandHandler handler)
@@ -28,16 +28,16 @@ void CommandHttpServer::SetCommandHandler(CommandHandler handler)
 
 void CommandHttpServer::Run()
 {
-    LogFile::Info("CommandHttpServer accepting connections...");
+    LogFile::info("CommandHttpServer accepting connections...");
     while (m_running)
     {
         try { AcceptOne(); }
         catch (const std::exception& e)
         {
-            LogFile::Error(std::string("HTTP accept loop error: ") + e.what());
+            LogFile::error(std::string("HTTP accept loop error: ") + e.what());
         }
     }
-    LogFile::Info("CommandHttpServer exiting.");
+    LogFile::info("CommandHttpServer exiting.");
 }
 
 void CommandHttpServer::AcceptOne()
@@ -68,7 +68,7 @@ void CommandHttpServer::HandleSession(tcp::socket socket)
     }
     catch (const std::exception& e)
     {
-        LogFile::Error(std::string("HTTP session error: ") + e.what());
+        LogFile::error(std::string("HTTP session error: ") + e.what());
     }
 }
 
@@ -103,7 +103,7 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
         return notFound();
 
     const std::string& body = req.body();
-    LogFile::Info("Message body: " + body);
+    LogFile::info("Message body: " + body);
     
     // Extract JSON values 
     auto [command, value] = ParseSingleCommandJson(body);
@@ -111,7 +111,7 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
     {
         case Command::GearUp:
         {
-            LogFile::Info("Gear up request received.");
+            LogFile::info("Gear up request received.");
             shared::can::message::GearChange msg
             {
                 shared::can::MessageCategory::Control,
@@ -122,7 +122,7 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
         }
         case Command::GearDown:
         {
-            LogFile::Info("Gear down request received.");
+            LogFile::info("Gear down request received.");
             shared::can::message::GearChange msg
             {
                 shared::can::MessageCategory::Control,
@@ -133,7 +133,7 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
         }
         case Command::Throttle:
         {
-            LogFile::Info("Throttle change received.");
+            LogFile::info("Throttle change received.");
             shared::can::message::Throttle msg
             {
                 shared::can::MessageCategory::Control,
@@ -145,7 +145,7 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
         }
         default:
         {
-            LogFile::Info("Unknown command type received.");
+            LogFile::info("Unknown command type received.");
             break;
         }
     }

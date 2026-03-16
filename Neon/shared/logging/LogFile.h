@@ -7,12 +7,8 @@
 #undef WARNING
 #endif
 #include <string>
-#include <iostream>
 #include <fstream>
-#include <sstream>
-#include <iomanip>
 #include <chrono>
-#include <ctime>
 #include <mutex>
 
 enum class LogLevel 
@@ -26,24 +22,24 @@ enum class LogLevel
 class LogFile 
 {
 public:
-    static LogFile& Instance();
+    static LogFile& instance();
 
     void setLogFile(const std::string& filename);
     void setLevel(LogLevel level);
 
-    void log(LogLevel level, const std::string& message);
+    void log(LogLevel level, const std::string& message) const;
 
-    static void Debug(const std::string& msg);
-    static void Info(const std::string& msg);
-    static void Warn(const std::string& msg);
-    static void Error(const std::string& msg);
+    static void debug(const std::string& msg);
+    static void info(const std::string& msg);
+    static void warn(const std::string& msg);
+    static void error(const std::string& msg);
 
 private:
     LogFile();
     ~LogFile();
 
-    std::string timestamp() const;
-    std::string levelToString(LogLevel level) const;
+    static std::string timestamp();
+    static std::string levelToString(LogLevel level);
 
     std::ofstream ofs_;
     LogLevel level_;

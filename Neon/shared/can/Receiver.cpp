@@ -24,18 +24,18 @@ namespace shared::can
         socket_.open(udp::v4(), ec);
         if (ec)
         {
-            LogFile::Error("CAN Receiver: socket.open failed: " + ec.message());
+            LogFile::error("CAN Receiver: socket.open failed: " + ec.message());
             return;
         }
 
         socket_.bind(udp::endpoint(udp::v4(), listenPort), ec);
         if (ec)
         {
-            LogFile::Error("CAN Receiver: socket.bind failed: " + ec.message());
+            LogFile::error("CAN Receiver: socket.bind failed: " + ec.message());
             return;
         }
 
-        LogFile::Info("CAN Receiver listening on UDP port " + std::to_string(listenPort));
+        LogFile::info("CAN Receiver listening on UDP port " + std::to_string(listenPort));
     }
 
     void Receiver::Stop()
@@ -63,11 +63,11 @@ namespace shared::can
 
     void Receiver::Run()
     {
-        LogFile::Info("CAN Receiver thread started");
+        LogFile::info("CAN Receiver thread started");
 
         if (!socket_.is_open())
         {
-            LogFile::Error("CAN Receiver: socket not open, exiting Run()");
+            LogFile::error("CAN Receiver: socket not open, exiting Run()");
             return;
         }
 
@@ -90,13 +90,13 @@ namespace shared::can
 
             if (ec)
             {
-                LogFile::Error("CAN Receiver: receive_from failed: " + ec.message());
+                LogFile::error("CAN Receiver: receive_from failed: " + ec.message());
                 continue;
             }
 
             handleDatagram(buf.data(), n, sender);
         }
 
-        LogFile::Info("CAN Receiver stopped.");
+        LogFile::info("CAN Receiver stopped.");
     }
 }

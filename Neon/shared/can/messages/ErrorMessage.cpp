@@ -18,8 +18,8 @@ namespace shared::can::message
 
         m_buffer.reserve(1u + 1u + 9u + errorMessage.length());
 
-        shared::bit_parser::ByteBuffer buf(m_buffer);
-        shared::bit_parser::BitWriter w(buf);
+        bit_parser::ByteBuffer buf(m_buffer);
+        bit_parser::BitWriter w(buf);
 
         w.writeU8(static_cast<std::uint8_t>(category));
 
@@ -30,8 +30,8 @@ namespace shared::can::message
 
     MessageCategory ErrorMessage::getCategory() const
     {
-        shared::bit_parser::BitReader r(
-            shared::bit_parser::Span<const std::uint8_t>(m_buffer.data(), m_buffer.size())
+        bit_parser::BitReader r(
+            bit_parser::Span<const std::uint8_t>(m_buffer.data(), m_buffer.size())
         );
 
         return static_cast<MessageCategory>(r.readU8());
@@ -39,8 +39,8 @@ namespace shared::can::message
 
     headers::Error ErrorMessage::getErrorType() const
     {
-        shared::bit_parser::BitReader r(
-            shared::bit_parser::Span<const std::uint8_t>(m_buffer.data(), m_buffer.size())
+        bit_parser::BitReader r(
+            bit_parser::Span<const std::uint8_t>(m_buffer.data(), m_buffer.size())
         );
 
         (void)r.readU8(); // Skip MessageCategory
@@ -50,8 +50,8 @@ namespace shared::can::message
 
     std::string ErrorMessage::getErrorMessage() const
     {
-        shared::bit_parser::BitReader r(
-            shared::bit_parser::Span<const std::uint8_t>(m_buffer.data(), m_buffer.size())
+        bit_parser::BitReader r(
+            bit_parser::Span<const std::uint8_t>(m_buffer.data(), m_buffer.size())
         );
 
         (void)r.readU8(); // Skip MessageCategory

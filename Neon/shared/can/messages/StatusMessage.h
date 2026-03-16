@@ -16,11 +16,11 @@ namespace shared::can::message
         StatusMessage(MessageCategory category, headers::Status type, std::uint32_t value);
         explicit StatusMessage(std::vector<std::uint8_t> existingBuffer);
 
-        MessageCategory getCategory() const;
-        headers::Status getType() const;
-        std::uint32_t getValue() const;
+        [[nodiscard]] MessageCategory getCategory() const;
+        [[nodiscard]] headers::Status getType() const;
+        [[nodiscard]] std::uint32_t getValue() const;
 
-        const std::vector<std::uint8_t>& getRawBuffer() const { return m_buffer; }
+        [[nodiscard]] const std::vector<std::uint8_t>& getRawBuffer() const { return m_buffer; }
     };
 
 }

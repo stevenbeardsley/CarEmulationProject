@@ -1,6 +1,10 @@
 #include "LogFile.h"
 
-LogFile& LogFile::Instance()
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+
+LogFile& LogFile::instance()
 {
     static LogFile instance;
     return instance;
@@ -23,12 +27,12 @@ void LogFile::setLogFile(const std::string& filename)
         std::cerr << "SimpleLogFile: Failed to open log file: " << filename << std::endl;
 }
 
-void LogFile::setLevel(LogLevel level)
+void LogFile::setLevel(const LogLevel level)
 {
     level_ = level;
 }
 
-void LogFile::log(LogLevel level, const std::string& message)
+void LogFile::log(const LogLevel level, const std::string& message) const
 {
     if (level < level_)
         return;
@@ -37,7 +41,7 @@ void LogFile::log(LogLevel level, const std::string& message)
     oss << timestamp() << " [" << levelToString(level) << "] " << message << "\n";
     const std::string line = oss.str();
 
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::scoped_lock lock(mutex_);
 
     // 1) Docker logs path (stdout/stderr)
     // Use stderr for errors, stdout otherwise.
@@ -53,25 +57,25 @@ void LogFile::log(LogLevel level, const std::string& message)
     }
 }
 
-void LogFile::Debug(const std::string& msg) { Instance().log(LogLevel::DEBUG, msg); }
-void LogFile::Info(const std::string& msg) { Instance().log(LogLevel::INFO, msg); }
-void LogFile::Warn(const std::string& msg) { Instance().log(LogLevel::WARNING, msg); }
-void LogFile::Error(const std::string& msg) { Instance().log(LogLevel::ERROR, msg); }
+void LogFile::debug(const std::string& msg) { instance().log(LogLevel::DEBUG, msg); }
+void LogFile::info(const std::string& msg) { instance().log(LogLevel::INFO, msg); }
+void LogFile::warn(const std::string& msg) { instance().log(LogLevel::WARNING, msg); }
+void LogFile::error(const std::string& msg) { instance().log(LogLevel::ERROR, msg); }
 
-std::string LogFile::timestamp() const 
+std::string LogFile::timestamp()
 {
     const auto now = std::chrono::system_clock::now();
-    const auto in_time_t = std::chrono::system_clock::to_time_t(now);
+    const auto inTimeT = std::chrono::system_clock::to_time_t(now);
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
         now.time_since_epoch()) % 1000;
 
     std::ostringstream ss;
-    ss << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d %H:%M:%S")
+    ss << std::put_time(std::localtime(&inTimeT), "%Y-%m-%d %H:%M:%S")
         << '.' << std::setfill('0') << std::setw(3) << ms.count();
     return ss.str();
 }
 
-std::string LogFile::levelToString(LogLevel level) const
+std::string LogFile::levelToString(const LogLevel level)
 {
     switch (level) 
     {

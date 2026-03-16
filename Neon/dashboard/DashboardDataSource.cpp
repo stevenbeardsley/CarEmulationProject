@@ -114,7 +114,7 @@ namespace dashboard
             << "\"status\":" << (d.m_status ? "true" : "false")
             << "}";
 
-        LogFile::Info(oss.str());
+        LogFile::info(oss.str());
         return oss.str();
     }
 }

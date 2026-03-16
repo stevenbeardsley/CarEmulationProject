@@ -8,7 +8,7 @@ Transmission::Transmission(const shared::config::Engine& engineConfig, const sha
 	m_engineConfig(engineConfig),
 	m_transmissionConfig(transmissionConfig)
 {
-	LogFile::Info("Transmission: Transmission system created with id: " + m_transmissionConfig.m_id);
+	LogFile::info("Transmission: Transmission system created with id: " + m_transmissionConfig.m_id);
 }
 
 std::uint32_t Transmission::getGear() const
@@ -20,19 +20,19 @@ std::uint32_t Transmission::getGear() const
 void Transmission::gearUp()
 {
 	m_gear++;
-	LogFile::Info("Transmission: Gear has been shifted up."); 
+	LogFile::info("Transmission: Gear has been shifted up."); 
 }
 
 void Transmission::gearDown()
 {
 	if (m_gear == 0)
 	{
-		LogFile::Error("Transmission: Gear is at the bottom gear, cannot be shifted lower.");
+		LogFile::error("Transmission: Gear is at the bottom gear, cannot be shifted lower.");
 	}
 	else
 	{
 		m_gear--;
-		LogFile::Info("Transmission: Gear has been shifted down");
+		LogFile::info("Transmission: Gear has been shifted down");
 	}
 }
 
