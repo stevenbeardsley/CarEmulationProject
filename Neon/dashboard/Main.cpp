@@ -1,9 +1,7 @@
 ﻿#include "CommandHttpServer.h"
-#include "CommandMessage.h"
 #include "DashboardDataSource.h"
 #include "LogFile.h"
 #include "Process.h"
-#include "shared/Peers.h"
 #include "shared/can/Bus.h"
 #include "shared/can/messages/ErrorMessage.h"
 #include "shared/can/messages/StatusMessage.h"
@@ -13,7 +11,6 @@
 #include "shared/bit_parser/BitReader.h"
 
 #include <atomic>
-#include <cmath>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio.hpp>
 #include <boost/beast/core.hpp>
@@ -56,9 +53,9 @@ void static handleCarData(websocket::stream<tcp::socket> ws, dashboard::Dashboar
     {
         while (running)
         {
-            std::string currentData = dataSource.GetDataJson();
+            std::string currentData = dataSource.getDataJson();
             ws.write(net::buffer(currentData));
-            dataSource.ClearErrors();
+            dataSource.clearErrors();
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
     }
@@ -105,7 +102,7 @@ int main()
 
         dashboard::UiData uiData{ 0, 0, 0, 0, true };
         dashboard::DashboardDataSource dataSource{ uiData };
-        dataSource.SetMaxRpms(engineConfig.max_rpm);
+        dataSource.setMaxRpms(engineConfig.max_rpm);
 
         dashboard::Process process;
         std::thread dashboardProcessThread([&process]() { process.run(); });
@@ -118,8 +115,8 @@ int main()
 
         // === CAN Bus & Receiver ===
         shared::can::Bus canBus(0, 15000);
-        canBus.AddPeer("ecm", 15000);
-        canBus.AddPeer("tcm", 15000);
+        (void)canBus.addPeer("ecm", 15000);
+        (void)canBus.addPeer("tcm", 15000);
 
         // The Receiver now manages the inbox directly
         shared::can::Receiver canRx(running, 15000, inbox, inboxMutex, inboxCv);
@@ -163,20 +160,20 @@ int main()
                         switch (static_cast<shared::can::headers::Status>(typeHeader))
                         {
                         case shared::can::headers::Status::CurrentGear:
-                            dataSource.SetGear(msg.getValue());
+                            dataSource.setGear(msg.getValue());
                             break;
                         case shared::can::headers::Status::Speed:
-                            dataSource.SetSpeed(msg.getValue());
+                            dataSource.setSpeed(msg.getValue());
                             break;
                         case shared::can::headers::Status::RPM:
-                            dataSource.SetRpm(msg.getValue());
+                            dataSource.setRpm(msg.getValue());
                             break;
                         case shared::can::headers::Status::EngineTemperature:
-                            dataSource.SetEngineTemp(static_cast<std::uint32_t>(
+                            dataSource.setEngineTemp(static_cast<std::uint32_t>(
                                 std::round(static_cast<double>(msg.getValue()) / 10.0)));
                             break;
                         case shared::can::headers::Status::Fuel:
-                            dataSource.SetEngineFuel(msg.getValue());
+                            dataSource.setEngineFuel(msg.getValue());
                             break;
                         default:
                             break;
@@ -186,7 +183,7 @@ int main()
                     case shared::can::MessageCategory::Error:
                     {
                         shared::can::message::ErrorMessage msg(std::move(rawData));
-                        dataSource.AddError(msg.getErrorType(), msg.getErrorMessage());
+                        dataSource.addError(msg.getErrorType(), msg.getErrorMessage());
                         LogFile::Warn("Error received: " + msg.getErrorMessage()); // TODO: Clear all errors every tick
                         break;
                     }

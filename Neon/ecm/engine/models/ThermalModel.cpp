@@ -15,16 +15,16 @@ namespace ecm::engine::models
     {
     }
 
-    double ThermalModel::clampd(double v, double lo, double hi)
+    double ThermalModel::clampd(const double v, const double lo, const double hi)
     {
         return std::max(lo, std::min(v, hi));
     }
 
-    void ThermalModel::update(double rpm,
-        double throttle,
-        double idleRpm,
-        double redlineRpm,
-        double dtSeconds)
+    void ThermalModel::update(const double rpm,
+        const double throttle,
+        const double idleRpm,
+        const double redlineRpm,
+        const double dtSeconds)
     {
         if (dtSeconds <= 0.0)
             return;
@@ -46,10 +46,7 @@ namespace ecm::engine::models
         double coolingFactor = std::exp(-m_coolRate * dtSeconds);
         m_tempC = m_ambientC + (m_tempC - m_ambientC) * coolingFactor;
 
-        if (m_tempC < m_ambientC)
-        {
-            m_tempC = m_ambientC;
-        }
+        m_tempC = std::max(m_tempC, m_ambientC);
 
         if (m_tempC >= m_overheatC)
         {

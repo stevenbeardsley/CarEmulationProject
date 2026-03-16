@@ -50,8 +50,8 @@ int main() {
     shared::can::Receiver canRx(running, 15000, inbox, m, cv);
 
     shared::can::Bus canTx(0, 15000);
-    canTx.AddPeer("dashboard", 15000);
-    canTx.AddPeer("tcm", 15000);
+    canTx.addPeer("dashboard", 15000);
+    canTx.addPeer("tcm", 15000);
 
     shared::config::Config config;
     config.LoadFromFile("config.json");
@@ -139,20 +139,20 @@ int main() {
                 std::uint32_t currentRpm = engine.getRpm();
                 std::uint32_t currentSpeed = engine.getSpeedMph();
 
-                canTx.Send(shared::can::message::StatusMessage(
+                canTx.send(shared::can::message::StatusMessage(
                     shared::can::MessageCategory::Status,
                     shared::can::headers::Status::RPM,
                     currentRpm
                 ));
 
-                canTx.Send(shared::can::message::StatusMessage(
+                canTx.send(shared::can::message::StatusMessage(
                     shared::can::MessageCategory::Status,
                     shared::can::headers::Status::Speed,
                     currentSpeed
                 ));
 
                 uint32_t fuel = static_cast<uint32_t>(engine.getFuelPercentage());
-                canTx.Send(shared::can::message::StatusMessage(
+                canTx.send(shared::can::message::StatusMessage(
                     shared::can::MessageCategory::Status,
                     shared::can::headers::Status::Fuel,
                     fuel
@@ -160,7 +160,7 @@ int main() {
 
                 if (fuel <= 25 && fuel != 0)
                 {
-                    canTx.Send(shared::can::message::ErrorMessage(
+                    canTx.send(shared::can::message::ErrorMessage(
                         shared::can::MessageCategory::Error,
                         shared::can::headers::Error::LowFuel,
                         "Warning: Low fuel."
@@ -169,7 +169,7 @@ int main() {
                 
                 if (fuel == 0)
                 {
-                    canTx.Send(shared::can::message::ErrorMessage(
+                    canTx.send(shared::can::message::ErrorMessage(
                         shared::can::MessageCategory::Error,
                         shared::can::headers::Error::NoFuel,
                         "Critical: Empty fuel."
@@ -178,7 +178,7 @@ int main() {
 
                 if (engine.isStalled())
                 {
-                    canTx.Send(shared::can::message::ErrorMessage(
+                    canTx.send(shared::can::message::ErrorMessage(
                         shared::can::MessageCategory::Error,
                         shared::can::headers::Error::EngineStalled,
                         "Critical: Engine has stalled due to over-rev."
@@ -190,7 +190,7 @@ int main() {
                 {
                     if (currentRpm > static_cast<std::uint32_t>(engineConfig.max_rpm * 0.85))
                     {
-                        canTx.Send(shared::can::message::ErrorMessage(
+                        canTx.send(shared::can::message::ErrorMessage(
                             shared::can::MessageCategory::Error,
                             shared::can::headers::Error::ShiftUpReccommended,
                             "Warning: Shift up recommended."
@@ -198,7 +198,7 @@ int main() {
                     }
                     else if (currentGear > 1 && currentSpeed > 5 && currentRpm < static_cast<std::uint32_t>(engineConfig.idle_rpm * 1.25))
                     {
-                        canTx.Send(shared::can::message::ErrorMessage(
+                        canTx.send(shared::can::message::ErrorMessage(
                             shared::can::MessageCategory::Error,
                             shared::can::headers::Error::ShiftDownRecommended,
                             "Warning: Shift down recommended."
@@ -211,14 +211,14 @@ int main() {
             if (now >= nextSlowTelemetry) {
                 nextSlowTelemetry += slowUpdateTick;
                 const auto temperature = scaleTemp(engine.getCoolantTempC());
-                canTx.Send(shared::can::message::StatusMessage(
+                canTx.send(shared::can::message::StatusMessage(
                     shared::can::MessageCategory::Status,
                     shared::can::headers::Status::EngineTemperature,
                     temperature));
 
                 if (temperature >= 1000)
                 {
-                    canTx.Send(shared::can::message::ErrorMessage(
+                    canTx.send(shared::can::message::ErrorMessage(
                         shared::can::MessageCategory::Error,
                         shared::can::headers::Error::EngineOverheating,
                         "Engine overheating"

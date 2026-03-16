@@ -10,84 +10,84 @@ namespace dashboard
     {
     }
 
-    DashboardDataSource::DashboardDataSource(const UiData& initial)
-        : m_data(initial)
+    DashboardDataSource::DashboardDataSource(UiData initial)
+        : m_data(std::move(initial))
     {
     }
 
-    void DashboardDataSource::SetGear(std::int32_t gear)
+    void DashboardDataSource::setGear(const std::int32_t gear)
     {
-        std::lock_guard<std::mutex> lk(m_mtx);
+	    std::scoped_lock lk(m_mtx);
         m_data.m_gear = gear;
     }
 
-    void DashboardDataSource::SetSpeed(std::int32_t speed)
+    void DashboardDataSource::setSpeed(std::int32_t speed)
     {
-        std::lock_guard<std::mutex> lk(m_mtx);
+	    std::scoped_lock lk(m_mtx);
         m_data.m_speed = speed;
     }
 
-    void DashboardDataSource::SetEngineFuel(std::uint32_t fuel)
+    void DashboardDataSource::setEngineFuel(std::uint32_t fuel)
     {
-        std::lock_guard<std::mutex> lk(m_mtx);
+	    std::scoped_lock lk(m_mtx);
         m_data.m_fuel = fuel;
     }
 
-    void DashboardDataSource::SetRpm(std::int32_t rpm)
+    void DashboardDataSource::setRpm(std::int32_t rpm)
     {
-        std::lock_guard<std::mutex> lk(m_mtx);
+	    std::scoped_lock lk(m_mtx);
         m_data.m_rpm = rpm;
     }
 
-    void DashboardDataSource::SetMaxRpms(std::uint32_t maxRpm)
+    void DashboardDataSource::setMaxRpms(std::uint32_t maxRpm)
     {
-        std::lock_guard<std::mutex> lk(m_mtx);
+	    std::scoped_lock lk(m_mtx);
         m_data.m_maxRpms = maxRpm;
     }
 
-    void DashboardDataSource::SetEngineTemp(std::uint32_t temp)
+    void DashboardDataSource::setEngineTemp(std::uint32_t temp)
     {
-        std::lock_guard<std::mutex> lk(m_mtx);
+	    std::scoped_lock lk(m_mtx);
         m_data.m_engineTemp = temp;
     }
 
-    void DashboardDataSource::SetStatus(bool status)
+    void DashboardDataSource::setStatus(bool status)
     {
-        std::lock_guard<std::mutex> lk(m_mtx);
+	    std::scoped_lock lk(m_mtx);
         m_data.m_status = status;
     }
 
-    void DashboardDataSource::AddError(shared::can::headers::Error code,
-        const std::string& message) 
+    void DashboardDataSource::addError(const shared::can::headers::Error code,
+        const std::string& msg) 
     {
-        std::lock_guard<std::mutex> lk(m_mtx);
-        m_data.m_activeErrors.push_back({ code, message });
+	    std::scoped_lock lk(m_mtx);
+        m_data.m_activeErrors.push_back({ code, msg });
     }
 
-    void DashboardDataSource::ClearErrors() 
+    void DashboardDataSource::clearErrors() 
     {
-        std::lock_guard<std::mutex> lk(m_mtx);
+	    std::scoped_lock lk(m_mtx);
         m_data.m_activeErrors.clear();
     }
 
-    void DashboardDataSource::Update(std::int32_t speed, std::int32_t gear, std::int32_t rpm, bool status)
+    void DashboardDataSource::update(std::int32_t speed, std::int32_t gear, std::int32_t rpm, bool status)
     {
-        std::lock_guard<std::mutex> lk(m_mtx);
+	    std::scoped_lock lk(m_mtx);
         m_data.m_speed = speed;
         m_data.m_gear = gear;
         m_data.m_rpm = rpm;
         m_data.m_status = status;
     }
 
-    UiData DashboardDataSource::Snapshot() const
+    UiData DashboardDataSource::snapshot() const
     {
-        std::lock_guard<std::mutex> lk(m_mtx);
+	    std::scoped_lock lk(m_mtx);
         return m_data; 
     }
 
-    std::string DashboardDataSource::GetDataJson() const
+    std::string DashboardDataSource::getDataJson() const
     {
-        const auto d = Snapshot();
+        const auto d = snapshot();
 
         std::ostringstream oss;
         oss << "{"

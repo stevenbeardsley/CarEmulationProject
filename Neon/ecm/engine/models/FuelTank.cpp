@@ -1,10 +1,9 @@
 #include "FuelTank.h"
 #include <algorithm>
-#include <cmath>
 
 namespace ecm::engine::models
 {
-    void FuelTank::initialize(double displacementLitres)
+    void FuelTank::initialize(const double displacementLitres)
     {
         m_displacementL = std::max(0.1, displacementLitres);
         // Scale tank capacity by engine size
@@ -14,21 +13,21 @@ namespace ecm::engine::models
         m_fuelLevelL = m_capacityL; // start full
     }
 
-    void FuelTank::update(double rpm,
+    void FuelTank::update(const double rpm,
         double throttle01,
-        double idleRpm,
-        double maxRpm,
-        double dtSeconds)
+        const double idleRpm,
+        const double maxRpm,
+        const double dtSeconds)
     {
         if (m_fuelLevelL <= 0.0)
             return;
 
         throttle01 = std::clamp(throttle01, 0.0, 1.0);
-        const double rpmNorm =
+        const auto rpmNorm =
             std::clamp((rpm - idleRpm) / std::max(1.0, maxRpm - idleRpm), 0.0, 1.0);
 
         // Base idle consumption (L/sec)
-        double burnRate = 0.35 * m_displacementL;   // idle baseline - 0.015 for non demo
+        auto burnRate = 0.35 * m_displacementL;   // idle baseline - 0.015 for non demo
         // Load component
         burnRate += 0.0012 * m_displacementL * throttle01;
         // RPM influence
@@ -40,8 +39,7 @@ namespace ecm::engine::models
         }
 
         m_fuelLevelL -= burnRate * dtSeconds;
-        if (m_fuelLevelL < 0.0)
-            m_fuelLevelL = 0.0;
+        m_fuelLevelL = std::max(m_fuelLevelL, 0.0);
     }
 
     bool FuelTank::isEmpty() const
@@ -66,17 +64,11 @@ namespace ecm::engine::models
         return m_capacityL;
     }
 
-    void FuelTank::refuelFull()
-    {
-        m_fuelLevelL = m_capacityL;
-    }
-
-    void FuelTank::addFuelLitres(double litres)
+    void FuelTank::addFuelLitres(const double litres)
     {
         if (litres <= 0.0)
             return;
         m_fuelLevelL += litres;
-        if (m_fuelLevelL > m_capacityL)
-            m_fuelLevelL = m_capacityL;
+        m_fuelLevelL = std::min(m_fuelLevelL, m_capacityL);
     }
 }

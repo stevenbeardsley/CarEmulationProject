@@ -1,7 +1,7 @@
-#pragma once
+#ifndef SHARED_CAN_RECEIVER_H
+#define SHARED_CAN_RECEIVER_H
 
 #include <atomic>
-#include <cstdint>
 #include <vector>
 #include <queue>
 #include <mutex>
@@ -38,3 +38,5 @@ namespace shared::can
         std::condition_variable& inboxCv_;
     };
 }
+
+#endif

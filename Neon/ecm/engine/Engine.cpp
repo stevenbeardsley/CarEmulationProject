@@ -10,39 +10,26 @@ namespace ecm::engine
 
     shared::config::Engine Engine::sanitizeEngineCfg(shared::config::Engine cfg)
     {
-        if (cfg.idle_rpm < 500)
-        {
-            cfg.idle_rpm = 500;
-        }
-        if (cfg.max_rpm < 1500)
-        {
-            cfg.max_rpm = 1500;
-        }
-        if (cfg.idle_rpm >= cfg.max_rpm)
+	    cfg.idle_rpm = std::max(cfg.idle_rpm, 500);
+	    cfg.max_rpm = std::max(cfg.max_rpm, 1500);
+	    if (cfg.idle_rpm >= cfg.max_rpm)
         {
             cfg.idle_rpm = std::max(500, cfg.max_rpm - 1000);
         }
 
-        if (cfg.max_torque_nm < 10.0)
-        {
-            cfg.max_torque_nm = 10.0;
-        }
+	    cfg.max_torque_nm = std::max(cfg.max_torque_nm, 10.0);
 
-        if (cfg.displacement_l < 0.1)
-        {
-            cfg.displacement_l = 0.1;
-        }
-        return cfg;
+	    cfg.displacement_l = std::max(cfg.displacement_l, 0.1);
+	    return cfg;
     }
 
     shared::config::Transmission Engine::sanitizeTransCfg(shared::config::Transmission cfg)
     {
-        if (cfg.m_gears < 0) cfg.m_gears = 0;
+	    cfg.m_gears = std::max(cfg.m_gears, 0);
 
-        if (cfg.m_finalDrive <= 0.01)
-            cfg.m_finalDrive = 0.01;
+	    cfg.m_finalDrive = std::max(cfg.m_finalDrive, 0.01);
 
-        // Ensure gearRatios length matches gears if possible
+	    // Ensure gearRatios length matches gears if possible
         if (cfg.m_gears > 0 && static_cast<int>(cfg.m_gearRatios.size()) < cfg.m_gears)
         {
             // If config says 5 gears but only gives 4 ratios, clamp gears to provided ratios
@@ -52,7 +39,7 @@ namespace ecm::engine
         // Defensive: remove non-positive ratios
         for (double& r : cfg.m_gearRatios)
         {
-            if (r < 0.01) r = 0.01;
+	        r = std::max(r, 0.01);
         }
 
         // reverse can be negative in many configs; we keep it as-is
@@ -84,7 +71,7 @@ namespace ecm::engine
 
     void Engine::start()
     {
-        std::lock_guard<std::mutex> lk(m_mutex);
+	    std::scoped_lock lk(m_mutex);
         if (m_running)
             return;
 
@@ -404,8 +391,7 @@ namespace ecm::engine
                 const double overSpeedMps = m_speedMps - speedCapMps;
                 netForce -= (overSpeedMps * 500.0);
 
-                if (netForce > 0.0)
-                    netForce = 0.0;
+                netForce = std::min(netForce, 0.0);
             }
             else if (m_effectiveThrottle < 0.05 && rpmFromSpeed > idleRpm)
             {
@@ -421,7 +407,7 @@ namespace ecm::engine
         }
 
         m_speedMps += m_accelMps2 * dtSeconds;
-        if (m_speedMps < 0.0) m_speedMps = 0.0;
+        m_speedMps = std::max(m_speedMps, 0.0);
 
         m_thermal.update(m_rpm, m_effectiveThrottle, idleRpm, redlineRpm, dtSeconds);
     }

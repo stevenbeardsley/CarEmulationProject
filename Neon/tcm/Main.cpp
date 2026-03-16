@@ -95,8 +95,8 @@ int main()
         });
 
     shared::can::Bus canBus(0, 15000);
-    canBus.AddPeer("ecm", 15000);
-    canBus.AddPeer("dashboard", 15000);
+    (void)canBus.addPeer("ecm", 15000);
+    (void)canBus.addPeer("dashboard", 15000);
 
     std::thread gearPublishThread([&]() {
         while (running) {
@@ -107,7 +107,7 @@ int main()
             };
 
             LogFile::Debug("TCM: Publishing CurrentGear=" + std::to_string(transmission.getGear()));
-            canBus.Send(msg);
+            canBus.send(msg);
 
             // Shutdown-aware sleep
             for (auto i = 0; i < 10 && running; ++i)

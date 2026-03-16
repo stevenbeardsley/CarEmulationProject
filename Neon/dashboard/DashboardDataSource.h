@@ -14,28 +14,28 @@ namespace dashboard
     {
     public:
         DashboardDataSource();                 // default: zeroed + status=true
-        explicit DashboardDataSource(const UiData& initial);
+        explicit DashboardDataSource(UiData initial);
 
         // Thread-safe setters
-        void SetGear(std::int32_t gear);
-        void SetSpeed(std::int32_t speed);
-        void SetRpm(std::int32_t rpm);
-        void SetMaxRpms(std::uint32_t maxRpms);
-        void SetEngineTemp(std::uint32_t temp);
-        void SetStatus(bool status);
-        void SetEngineFuel(std::uint32_t fuel);
+        void setGear(std::int32_t gear);
+        void setSpeed(std::int32_t speed);
+        void setRpm(std::int32_t rpm);
+        void setMaxRpms(std::uint32_t maxRpms);
+        void setEngineTemp(std::uint32_t temp);
+        void setStatus(bool status);
+        void setEngineFuel(std::uint32_t fuel);
 
-        void AddError(shared::can::headers::Error code, const std::string& msg);
-        void ClearErrors();
+        void addError(shared::can::headers::Error code, const std::string& msg);
+        void clearErrors();
 
         // Convenience: update multiple fields atomically
-        void Update(std::int32_t speed, std::int32_t gear, std::int32_t rpm, bool status);
+        void update(std::int32_t speed, std::int32_t gear, std::int32_t rpm, bool status);
 
         // Thread-safe snapshot (consistent view)
-        UiData Snapshot() const;
+        UiData snapshot() const;
 
         // JSON string for WebSocket payloads
-        std::string GetDataJson() const;
+        std::string getDataJson() const;
 
     private:
         mutable std::mutex m_mtx;

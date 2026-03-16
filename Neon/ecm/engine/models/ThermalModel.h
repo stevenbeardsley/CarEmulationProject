@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ECM_ENGINE_MODELS_THERMALMODEL_H
+#define ECM_ENGINE_MODELS_THERMALMODEL_H
 
 namespace ecm::engine::models
 {
@@ -9,12 +10,12 @@ namespace ecm::engine::models
         ThermalModel(double ambientC = 20.0,
             double heatRate = 4.5,
             double coolRate = 0.05,
-            double overheatC = 105.0);
+            double overheatC = 100.0);
 
         void update(double rpm, double throttle, double idleRpm, double redlineRpm, double dtSeconds);
 
-        double getCoolantTempC() const;
-        bool isOverheating() const;
+        [[nodiscard]] double getCoolantTempC() const;
+        [[nodiscard]] bool isOverheating() const;
 
     private:
         static double clampd(double v, double lo, double hi);
@@ -30,3 +31,4 @@ namespace ecm::engine::models
         double m_overheatC;
     };
 }
+#endif

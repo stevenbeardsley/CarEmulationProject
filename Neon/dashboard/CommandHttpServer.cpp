@@ -117,7 +117,7 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
                 shared::can::MessageCategory::Control,
                 shared::can::headers::Control::GearUpRequest
             };
-            m_bus.Send(msg);
+            m_bus.send(msg);
             break;
         }
         case Command::GearDown:
@@ -128,7 +128,7 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
                 shared::can::MessageCategory::Control,
                 shared::can::headers::Control::GearDownRequest
             };
-            m_bus.Send(msg);
+            m_bus.send(msg);
             break;
         }
         case Command::Throttle:
@@ -140,7 +140,7 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
                 shared::can::headers::Control::ThrottleRequest,
                 static_cast<std::uint32_t>(value)
             };
-            m_bus.Send(msg);
+            m_bus.send(msg);
             break;
         }
         default:

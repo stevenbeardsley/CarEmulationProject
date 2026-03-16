@@ -7,7 +7,7 @@
 
 namespace shared::can
 {
-    Bus::Bus(unsigned short bindPort, unsigned short defaultPeerPort)
+    Bus::Bus(const unsigned short bindPort, const unsigned short defaultPeerPort)
         : ioc_()
         , socket_(ioc_)
         , resolver_(ioc_)
@@ -15,7 +15,7 @@ namespace shared::can
         , m_defaultPeerPort(defaultPeerPort)
     {
         boost::system::error_code ec;
-        udp::endpoint local(udp::v4(), bindPort_);
+        const udp::endpoint local(udp::v4(), bindPort_);
 
         socket_.open(local.protocol(), ec);
         if (ec)
@@ -34,10 +34,10 @@ namespace shared::can
             return;
         }
 
-        std::cout << "Bus: bound to local port " << GetLocalPort() << "\n";
+        std::cout << "Bus: bound to local port " << getLocalPort() << "\n";
     }
 
-    bool Bus::AddPeer(const std::string& host, unsigned short port)
+    bool Bus::addPeer(const std::string& host, unsigned short port)
     {
         if (port == 0)
             port = m_defaultPeerPort;
@@ -58,10 +58,10 @@ namespace shared::can
 
             if (!ec && !results.empty())
             {
-                udp::endpoint endpoint = *results.begin();
+                const udp::endpoint endpoint = *results.begin();
 
                 {
-                    std::lock_guard<std::mutex> lock(peersMutex_);
+	                std::scoped_lock lock(peersMutex_);
 
                     // Optional: de-dupe
                     if (std::find(peers_.begin(), peers_.end(), endpoint) == peers_.end())
@@ -73,7 +73,6 @@ namespace shared::can
                 return true;
             }
 
-            // Don’t spam too hard; log first + last (or every N attempts)
             if (attempt == 1 || attempt == maxAttempts)
             {
                 LogFile::Warn("CAN BUS: AddPeer resolve failed for " + host + ":"
@@ -88,14 +87,14 @@ namespace shared::can
         return false;
     }
 
-    bool Bus::AddPeer(const std::string& host)
+    bool Bus::addPeer(const std::string& host)
     {
-        return AddPeer(host, m_defaultPeerPort);
+        return addPeer(host, m_defaultPeerPort);
     }
 
-    void Bus::Send(const std::vector<std::uint8_t>& datagram)
+    void Bus::send(const std::vector<std::uint8_t>& datagram)
     {
-        std::lock_guard<std::mutex> sendLock(sendMutex_);
+	    std::scoped_lock sendLock(sendMutex_);
 
         if (!socket_.is_open() || datagram.empty())
         {
@@ -104,7 +103,7 @@ namespace shared::can
 
         std::vector<udp::endpoint> peersCopy;
         {
-            std::lock_guard<std::mutex> lock(peersMutex_);
+	        std::scoped_lock lock(peersMutex_);
             peersCopy = peers_;
         }
 
@@ -129,11 +128,14 @@ namespace shared::can
         }
     }
 
-    unsigned short Bus::GetLocalPort() const
+    unsigned short Bus::getLocalPort() const
     {
         boost::system::error_code ec;
-        auto endpoint = socket_.local_endpoint(ec);
-        if (ec) return 0;
+        const auto endpoint = socket_.local_endpoint(ec);
+        if (ec) 
+        {
+            return 0;
+        };
         return endpoint.port();
     }
 

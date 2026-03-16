@@ -1,4 +1,6 @@
-#pragma once
+#ifndef DASHBOARD_WEBSOCKETRECEIVER_H
+#define DASHBOARD_WEBSOCKETRECEIVER_H
+
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
 #include <boost/asio/ip/tcp.hpp>
@@ -27,3 +29,5 @@ private:
     std::atomic<bool>& running_;
     std::thread listenerThread_;
 };
+
+#endif

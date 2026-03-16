@@ -1,10 +1,10 @@
-#pragma once
+#ifndef  ECM_ENGINE_ENGINE_H
+#define ECM_ENGINE_ENGINE_H
 
 #include <cstdint>
 #include <condition_variable>
 #include <mutex>
 #include <thread>
-#include <vector>
 
 #include "shared/config/Engine.h"
 #include "shared/config/Transmission.h"
@@ -99,3 +99,5 @@ namespace ecm::engine
         models::FuelTank m_fuel;
     };
 }
+
+#endif

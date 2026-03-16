@@ -5,7 +5,6 @@ set(dashboard_HEADERS
     DashboardDataSource.h
     Process.h
     CommandHttpServer.h
-    WebSocketReceiver.h
     UiData.h
 )
 
@@ -13,8 +12,7 @@ set(dashboard_SOURCE
     Main.cpp
     DashboardDataSource.cpp
     Process.cpp
-    CommandHttpServer.cpp
-    WebSocketReceiver.cpp)
+    CommandHttpServer.cpp)
 
 add_executable(Dashboard 
     ${dashboard_SOURCE}

@@ -1,4 +1,6 @@
-#pragma once
+#ifndef DASHBOARD_COMMANDMESSAGE_H
+#define DASHBOARD_COMMANDMESSAGE_H
+
 #include <string>
 
 namespace dashboard
@@ -33,3 +35,4 @@ static Command toCommand(std::string command)
 }
 
 }
+#endif

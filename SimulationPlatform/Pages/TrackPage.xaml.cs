@@ -220,6 +220,25 @@ namespace SimulationPlatform.Pages
             try { await m_model.VehicleController.SetThrottleAsync(Acceleration); }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex.Message); }
         }
+        private void Refuel_Click(object sender, RoutedEventArgs e)
+        {
+            // TODO: Implement refuel logic (e.g., reset fuel percentage to 100%)
+        }
+
+        private void Redeploy_Click(object sender, RoutedEventArgs e)
+        {
+            // TODO: Implement redeploy logic (e.g., spawn the vehicle at the starting line)
+        }
+
+        private void Ignition_Click(object sender, RoutedEventArgs e)
+        {
+            // TODO: Implement ignition logic (e.g., toggle engine state, enable throttle)
+        }
+
+        private void Reset_Click(object sender, RoutedEventArgs e)
+        {
+            // TODO: Implement track reset logic (e.g., clear telemetry, reset timers)
+        }
 
         private void UpdateCarData(CarData carData)
         {
@@ -400,7 +419,7 @@ namespace SimulationPlatform.Pages
             if (!_rpmDialBuilt)
             {
                 var center = new Point(95, 78);
-                double radius = 70;
+                const double radius = 70;
 
                 var start = StartAngleDeg;
                 var endFull = StartAngleDeg + SweepDeg;

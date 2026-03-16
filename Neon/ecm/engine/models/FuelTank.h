@@ -13,11 +13,10 @@ public:
         double idleRpm,
         double maxRpm,
         double dtSeconds);
-    bool isEmpty() const;
-    double getFuelLitres() const;
-    double getFuelPercent() const;
-    double getCapacityLitres() const;
-    void refuelFull();
+	[[nodiscard]] bool isEmpty() const;
+    [[nodiscard]] double getFuelLitres() const;
+    [[nodiscard]] double getFuelPercent() const;
+    [[nodiscard]] double getCapacityLitres() const;
     void addFuelLitres(double litres);
 
 private:

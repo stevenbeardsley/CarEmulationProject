@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SHARED_CAN_BUS_h
+#define SHARED_CAN_BUS_h
 
 #include <string>
 #include <vector>
@@ -14,16 +15,16 @@ namespace shared::can
     public:
         Bus(unsigned short bindPort, unsigned short defaultPeerPort);
 
-        void Send(const std::vector<std::uint8_t>& datagram);
+        void send(const std::vector<std::uint8_t>& datagram);
 
         [[nodiscard]]
-        bool AddPeer(const std::string& host, unsigned short port);
+        bool addPeer(const std::string& host, unsigned short port);
         
         [[nodiscard]]
-        bool AddPeer(const std::string& host);
+        bool addPeer(const std::string& host);
 
 
-        [[nodiscard]] unsigned short GetLocalPort() const;
+        [[nodiscard]] unsigned short getLocalPort() const;
 
     private:
         boost::asio::io_context ioc_;
@@ -39,3 +40,5 @@ namespace shared::can
         std::mutex sendMutex_;
     };
 }
+
+#endif

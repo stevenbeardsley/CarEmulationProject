@@ -1,5 +1,4 @@
 #include "Process.h"
-#include <iostream>
 #include <thread>
 
 namespace ecm

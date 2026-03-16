@@ -12,8 +12,8 @@ namespace shared::can::message
         m_buffer.clear();
         m_buffer.reserve(1u + 1u + 4u); // Total 6 bytes
 
-        shared::bit_parser::ByteBuffer buf(m_buffer);
-        shared::bit_parser::BitWriter w(buf);
+        bit_parser::ByteBuffer buf(m_buffer);
+        bit_parser::BitWriter w(buf);
 
         w.writeU8(static_cast<std::uint8_t>(category));
         w.writeU8(static_cast<std::uint8_t>(type));
@@ -27,7 +27,7 @@ namespace shared::can::message
 
     MessageCategory Throttle::getCategory() const
     {
-        shared::bit_parser::BitReader r(
+        bit_parser::BitReader r(
             shared::bit_parser::Span<const std::uint8_t>(m_buffer.data(), m_buffer.size())
         );
 
@@ -36,7 +36,7 @@ namespace shared::can::message
 
     headers::Control Throttle::getType() const
     {
-        shared::bit_parser::BitReader r(
+        bit_parser::BitReader r(
             shared::bit_parser::Span<const std::uint8_t>(m_buffer.data(), m_buffer.size())
         );
 
@@ -47,7 +47,7 @@ namespace shared::can::message
 
     std::uint32_t Throttle::getValue() const
     {
-        shared::bit_parser::BitReader r(
+        bit_parser::BitReader r(
             shared::bit_parser::Span<const std::uint8_t>(m_buffer.data(), m_buffer.size())
         );
 
