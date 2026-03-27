@@ -59,9 +59,9 @@ namespace ecm::engine::models
         return (m_fuelLevelL / m_capacityL) * 100.0;
     }
 
-    double FuelTank::getCapacityLitres() const
+    void FuelTank::refuel()
     {
-        return m_capacityL;
+        m_fuelLevelL = m_capacityL;
     }
 
     void FuelTank::addFuelLitres(const double litres)

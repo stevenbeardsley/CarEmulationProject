@@ -31,8 +31,7 @@ namespace ecm::engine
         void setThrottle(std::uint32_t throttlePercent);
         void setSelectedGear(int gear);
 
-        void setMassKg(double kg);
-        void setWheelRadiusM(double meters);
+        void refuel();
 
         [[nodiscard]] std::uint32_t getSpeedMph() const;
         [[nodiscard]] std::uint32_t getRpm() const;

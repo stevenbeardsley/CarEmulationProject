@@ -11,6 +11,8 @@ enum class Command
     GearUp,
     GearDown,
     Throttle,
+    Fuel,
+    Refuel,
     Unknown
 };
 
@@ -30,8 +32,11 @@ static Command toCommand(const std::string& command)
     {
         commandType = Command::Throttle;
     }
-
-    return commandType;
+    else if (command == "refuel")
+    {
+        commandType = Command::Refuel;
+    }
+	return commandType;
 }
 
 }

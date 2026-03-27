@@ -247,12 +247,26 @@ namespace SimulationPlatform.Pages
 
         private async void accelerationSelected()
         {
-            try { await m_model.VehicleController.SetThrottleAsync(Acceleration); }
-            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex.Message); }
+            try
+            {
+                await m_model.VehicleController.SetThrottleAsync(Acceleration);
+            }
+
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
         }
-        private void Refuel_Click(object sender, RoutedEventArgs e)
+        private async void Refuel_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Implement refuel logic (e.g., reset fuel percentage to 100%)
+            try
+            {
+                await m_model.VehicleController.Refuel();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
         }
 
         private void Redeploy_Click(object sender, RoutedEventArgs e)
@@ -270,20 +284,23 @@ namespace SimulationPlatform.Pages
         {
             try
             {
-                DispatcherQueue.TryEnqueue(() =>
+                if (DispatcherQueue != null)
                 {
-                    SpeedValue = carData.Speed;           // drives animation + raises property changed
-                    Speed = carData.Speed.ToString();
-                    EngineTemp = carData.EngineTemp.ToString();
-                    // Keep string binding for text readout
-                    Rpm = carData.Rpms.ToString();
+                    DispatcherQueue.TryEnqueue(() =>
+                    {
+                        SpeedValue = carData.Speed;           // drives animation + raises property changed
+                        Speed = carData.Speed.ToString();
+                        EngineTemp = carData.EngineTemp.ToString();
+                        // Keep string binding for text readout
+                        Rpm = carData.Rpms.ToString();
 
-                    // Update dial using numeric value from model/telemetry
-                    UpdateRpmGauge(carData.Rpms);
-                    UpdateFuelGauge(carData.Fuel);
-                    UpdateErrorList(carData.Errors);
-                    GearValue = carData.Gear;
-                });
+                        // Update dial using numeric value from model/telemetry
+                        UpdateRpmGauge(carData.Rpms);
+                        UpdateFuelGauge(carData.Fuel);
+                        UpdateErrorList(carData.Errors);
+                        GearValue = carData.Gear;
+                    });
+                }
             }
             catch (Exception ex)
             {
@@ -293,7 +310,6 @@ namespace SimulationPlatform.Pages
 
         private void UpdateErrorList(Dictionary<int, string> latestErrors)
         {
-            // 1. Remove stale errors
             for (var i = ActiveErrors.Count - 1; i >= 0; i--)
             {
                 if (int.TryParse(ActiveErrors[i].Code, out var existingCode))
@@ -305,7 +321,6 @@ namespace SimulationPlatform.Pages
                 }
             }
 
-            // 2. Add or Update
             foreach (var kvp in latestErrors)
             {
                 var stringCode = kvp.Key.ToString();
@@ -313,7 +328,6 @@ namespace SimulationPlatform.Pages
 
                 if (existing == null)
                 {
-                    // Create the internal model and wrap in the VM
                     var model = new ErrorMessage(kvp.Key, kvp.Value);
                     ActiveErrors.Add(new ErrorViewModel(model));
                 }

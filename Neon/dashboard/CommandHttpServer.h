@@ -8,7 +8,6 @@
 #include <atomic>
 #include <functional>
 #include <string>
-#include <cstdint>
 
 namespace net = boost::asio;
 namespace beast = boost::beast;
@@ -28,18 +27,17 @@ public:
         unsigned short listenPort,
         shared::can::Bus& bus);
 
-    void SetCommandHandler(CommandHandler handler);
-    void Run(); // blocking accept loop
+    void setCommandHandler(CommandHandler handler);
+    void run(); // blocking accept loop
     
     [[nodiscard]]
-    std::pair<Command, int> ParseSingleCommandJson(const std::string& json);
+    static std::pair<Command, int> parseSingleCommandJson(const std::string& json);
 
 private:
-    void AcceptOne();
-    void HandleSession(tcp::socket socket);
+    void acceptOne();
+    void handleSession(tcp::socket socket) const;
 
-    http::response<http::string_body>
-        MakeResponse(const http::request<http::string_body>& req);
+    http::response<http::string_body> makeResponse(const http::request<http::string_body>& req) const;
 
     net::io_context& m_ioc;
     tcp::acceptor m_acceptor;

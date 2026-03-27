@@ -5,7 +5,7 @@
 #include "shared/can/Bus.h"
 #include "shared/can/MessageCategory.h"
 #include "shared/can/messages/StatusMessage.h"
-#include "shared/can/messages/GearChange.h"
+#include "shared/can/messages/CommandMessage.h"
 #include "shared/can/headers/Status.h"
 #include "shared/can/headers/Control.h"
 #include "shared/bit_parser/BitReader.h"

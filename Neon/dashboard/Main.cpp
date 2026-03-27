@@ -31,11 +31,13 @@ namespace http = beast::http;
 namespace net = boost::asio;
 using tcp = net::ip::tcp;
 
-static std::atomic<bool> running(true);
+namespace
+{
+	
+std::atomic running(true);
+tcp::acceptor* g_acceptor = nullptr;
 
-static tcp::acceptor* g_acceptor = nullptr;
-
-void static signalHandler(int)
+void signalHandler(int)
 {
     LogFile::info("Received stop signal, shutting down...");
     running = false;
@@ -46,7 +48,7 @@ void static signalHandler(int)
     }
 }
 
-void static handleCarData(websocket::stream<tcp::socket> ws, dashboard::DashboardDataSource& dataSource)
+void handleCarData(websocket::stream<tcp::socket> ws, dashboard::DashboardDataSource& dataSource)
 {
     LogFile::info("Client subscribed to /carData");
     try
@@ -65,7 +67,7 @@ void static handleCarData(websocket::stream<tcp::socket> ws, dashboard::Dashboar
     }
 }
 
-void static handleCarCommands(websocket::stream<tcp::socket> ws)
+void handleCarCommands(websocket::stream<tcp::socket> ws)
 {
     LogFile::info("Client subscribed to /carCommands");
     try
@@ -83,6 +85,7 @@ void static handleCarCommands(websocket::stream<tcp::socket> ws)
     {
         LogFile::error("Error in /carCommands connection: " + std::string(e.what()));
     }
+}
 }
 
 int main()
@@ -184,9 +187,11 @@ int main()
                     {
                         shared::can::message::ErrorMessage msg(std::move(rawData));
                         dataSource.addError(msg.getErrorType(), msg.getErrorMessage());
-                        LogFile::warn("Error received: " + msg.getErrorMessage()); // TODO: Clear all errors every tick
+                        LogFile::warn("Error received: " + msg.getErrorMessage());
                         break;
                     }
+                    case shared::can::MessageCategory::Control:
+	                    break; // Dashboard has no control functionality 
                     default:
                         break;
                     }
@@ -194,9 +199,9 @@ int main()
             });
 
         // === Command & WebSocket Servers ===
-        net::io_context cmdIoc; // tesskdfh
+        net::io_context cmdIoc; 
         dashboard::CommandHttpServer commandServer{ cmdIoc, running, 8081, canBus };
-        std::thread commandThread([&]() { commandServer.Run(); });
+        std::thread commandThread([&]() { commandServer.run(); });
 
         net::io_context wsIoc;
         tcp::acceptor acceptor(wsIoc, tcp::endpoint(tcp::v4(), 8080));
@@ -218,7 +223,7 @@ int main()
                 http::request<http::string_body> req;
                 http::read(ws.next_layer(), buffer, req);
 
-                const std::string target = std::string(req.target());
+                const auto target = std::string(req.target());
                 ws.accept(req);
 
                 if (target == "/carData") 

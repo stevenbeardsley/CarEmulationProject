@@ -10,6 +10,11 @@ public class VehicleController
         m_httpClient = commandSender;
     }
 
+    public async Task Refuel()
+    {
+        await m_httpClient.SendAsync("command", "refuel", 1);
+    }
+
     public async Task ShiftUpAsync()
     {
         await m_httpClient.SendAsync("command", "gear_up", 1);

@@ -2,7 +2,7 @@
 #include "LogFile.h"
 
 #include "shared/can/MessageCategory.h"
-#include "shared/can/messages/GearChange.h"
+#include "shared/can/messages/CommandMessage.h"
 #include "shared/can/messages/Throttle.h"
 
 
@@ -11,7 +11,7 @@ namespace dashboard
 
 CommandHttpServer::CommandHttpServer(net::io_context& ioc,
     std::atomic<bool>& runningFlag,
-    unsigned short listenPort,
+    const unsigned short listenPort,
     shared::can::Bus& bus)
     : m_ioc(ioc)
     , m_acceptor(ioc, tcp::endpoint(tcp::v4(), listenPort))
@@ -21,17 +21,17 @@ CommandHttpServer::CommandHttpServer(net::io_context& ioc,
     LogFile::info("CommandHttpServer listening on port " + std::to_string(listenPort));
 }
 
-void CommandHttpServer::SetCommandHandler(CommandHandler handler)
+void CommandHttpServer::setCommandHandler(CommandHandler handler)
 {
     m_commandHandler = std::move(handler);
 }
 
-void CommandHttpServer::Run()
+void CommandHttpServer::run()
 {
     LogFile::info("CommandHttpServer accepting connections...");
     while (m_running)
     {
-        try { AcceptOne(); }
+        try { acceptOne(); }
         catch (const std::exception& e)
         {
             LogFile::error(std::string("HTTP accept loop error: ") + e.what());
@@ -40,16 +40,16 @@ void CommandHttpServer::Run()
     LogFile::info("CommandHttpServer exiting.");
 }
 
-void CommandHttpServer::AcceptOne()
+void CommandHttpServer::acceptOne()
 {
     tcp::socket socket(m_ioc);
     m_acceptor.accept(socket);
 
     // One thread per connection (simple + fine for your use-case)
-    std::thread(&CommandHttpServer::HandleSession, this, std::move(socket)).detach();
+    std::thread(&CommandHttpServer::handleSession, this, std::move(socket)).detach();
 }
 
-void CommandHttpServer::HandleSession(tcp::socket socket)
+void CommandHttpServer::handleSession(tcp::socket socket) const
 {
     try
     {
@@ -59,7 +59,7 @@ void CommandHttpServer::HandleSession(tcp::socket socket)
         http::request<http::string_body> req;
         http::read(socket, buffer, req);
 
-        auto res = MakeResponse(req);
+        auto res = makeResponse(req);
         http::write(socket, res);
 
         // Close socket politely (since we’re not doing keep-alive)
@@ -72,8 +72,7 @@ void CommandHttpServer::HandleSession(tcp::socket socket)
     }
 }
 
-http::response<http::string_body>
-CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
+http::response<http::string_body> CommandHttpServer::makeResponse(const http::request<http::string_body>& req) const
 {
     auto badRequest = [&](std::string msg)
         {
@@ -106,13 +105,12 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
     LogFile::info("Message body: " + body);
     
     // Extract JSON values 
-    auto [command, value] = ParseSingleCommandJson(body);
-    switch (command)
+    switch (auto [command, value] = parseSingleCommandJson(body); command)
     {
         case Command::GearUp:
         {
             LogFile::info("Gear up request received.");
-            shared::can::message::GearChange msg
+            const shared::can::message::CommandMessage msg
             {
                 shared::can::MessageCategory::Control,
                 shared::can::headers::Control::GearUpRequest
@@ -123,7 +121,7 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
         case Command::GearDown:
         {
             LogFile::info("Gear down request received.");
-            shared::can::message::GearChange msg
+            const shared::can::message::CommandMessage msg
             {
                 shared::can::MessageCategory::Control,
                 shared::can::headers::Control::GearDownRequest
@@ -134,7 +132,7 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
         case Command::Throttle:
         {
             LogFile::info("Throttle change received.");
-            shared::can::message::Throttle msg
+            const shared::can::message::Throttle msg
             {
                 shared::can::MessageCategory::Control,
                 shared::can::headers::Control::ThrottleRequest,
@@ -143,6 +141,17 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
             m_bus.send(msg);
             break;
         }
+		case Command::Refuel:
+		{
+            LogFile::info("Refuel request received.");
+            const shared::can::message::CommandMessage msg
+            {
+                shared::can::MessageCategory::Control,
+                shared::can::headers::Control::Refuel
+            };
+            m_bus.send(msg);
+            break;
+		}
         default:
         {
             LogFile::info("Unknown command type received.");
@@ -160,7 +169,7 @@ CommandHttpServer::MakeResponse(const http::request<http::string_body>& req)
     return res;
 }
 
-std::pair<Command, int> CommandHttpServer::ParseSingleCommandJson(const std::string& json)
+std::pair<Command, int> CommandHttpServer::parseSingleCommandJson(const std::string& json)
 {
     // Expected format: {"key": value}
 
@@ -191,7 +200,8 @@ std::pair<Command, int> CommandHttpServer::ParseSingleCommandJson(const std::str
     if (negative)
         value = -value;
 
-    return {
+    return
+	{
         toCommand(json.substr(keyBegin, keyEnd - keyBegin)),
         value
     };

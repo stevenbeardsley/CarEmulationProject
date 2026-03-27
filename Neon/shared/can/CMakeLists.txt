@@ -2,7 +2,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 
 set(can_message_HEADERS
     messages/ErrorMessage.h
-    messages/GearChange.h
+    messages/CommandMessage.h
     messages/ICanMessage.h
     messages/StatusMessage.h
     messages/Throttle.h
@@ -10,7 +10,7 @@ set(can_message_HEADERS
 
 set(can_message_SOURCE
     messages/ErrorMessage.cpp
-    messages/GearChange.cpp
+    messages/CommandMessage.cpp
     messages/StatusMessage.cpp
     messages/Throttle.cpp
 )

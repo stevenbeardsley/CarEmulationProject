@@ -22,18 +22,23 @@
 #include <mutex>
 #include <condition_variable>
 #include <chrono>
-#include <cmath>
 
-std::atomic<bool> running(true);
+namespace
+{
 
-void static signalHandler(int) {
+std::atomic running(true);
+
+void signalHandler(int) {
     LogFile::info("Received stop signal, shutting down...");
     running = false;
 }
 
-static inline std::int32_t scaleTemp(double tempC) {
+std::int32_t scaleTemp(const double tempC) {
     return static_cast<std::int32_t>(std::llround(tempC * 10.0));
 }
+
+}
+
 
 int main() {
     std::signal(SIGINT, signalHandler);
@@ -50,8 +55,8 @@ int main() {
     shared::can::Receiver canRx(running, 15000, inbox, m, cv);
 
     shared::can::Bus canTx(0, 15000);
-    canTx.addPeer("dashboard", 15000);
-    canTx.addPeer("tcm", 15000);
+    (void)canTx.addPeer("dashboard", 15000); // TODO: Use the return value
+    (void)canTx.addPeer("tcm", 15000);
 
     shared::config::Config config;
     config.LoadFromFile("config.json");
@@ -68,8 +73,8 @@ int main() {
 
     std::thread processThread([&]() {
         using clock = std::chrono::steady_clock;
-        const auto fastUpdateTick = std::chrono::milliseconds(shared::fastUpdate);
-        const auto slowUpdateTick = std::chrono::milliseconds(shared::slowUpdate);
+        constexpr auto fastUpdateTick = std::chrono::milliseconds(shared::fastUpdate);
+        constexpr auto slowUpdateTick = std::chrono::milliseconds(shared::slowUpdate);
 
         auto nextSlowTelemetry = clock::now();
         auto nextFastTelemetry = clock::now();
@@ -81,7 +86,7 @@ int main() {
         {
             std::vector<std::uint8_t> rawData;
             {
-                std::unique_lock<std::mutex> lk(m);
+                std::unique_lock lk(m);
                 cv.wait_for(lk, std::chrono::milliseconds(10), [&]() 
                     {
                         return !running || !inbox.empty();
@@ -100,7 +105,7 @@ int main() {
                     shared::bit_parser::Span<const std::uint8_t>(rawData.data(), rawData.size())
                 );
 
-                auto category = static_cast<shared::can::MessageCategory>(reader.readU8());
+                const auto category = static_cast<shared::can::MessageCategory>(reader.readU8());
                 auto typeHeader = reader.readU8();
 
                 if (category == shared::can::MessageCategory::Control) 
@@ -113,6 +118,12 @@ int main() {
                         engine.setThrottle(msg.getValue());
                         break;
                     }
+                    case shared::can::headers::Control::Refuel:
+                        engine.refuel();
+                    	break;
+                    case shared::can::headers::Control::GearUpRequest:
+                    case shared::can::headers::Control::GearDownRequest:
+	                    break;
                     default:
                         break;
                     }
@@ -136,8 +147,8 @@ int main() {
             {
                 nextFastTelemetry += fastUpdateTick;
 
-                std::uint32_t currentRpm = engine.getRpm();
-                std::uint32_t currentSpeed = engine.getSpeedMph();
+                const auto currentRpm = engine.getRpm();
+                const auto currentSpeed = engine.getSpeedMph();
 
                 canTx.send(shared::can::message::StatusMessage(
                     shared::can::MessageCategory::Status,
@@ -151,7 +162,7 @@ int main() {
                     currentSpeed
                 ));
 
-                uint32_t fuel = static_cast<uint32_t>(engine.getFuelPercentage());
+                const auto fuel = static_cast<uint32_t>(engine.getFuelPercentage());
                 canTx.send(shared::can::message::StatusMessage(
                     shared::can::MessageCategory::Status,
                     shared::can::headers::Status::Fuel,

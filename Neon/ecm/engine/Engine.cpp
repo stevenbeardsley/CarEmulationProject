@@ -127,6 +127,11 @@ namespace ecm::engine
         return m_fuel.isEmpty();
     }
 
+    void Engine::refuel()
+    {
+        std::lock_guard<std::mutex> lk(m_mutex);
+        m_fuel.refuel();
+    }
     void Engine::setThrottle(std::uint32_t throttlePercent)
     {
         {
@@ -179,17 +184,6 @@ namespace ecm::engine
         m_cv.notify_all();
     }
 
-    void Engine::setMassKg(double kg)
-    {
-        std::lock_guard<std::mutex> lk(m_mutex);
-        m_massKg = (kg > 1.0) ? kg : 1.0;
-    }
-
-    void Engine::setWheelRadiusM(double meters)
-    {
-        std::lock_guard<std::mutex> lk(m_mutex);
-        m_wheelRadiusM = (meters > 0.05) ? meters : 0.05;
-    }
 
     std::uint32_t Engine::getSpeedMph() const
     {

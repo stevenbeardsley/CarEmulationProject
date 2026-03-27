@@ -10,11 +10,11 @@
 namespace shared::can::message
 {
 
-    class GearChange : public ICanMessage
+    class CommandMessage : public ICanMessage
     {
     public:
-        GearChange(MessageCategory category, headers::Control type);
-        explicit GearChange(std::vector<std::uint8_t> existingBuffer);
+        CommandMessage(MessageCategory category, headers::Control type);
+        explicit CommandMessage(std::vector<std::uint8_t> existingBuffer);
 
         [[nodiscard]] MessageCategory getCategory() const;
         [[nodiscard]] headers::Control getType() const;
