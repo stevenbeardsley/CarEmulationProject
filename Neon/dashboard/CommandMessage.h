@@ -13,6 +13,7 @@ enum class Command
     Throttle,
     Fuel,
     Refuel,
+    Brake,
     Unknown
 };
 
@@ -31,6 +32,10 @@ static Command toCommand(const std::string& command)
     else if (command == "throttle")
     {
         commandType = Command::Throttle;
+    }
+    else if (command == "brake")
+    {
+        commandType = Command::Brake;
     }
     else if (command == "refuel")
     {

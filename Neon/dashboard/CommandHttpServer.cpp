@@ -3,7 +3,7 @@
 
 #include "shared/can/MessageCategory.h"
 #include "shared/can/messages/CommandMessage.h"
-#include "shared/can/messages/Throttle.h"
+#include "shared/can/messages/SpeedControl.h"
 
 
 namespace dashboard
@@ -132,7 +132,7 @@ http::response<http::string_body> CommandHttpServer::makeResponse(const http::re
         case Command::Throttle:
         {
             LogFile::info("Throttle change received.");
-            const shared::can::message::Throttle msg
+            const shared::can::message::SpeedControl msg
             {
                 shared::can::MessageCategory::Control,
                 shared::can::headers::Control::ThrottleRequest,
@@ -141,6 +141,18 @@ http::response<http::string_body> CommandHttpServer::makeResponse(const http::re
             m_bus.send(msg);
             break;
         }
+		case Command::Brake:
+    	{
+            LogFile::info("Brake change received.");
+            const shared::can::message::SpeedControl msg
+            {
+                shared::can::MessageCategory::Control,
+                shared::can::headers::Control::BrakeRequest,
+                static_cast<std::uint32_t>(value)
+            };
+            m_bus.send(msg);
+            break;
+    	}
 		case Command::Refuel:
 		{
             LogFile::info("Refuel request received.");

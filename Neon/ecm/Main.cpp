@@ -4,7 +4,7 @@
 #include "shared/can/Bus.h"
 #include "shared/can/messages/StatusMessage.h"
 #include "shared/can/messages/ErrorMessage.h"
-#include "shared/can/messages/Throttle.h"
+#include "shared/can/messages/SpeedControl.h"
 #include "shared/can/headers/Status.h"
 #include "shared/can/headers/Control.h"
 #include "shared/can/headers/Error.h"
@@ -114,10 +114,16 @@ int main() {
                     {
                     case shared::can::headers::Control::ThrottleRequest: 
                     {
-                        shared::can::message::Throttle msg(std::move(rawData));
+                        shared::can::message::SpeedControl msg(std::move(rawData));
                         engine.setThrottle(msg.getValue());
                         break;
                     }
+                    case shared::can::headers::Control::BrakeRequest:
+                    {
+                        shared::can::message::SpeedControl msg(std::move(rawData));
+                        engine.setBrakeLevel(msg.getValue());
+                        break;
+	                }
                     case shared::can::headers::Control::Refuel:
                         engine.refuel();
                     	break;

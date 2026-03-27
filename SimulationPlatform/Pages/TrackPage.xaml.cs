@@ -366,16 +366,24 @@ namespace SimulationPlatform.Pages
         }
 
         private void BrakeSlider_PointerReleased(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
-            => brakeSelected();
+            => BrakeSelected();
 
         private void BrakeSlider_PointerCaptureLost(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
-            => brakeSelected();
+            => BrakeSelected();
 
         // Assuming you'll add a method like this to handle the final selection, 
         // similar to your accelerationSelected() method:
-        private void brakeSelected()
+        private async void BrakeSelected()
         {
-            // Logic to send the final brake value to your simulation engine
+            try
+            {
+                await m_model.VehicleController.SetBrakeAsync(Brake);
+            }
+
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
         }
 
         private void AccelerationSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)

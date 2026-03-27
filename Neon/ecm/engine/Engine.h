@@ -29,6 +29,7 @@ namespace ecm::engine
         bool isRunning() const;
 
         void setThrottle(std::uint32_t throttlePercent);
+        void setBrakeLevel(std::uint32_t brakePercent);
         void setSelectedGear(int gear);
 
         void refuel();
@@ -81,7 +82,8 @@ namespace ecm::engine
         int m_selectedGear{ 0 };
         double m_gearRatio{ 0.0 };
         double m_finalDrive{ 1.0 };
-
+        std::uint32_t m_brakePercent{ 0 };
+        double m_effectiveBrake{ 0.0 };
         double m_massKg{ 1400.0 };
         double m_wheelRadiusM{ 0.30 };
 

@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 
 namespace SimulationPlatform.Controllers;
+
 public class VehicleController
 {
     private readonly ICommandSender m_httpClient;
@@ -27,7 +28,11 @@ public class VehicleController
 
     public async Task SetThrottleAsync(double value)
     {
-        await m_httpClient.SendAsync("command", "throttle", value); // TODO: Is this being sent multiple times (?)
+        await m_httpClient.SendAsync("command", "throttle", value);
     }
 
+    public async Task SetBrakeAsync(double value)
+    {
+        await m_httpClient.SendAsync("command", "brake", value);
+    }
 }

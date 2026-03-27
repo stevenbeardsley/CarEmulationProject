@@ -9,7 +9,8 @@ enum class Control
     GearUpRequest,
     GearDownRequest,
     Refuel,
-    ThrottleRequest
+    ThrottleRequest,
+    BrakeRequest
 };
 
 }

@@ -2,7 +2,7 @@
 #include <vector>
 #include <cstdint>
 
-#include "shared/can/messages/Throttle.h"
+#include "shared/can/messages/SpeedControl.h"
 #include "shared/can/headers/Control.h"
 
 using namespace shared::can;
@@ -17,7 +17,7 @@ TEST_F(ThrottleTest, ConstructsFromParametersAndReadsCorrectly)
     auto expectedType = static_cast<headers::Control>(2);
     std::uint32_t expectedValue = 987654321;
 
-    message::Throttle msg(expectedCategory, expectedType, expectedValue);
+    message::SpeedControl msg(expectedCategory, expectedType, expectedValue);
 
     EXPECT_EQ(msg.getCategory(), expectedCategory);
     EXPECT_EQ(msg.getType(), expectedType);
@@ -32,7 +32,7 @@ TEST_F(ThrottleTest, ConstructsFromExistingBufferAndReadsCorrectly) /// Byte end
         0xAA, 0xBB, 0xCC, 0xDD
     };
 
-    message::Throttle msg(std::move(rawBuffer));
+    message::SpeedControl msg(std::move(rawBuffer));
 
     EXPECT_EQ(static_cast<std::uint8_t>(msg.getCategory()), 0x03);
     EXPECT_EQ(static_cast<std::uint8_t>(msg.getType()), 0x01);

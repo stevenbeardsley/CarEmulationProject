@@ -10,11 +10,11 @@
 namespace shared::can::message
 {
 
-    class Throttle : public ICanMessage
+    class SpeedControl : public ICanMessage
     {
     public:
-        Throttle(MessageCategory category, headers::Control type, std::uint32_t value);
-        explicit Throttle(std::vector<std::uint8_t> existingBuffer);
+        SpeedControl(MessageCategory category, headers::Control type, std::uint32_t value);
+        explicit SpeedControl(std::vector<std::uint8_t> existingBuffer);
 
         [[nodiscard]] MessageCategory getCategory() const;
         [[nodiscard]] headers::Control getType() const;

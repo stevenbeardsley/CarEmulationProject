@@ -10,26 +10,26 @@ namespace ecm::engine
 
     shared::config::Engine Engine::sanitizeEngineCfg(shared::config::Engine cfg)
     {
-	    cfg.idle_rpm = std::max(cfg.idle_rpm, 500);
-	    cfg.max_rpm = std::max(cfg.max_rpm, 1500);
-	    if (cfg.idle_rpm >= cfg.max_rpm)
+        cfg.idle_rpm = std::max(cfg.idle_rpm, 500);
+        cfg.max_rpm = std::max(cfg.max_rpm, 1500);
+        if (cfg.idle_rpm >= cfg.max_rpm)
         {
             cfg.idle_rpm = std::max(500, cfg.max_rpm - 1000);
         }
 
-	    cfg.max_torque_nm = std::max(cfg.max_torque_nm, 10.0);
+        cfg.max_torque_nm = std::max(cfg.max_torque_nm, 10.0);
 
-	    cfg.displacement_l = std::max(cfg.displacement_l, 0.1);
-	    return cfg;
+        cfg.displacement_l = std::max(cfg.displacement_l, 0.1);
+        return cfg;
     }
 
     shared::config::Transmission Engine::sanitizeTransCfg(shared::config::Transmission cfg)
     {
-	    cfg.m_gears = std::max(cfg.m_gears, 0);
+        cfg.m_gears = std::max(cfg.m_gears, 0);
 
-	    cfg.m_finalDrive = std::max(cfg.m_finalDrive, 0.01);
+        cfg.m_finalDrive = std::max(cfg.m_finalDrive, 0.01);
 
-	    // Ensure gearRatios length matches gears if possible
+        // Ensure gearRatios length matches gears if possible
         if (cfg.m_gears > 0 && static_cast<int>(cfg.m_gearRatios.size()) < cfg.m_gears)
         {
             // If config says 5 gears but only gives 4 ratios, clamp gears to provided ratios
@@ -39,7 +39,7 @@ namespace ecm::engine
         // Defensive: remove non-positive ratios
         for (double& r : cfg.m_gearRatios)
         {
-	        r = std::max(r, 0.01);
+            r = std::max(r, 0.01);
         }
 
         // reverse can be negative in many configs; we keep it as-is
@@ -71,7 +71,7 @@ namespace ecm::engine
 
     void Engine::start()
     {
-	    std::scoped_lock lk(m_mutex);
+        std::scoped_lock lk(m_mutex);
         if (m_running)
             return;
 
@@ -132,11 +132,21 @@ namespace ecm::engine
         std::lock_guard<std::mutex> lk(m_mutex);
         m_fuel.refuel();
     }
+
     void Engine::setThrottle(std::uint32_t throttlePercent)
     {
         {
             std::lock_guard<std::mutex> lk(m_mutex);
             m_throttlePercent = (throttlePercent > 100u) ? 100u : throttlePercent;
+        }
+        m_cv.notify_all();
+    }
+
+    void Engine::setBrakeLevel(std::uint32_t brakePercent)
+    {
+        {
+            std::lock_guard<std::mutex> lk(m_mutex);
+            m_brakePercent = (brakePercent > 100u) ? 100u : brakePercent;
         }
         m_cv.notify_all();
     }
@@ -341,6 +351,12 @@ namespace ecm::engine
 
         m_effectiveThrottle = clampd(m_effectiveThrottle, 0.0, 1.0);
 
+        // Process Brake Smoothing (brakes typically respond slightly faster than throttle)
+        const double targetBrake = static_cast<double>(m_brakePercent) / 100.0;
+        const double brakeAlpha = 1.0 - std::exp(-10.0 * dtSeconds);
+        m_effectiveBrake = m_effectiveBrake + (targetBrake - m_effectiveBrake) * brakeAlpha;
+        m_effectiveBrake = clampd(m_effectiveBrake, 0.0, 1.0);
+
         if (m_thermal.isOverheating())
         {
             m_effectiveThrottle *= 0.5;
@@ -353,13 +369,24 @@ namespace ecm::engine
         const double wheelRps = (wheelCirc > 1e-6) ? (m_speedMps / wheelCirc) : 0.0;
         const double wheelRpm = wheelRps * 60.0;
 
+        // Calculate brake force (Assuming ~1G maximum deceleration: mass * 9.81 m/s^2)
+        const double maxBrakeForce = m_massKg * 9.81;
+        double currentBrakeForce = maxBrakeForce * m_effectiveBrake;
+
+        // Only apply heavy mechanical braking if the vehicle is actually moving to prevent 
+        // massive negative acceleration values from building up while stationary.
+        if (m_speedMps < 0.01)
+        {
+            currentBrakeForce = 0.0;
+        }
+
         // Neutral logic
         if (m_gearRatio <= 0.01)
         {
             const double targetNeutralRpm = canRun ? (idleRpm + (redlineRpm - idleRpm) * (0.25 + 0.75 * m_effectiveThrottle)) : 0.0;
             m_rpm = m_rpm + (targetNeutralRpm - m_rpm) * (1.0 - std::exp(-2.0 * dtSeconds));
 
-            double netForce = -resistForce;
+            double netForce = -resistForce - currentBrakeForce;
             m_accelMps2 = netForce / std::max(1.0, m_massKg);
         }
         else
@@ -377,7 +404,7 @@ namespace ecm::engine
             const double wheelTorque = engTorque * m_gearRatio * m_finalDrive * m_drivetrainEff;
             const double driveForce = (m_wheelRadiusM > 1e-6) ? (wheelTorque / m_wheelRadiusM) : 0.0;
 
-            double netForce = driveForce - resistForce;
+            double netForce = driveForce - resistForce - currentBrakeForce;
 
             // Engine Braking & Over-Rev Handling
             if (speedCapMps > 0.0 && m_speedMps > speedCapMps)

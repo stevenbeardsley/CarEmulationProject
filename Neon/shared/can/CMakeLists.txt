@@ -5,14 +5,14 @@ set(can_message_HEADERS
     messages/CommandMessage.h
     messages/ICanMessage.h
     messages/StatusMessage.h
-    messages/Throttle.h
+    messages/SpeedControl.h
 )
 
 set(can_message_SOURCE
     messages/ErrorMessage.cpp
     messages/CommandMessage.cpp
     messages/StatusMessage.cpp
-    messages/Throttle.cpp
+    messages/SpeedControl.cpp
 )
 
 set(can_headers_HEADERS
