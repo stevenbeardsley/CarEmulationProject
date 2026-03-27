@@ -34,12 +34,7 @@ public class AppModel : INotifyPropertyChanged
             m_commandSender = new HttpClient("localhost", 8081);
             VehicleController = new VehicleController(m_commandSender);
         }
-        // Standard event boilerplate
 
-        public CarData GetCarData()
-        {
-            return m_carData;
-        }
         private void OnConnected()
         {
             m_connected = true;

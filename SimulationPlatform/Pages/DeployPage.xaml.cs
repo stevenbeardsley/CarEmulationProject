@@ -54,28 +54,50 @@ namespace SimulationPlatform.Pages
             DeployErrorVisibility != Visibility.Visible &&
             !m_connected;
 
+        public bool m_undeployButtonEnabled => m_connected;
+
         public DeployPage()
         {
             this.InitializeComponent();
             m_model = App.m_model; // Classes are ref type, so this is a ref 
             DataContext = m_model;
             m_model.Connected += OnConnected;
+            
             m_model.Disconnected += OnDisconnected;
+
         }
 
         private void OnConnected()
         {
-            m_connected = true;
-            DeployingVisibility = Visibility.Collapsed;
-            OnPropertyChanged(nameof(DeployingVisibility));
-            ConnectedVisibility = Visibility.Visible;
-            OnPropertyChanged(nameof(ConnectedVisibility));
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                m_connected = true; 
+
+                OnPropertyChanged(nameof(ConnectedVisibility));
+
+                OnPropertyChanged(nameof(m_deployButtonEnabled));
+                OnPropertyChanged(nameof(m_undeployButtonEnabled));
+                OnPropertyChanged(nameof(m_selectOptionTextVisibility));
+                DeployingVisibility = Visibility.Collapsed;
+                OnPropertyChanged(nameof(DeployingVisibility));
+                ConnectedVisibility = Visibility.Visible;
+                OnPropertyChanged(nameof(ConnectedVisibility));
+            });
         }
 
         private void OnDisconnected()
         {
-            ConnectedVisibility = Visibility.Collapsed;
-            OnPropertyChanged(nameof(ConnectedVisibility));
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                m_connected = false;
+
+                ConnectedVisibility = Visibility.Collapsed;
+                OnPropertyChanged(nameof(ConnectedVisibility));
+
+                OnPropertyChanged(nameof(m_deployButtonEnabled));
+                OnPropertyChanged(nameof(m_undeployButtonEnabled));
+                OnPropertyChanged(nameof(m_selectOptionTextVisibility));
+            });
         }
 
         private void OnPropertyChanged(string propertyName = null)
@@ -87,14 +109,14 @@ namespace SimulationPlatform.Pages
         {
             if (App.m_model.isConnected())
             {
-                m_connected = true;
-                ConnectedVisibility = Visibility.Visible;
+                OnConnected();
             }
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            // TODO 
+            m_model.Connected -= OnConnected;
+            m_model.Disconnected -= OnDisconnected;
         }
 
         private (string, string) getOptionIds()
@@ -123,18 +145,28 @@ namespace SimulationPlatform.Pages
             return (transmissionId, engineId);
         }
 
+        private async void UndeployButton_Click(object sender, RoutedEventArgs e)
+        {
+            var scriptPath = "/mnt/c/Users/swbea/source/repos/CarEmulationProject/Neon/clean_docker.sh";
+            var output = await m_deploymentController.Undeploy(scriptPath);
+            // Depending on how your model is architected, undeploying here should 
+            // trigger the m_model.Disconnected event automatically. If it doesn't, 
+            // you might need to manually tell the model to disconnect its websocket.
+            if (output.ExitCode == 0)
+            {
+                await m_model.m_webSocketController.DisconnectAsync();
+            }
+        }
+
         private async void DeployButton_Click(object sender, RoutedEventArgs e)
         {
-            var scriptPath = "/mnt/c/Users/swbea/source/repos/CarEmulationProject/Neon/deploy.sh";  // adjust path
+            var scriptPath = "/mnt/c/Users/swbea/source/repos/CarEmulationProject/Neon/deploy.sh";  
             DeployingVisibility = Visibility.Visible;
             OnPropertyChanged(nameof(DeployingVisibility));
             OnPropertyChanged(nameof(m_deployButtonEnabled));
             OnPropertyChanged(nameof(m_selectOptionTextVisibility));
-            // TODO: parse options and pass them into Deploy 
-            (var transmissionId, var engineId) = getOptionIds(); 
+            var (transmissionId, engineId) = getOptionIds(); 
             var output = await m_deploymentController.Deploy(scriptPath, transmissionId, engineId);
-
-            // TODO - Try and just connect if deployment fails 
 
             if (output.ExitCode == 0)
             {
@@ -144,7 +176,10 @@ namespace SimulationPlatform.Pages
             else
             {
                 // Failed to deploy, output error message 
+                DeployingVisibility = Visibility.Collapsed;
                 DeployErrorVisibility = Visibility.Visible;
+
+                OnPropertyChanged(nameof(DeployingVisibility));
                 OnPropertyChanged(nameof(DeployErrorVisibility));
                 OnPropertyChanged(nameof(m_deployButtonEnabled));
                 OnPropertyChanged(nameof(m_selectOptionTextVisibility));

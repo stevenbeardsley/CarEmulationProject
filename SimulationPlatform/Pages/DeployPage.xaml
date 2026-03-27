@@ -106,25 +106,47 @@
                        Margin="0,0,0,5"
                        Visibility="{x:Bind m_selectOptionTextVisibility, Mode=OneWay}"/>
 
-            <Button Click="DeployButton_Click"
-                    IsEnabled="{x:Bind m_deployButtonEnabled, Mode=OneWay}"
-                    HorizontalAlignment="Left"
-                    BorderBrush="#4CAF50"
-                    BorderThickness="1"
-                    Background="White"
-                    Foreground="#4CAF50"
-                    CornerRadius="12"
-                    Padding="18,12"
-                    MinHeight="44">
+            <StackPanel Orientation="Horizontal" Spacing="16">
+                <Button Click="DeployButton_Click"
+                        IsEnabled="{x:Bind m_deployButtonEnabled, Mode=OneWay}"
+                        HorizontalAlignment="Left"
+                        BorderBrush="#4CAF50"
+                        BorderThickness="1"
+                        Background="White"
+                        Foreground="#4CAF50"
+                        CornerRadius="12"
+                        Padding="18,12"
+                        MinHeight="44">
 
-                <StackPanel Orientation="Horizontal" Spacing="10">
-                    <SymbolIcon Symbol="Play" Width="18" Height="18"/>
-                    <TextBlock Text="Deploy"
-                               VerticalAlignment="Center"
-                               FontSize="15"
-                               FontWeight="SemiBold"/>
-                </StackPanel>
-            </Button>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <SymbolIcon Symbol="Play" Width="18" Height="18"/>
+                        <TextBlock Text="Deploy"
+                                   VerticalAlignment="Center"
+                                   FontSize="15"
+                                   FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Click="UndeployButton_Click"
+                        HorizontalAlignment="Left"
+                        IsEnabled="{x:Bind m_undeployButtonEnabled, Mode=OneWay}"
+                        BorderBrush="#E53935"
+                        BorderThickness="1"
+                        Background="White"
+                        Foreground="#E53935"
+                        CornerRadius="12"
+                        Padding="18,12"
+                        MinHeight="44">
+
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <SymbolIcon Symbol="Stop" Width="18" Height="18"/>
+                        <TextBlock Text="Undeploy"
+                                   VerticalAlignment="Center"
+                                   FontSize="15"
+                                   FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
 
             <TextBlock Text="Deploying..." FontSize="14" Foreground="Orange"
                        Visibility="{x:Bind DeployingVisibility, Mode=OneWay}"/>

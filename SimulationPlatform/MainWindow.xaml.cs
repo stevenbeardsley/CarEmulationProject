@@ -28,17 +28,22 @@ namespace SimulationPlatform
 
         private void OnConnected()
         {
-            m_connected = true;
-
-            OnPropertyChanged(nameof(ConnectedVisibility));
-            OnPropertyChanged(nameof(DisconnectedVisibility));
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                m_connected = true;
+                OnPropertyChanged(nameof(ConnectedVisibility));
+                OnPropertyChanged(nameof(DisconnectedVisibility));
+            });
         }
 
         private void OnDisconnected()
         {
-            m_connected = false;
-            OnPropertyChanged(nameof(ConnectedVisibility));
-            OnPropertyChanged(nameof(DisconnectedVisibility));
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                m_connected = false;
+                OnPropertyChanged(nameof(ConnectedVisibility));
+                OnPropertyChanged(nameof(DisconnectedVisibility));
+            });
         }
 
         private void NavView_SelectionChanged(NavigationView sender,

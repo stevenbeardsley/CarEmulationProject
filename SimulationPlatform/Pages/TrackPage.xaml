@@ -374,8 +374,6 @@
 
                     <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                         <Button Content="Refuel" Click="Refuel_Click" Width="100"/>
-                        <Button Content="Redeploy" Click="Redeploy_Click" Width="100"/>
-                        <Button Content="Ignition" Click="Ignition_Click" Width="100"/>
                     </StackPanel>
                 </Grid>
             </Border>

@@ -75,13 +75,13 @@ namespace SimulationPlatform.Controllers
                     if (result.MessageType == WebSocketMessageType.Close)
                     {
                         await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Server closed connection", token);
-                        LogMessage?.Invoke("🔒 Connection closed by server.");
+                        LogMessage?.Invoke(" Connection closed by server.");
                         Disconnected?.Invoke();
                         return;
                     }
 
                     string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                    LogMessage?.Invoke($"📩 Received: {message}");
+                    LogMessage?.Invoke($" Received: {message}");
 
                     try
                     {
@@ -93,47 +93,22 @@ namespace SimulationPlatform.Controllers
                         }
                         else
                         {
-                            LogMessage?.Invoke("⚠️ Invalid JSON received.");
+                            LogMessage?.Invoke("⚠ Invalid JSON received.");
                         }
                     }
                     catch (Exception ex)
                     {
-                        LogMessage?.Invoke($"⚠️ JSON parse error: {ex.Message}");
+                        LogMessage?.Invoke($" JSON parse error: {ex.Message}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                LogMessage?.Invoke($"⚠️ Receive loop ended: {ex.Message}");
+                LogMessage?.Invoke($" Receive loop ended: {ex.Message}");
                 Disconnected?.Invoke();
             }
         }
 
-        public async Task SendCommandAsync(string command)
-        {
-            if (!_isCommandSocket)
-            {
-                LogMessage?.Invoke("⚠️ This WebSocket is for receiving data, not sending commands.");
-                return;
-            }
-
-            if (_ws == null || _ws.State != WebSocketState.Open)
-            {
-                LogMessage?.Invoke("⚠️ Not connected to server.");
-                return;
-            }
-
-            try
-            {
-                var bytes = Encoding.UTF8.GetBytes(command);
-                await _ws.SendAsync(bytes, WebSocketMessageType.Text, true, CancellationToken.None);
-                LogMessage?.Invoke($"🚀 Sent command: {command}");
-            }
-            catch (Exception ex)
-            {
-                LogMessage?.Invoke($"❌ Send failed: {ex.Message}");
-            }
-        }
 
         public async Task DisconnectAsync()
         {
@@ -143,13 +118,13 @@ namespace SimulationPlatform.Controllers
                 {
                     _cts?.Cancel();
                     await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Client disconnect", CancellationToken.None);
-                    LogMessage?.Invoke("🔌 Disconnected.");
+                    LogMessage?.Invoke(" Disconnected.");
                     Disconnected?.Invoke();
                 }
             }
             catch (Exception ex)
             {
-                LogMessage?.Invoke($"⚠️ Error during disconnect: {ex.Message}");
+                LogMessage?.Invoke($"Error during disconnect: {ex.Message}");
             }
         }
 
