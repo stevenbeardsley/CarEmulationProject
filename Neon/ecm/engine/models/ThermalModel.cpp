@@ -5,7 +5,7 @@
 namespace ecm::engine::models
 {
     // Initialize the engine at ambient temperature, not overheating
-    ThermalModel::ThermalModel(double ambientC, double heatRate, double coolRate, double overheatC)
+    ThermalModel::ThermalModel(const double ambientC, const double heatRate, const double coolRate, double overheatC)
         : m_ambientC(ambientC),
         m_heatRate(heatRate),
         m_coolRate(coolRate),
@@ -34,15 +34,11 @@ namespace ecm::engine::models
                 std::max(1.0, redlineRpm - idleRpm),
                 0.0, 1.0);
 
-        // m_heatRate is now realistically scaled (e.g., max 4.5 C/sec)
         const auto heatInput =
             m_heatRate * rpmLoad * throttle;
 
-        // 1. Calculate heat gain normally
         m_tempC += heatInput * dtSeconds;
 
-        // 2. Apply cooling using an exponential decay formula
-        // This ensures cooling never pushes temp below ambient
         double coolingFactor = std::exp(-m_coolRate * dtSeconds);
         m_tempC = m_ambientC + (m_tempC - m_ambientC) * coolingFactor;
 

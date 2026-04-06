@@ -14,7 +14,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- HEADER (unchanged text) -->
+        <!-- HEADER -->
         <StackPanel Grid.Row="0" Margin="20,16,20,0" Spacing="4">
             <TextBlock Text="Deploy Page"
                        HorizontalAlignment="Left"
@@ -32,13 +32,11 @@
                       VerticalScrollBarVisibility="Auto"
                       IsScrollInertiaEnabled="True">
 
-            <!-- Keep everything centered and responsive -->
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- This border keeps a nice frame; Viewbox scales the layout -->
                 <Border CornerRadius="16"
                         BorderThickness="1"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -46,13 +44,11 @@
                         HorizontalAlignment="Center"
                         MaxWidth="1100">
 
-                    <!-- Viewbox scales the composed "design canvas" -->
                     <Viewbox Stretch="Uniform"
                              StretchDirection="Both"
                              HorizontalAlignment="Center"
                              VerticalAlignment="Top">
 
-                        <!-- Fixed design surface that scales as a whole -->
                         <Grid Width="1100" Height="520">
                             <!-- Car image -->
                             <Image Source="/Assets/carBackground.png"
@@ -67,6 +63,7 @@
                                       HorizontalAlignment="Left"
                                       VerticalAlignment="Top"
                                       Margin="10,100,0,0"
+                                      IsEnabled="{x:Bind m_selectionEnabled, Mode=OneWay}"
                                       SelectionChanged="ColourComboBox_SelectionChanged">
                                 <ComboBoxItem Content="Blue"/>
                                 <ComboBoxItem Content="Red"/>
@@ -78,6 +75,7 @@
                                       HorizontalAlignment="Left"
                                       VerticalAlignment="Top"
                                       Margin="10,460,0,0"
+                                      IsEnabled="{x:Bind m_selectionEnabled, Mode=OneWay}"
                                       SelectionChanged="EngineComboBox_SelectionChanged">
                                 <ComboBoxItem Content="1.0L"/>
                                 <ComboBoxItem Content="2.0L"/>
@@ -88,6 +86,7 @@
                                       HorizontalAlignment="Left"
                                       VerticalAlignment="Top"
                                       Margin="780,460,0,0"
+                                      IsEnabled="{x:Bind m_selectionEnabled, Mode=OneWay}"
                                       SelectionChanged="TransmissionComboBox_SelectionChanged">
                                 <ComboBoxItem Content="5-speed"/>
                                 <ComboBoxItem Content="7-speed"/>
@@ -141,9 +140,9 @@
                     <StackPanel Orientation="Horizontal" Spacing="10">
                         <SymbolIcon Symbol="Stop" Width="18" Height="18"/>
                         <TextBlock Text="Undeploy"
-                                   VerticalAlignment="Center"
-                                   FontSize="15"
-                                   FontWeight="SemiBold"/>
+                               VerticalAlignment="Center"
+                               FontSize="15"
+                               FontWeight="SemiBold"/>
                     </StackPanel>
                 </Button>
             </StackPanel>

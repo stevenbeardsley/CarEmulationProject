@@ -80,7 +80,7 @@ namespace SimulationPlatform.Controllers
                         return;
                     }
 
-                    string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                    var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
                     LogMessage?.Invoke($" Received: {message}");
 
                     try

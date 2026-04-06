@@ -165,13 +165,5 @@ namespace SimulationPlatform.Models
                 lock (_lock) return _errors;
             }
         }
-
-        public bool HasErrors
-        {
-            get
-            {
-                lock (_lock) return _errors.Count > 0;
-            }
-        }
     }
 }

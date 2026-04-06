@@ -20,7 +20,6 @@ namespace shared::can::message
         [[nodiscard]] headers::Status getType() const;
         [[nodiscard]] std::uint32_t getValue() const;
 
-        [[nodiscard]] const std::vector<std::uint8_t>& getRawBuffer() const { return m_buffer; }
     };
 
 }

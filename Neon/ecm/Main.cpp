@@ -1,5 +1,4 @@
 #include "LogFile.h"
-#include "Process.h"
 #include "shared/can/Receiver.h"
 #include "shared/can/Bus.h"
 #include "shared/can/messages/StatusMessage.h"
@@ -68,7 +67,7 @@ int main() {
     engine.start();
 
     std::thread rxThread([&]() {
-        canRx.Run();
+        canRx.run();
         });
 
     std::thread processThread([&]() {
@@ -79,8 +78,7 @@ int main() {
         auto nextSlowTelemetry = clock::now();
         auto nextFastTelemetry = clock::now();
 
-        // Track gear locally so we don't recommend shifting in Neutral/Reverse
-        int currentGear = 0;
+        auto currentGear = 0;
 
         while (running) 
         {
@@ -114,21 +112,25 @@ int main() {
                     {
                     case shared::can::headers::Control::ThrottleRequest: 
                     {
+                        LogFile::info("ECM: Throttle Request received.");
                         shared::can::message::SpeedControl msg(std::move(rawData));
                         engine.setThrottle(msg.getValue());
                         break;
                     }
                     case shared::can::headers::Control::BrakeRequest:
                     {
+                        LogFile::info("ECM: Brake Request received.");
                         shared::can::message::SpeedControl msg(std::move(rawData));
                         engine.setBrakeLevel(msg.getValue());
                         break;
 	                }
                     case shared::can::headers::Control::Refuel:
-                        engine.refuel();
+                        LogFile::info("ECM: Refuel command received.");
+                    	engine.refuel();
                     	break;
                     case shared::can::headers::Control::GearUpRequest:
                     case shared::can::headers::Control::GearDownRequest:
+                        // Not subscribed
 	                    break;
                     default:
                         break;
@@ -186,6 +188,7 @@ int main() {
                 
                 if (fuel == 0)
                 {
+                    LogFile::warn("ECM: Empty warn.");
                     canTx.send(shared::can::message::ErrorMessage(
                         shared::can::MessageCategory::Error,
                         shared::can::headers::Error::NoFuel,
@@ -195,6 +198,7 @@ int main() {
 
                 if (engine.isStalled())
                 {
+                    LogFile::warn("ECM: Engine stalled.");
                     canTx.send(shared::can::message::ErrorMessage(
                         shared::can::MessageCategory::Error,
                         shared::can::headers::Error::EngineStalled,
@@ -202,7 +206,6 @@ int main() {
                     ));
                 }
 
-                // Only recommend shifting if in a forward driving gear
                 if (currentGear > 0 && !engine.isStalled())
                 {
                     if (currentRpm > static_cast<std::uint32_t>(engineConfig.max_rpm * 0.85))
@@ -233,8 +236,9 @@ int main() {
                     shared::can::headers::Status::EngineTemperature,
                     temperature));
 
-                if (temperature >= 1000)
+                if (temperature >= 980)
                 {
+                    LogFile::warn("ECM: Engine overheating");
                     canTx.send(shared::can::message::ErrorMessage(
                         shared::can::MessageCategory::Error,
                         shared::can::headers::Error::EngineOverheating,
@@ -249,7 +253,7 @@ int main() {
 
     running = false;
     engine.stop();
-    canRx.Stop();
+    canRx.stop();
     cv.notify_all();
 
     if (rxThread.joinable()) rxThread.join();

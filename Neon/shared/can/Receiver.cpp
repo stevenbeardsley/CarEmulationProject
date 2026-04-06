@@ -1,5 +1,5 @@
 #include "Receiver.h"
-#include "LogFile.h" // Assuming this is your custom logging class
+#include "LogFile.h"
 
 #include <array>
 
@@ -38,30 +38,27 @@ namespace shared::can
         LogFile::info("CAN Receiver listening on UDP port " + std::to_string(listenPort));
     }
 
-    void Receiver::Stop()
+    void Receiver::stop()
     {
         boost::system::error_code ec;
         socket_.close(ec);
     }
 
-    void Receiver::handleDatagram(const uint8_t* data, std::size_t n, const udp::endpoint& sender)
+    void Receiver::handleDatagram(const uint8_t* data, std::size_t n, const udp::endpoint& sender) const
     {
         if (n == 0) return; // Ignore empty packets
 
-        // 1. Copy the raw network data into a vector
-        std::vector<std::uint8_t> rawData(data, data + n);
 
-        // 2. Lock the mutex and push to the inbox
         {
+			std::vector<std::uint8_t> rawData(data, data + n);
             std::lock_guard<std::mutex> lock(inboxMutex_);
             inbox_.push(std::move(rawData));
         }
 
-        // 3. Wake up your consumer thread!
         inboxCv_.notify_one();
     }
 
-    void Receiver::Run()
+    void Receiver::run()
     {
         LogFile::info("CAN Receiver thread started");
 

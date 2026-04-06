@@ -13,7 +13,6 @@ namespace shared::can
     class Receiver
     {
     public:
-        // Type alias to make the constructor cleaner
         using InboxQueue = std::queue<std::vector<std::uint8_t>>;
 
         Receiver(std::atomic<bool>& runningFlag,
@@ -22,11 +21,11 @@ namespace shared::can
             std::mutex& inboxMutex,
             std::condition_variable& inboxCv);
 
-        void Run();
-        void Stop();
+        void run();
+        void stop();
 
     private:
-        void handleDatagram(const uint8_t* data, std::size_t n, const boost::asio::ip::udp::endpoint& sender);
+        void handleDatagram(const uint8_t* data, std::size_t n, const boost::asio::ip::udp::endpoint& sender) const;
 
         std::atomic<bool>& running_;
         boost::asio::io_context io_;

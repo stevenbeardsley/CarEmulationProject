@@ -51,7 +51,7 @@ int main()
     shared::can::Receiver canRx(running, 15000, inbox, m, cv);
 
     std::thread rxThread([&]() {
-        canRx.Run();
+        canRx.run();
         });
 
     std::thread processThread([&]() {
@@ -119,7 +119,7 @@ int main()
 
     // Shutdown order
     running = false;
-    canRx.Stop();
+    canRx.stop();
     cv.notify_all();
 
     if (rxThread.joinable()) rxThread.join();

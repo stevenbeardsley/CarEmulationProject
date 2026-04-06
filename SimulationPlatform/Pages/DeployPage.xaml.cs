@@ -1,13 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using SimulationPlatform.Controllers;
-using Windows.UI;
 
 namespace SimulationPlatform.Pages
 {
@@ -32,7 +30,7 @@ namespace SimulationPlatform.Pages
             get; private set;
         } = string.Empty;
 
-        private readonly DeploymentController m_deploymentController = new("Ubuntu"); // TODO: Move to the model?
+        private readonly DeploymentController m_deploymentController = new();
 
         private readonly AppModel m_model; // reference to the base model
 
@@ -45,7 +43,7 @@ namespace SimulationPlatform.Pages
 
         private bool m_connected = false;
         private bool m_colourChosen = false;
-        private bool m_engineTypeChosen = false; // TODO: When engine configurations are implemented.
+        private bool m_engineTypeChosen = false; 
         private bool m_transmissionTypeChosen = false;
         public bool m_deployButtonEnabled => m_colourChosen && 
             m_transmissionTypeChosen &&
@@ -54,6 +52,8 @@ namespace SimulationPlatform.Pages
             DeployErrorVisibility != Visibility.Visible &&
             !m_connected;
 
+        public bool m_selectionEnabled =>
+            !m_connected;
         public bool m_undeployButtonEnabled => m_connected;
 
         public DeployPage()
@@ -82,6 +82,8 @@ namespace SimulationPlatform.Pages
                 OnPropertyChanged(nameof(DeployingVisibility));
                 ConnectedVisibility = Visibility.Visible;
                 OnPropertyChanged(nameof(ConnectedVisibility));
+                OnPropertyChanged(nameof(m_selectionEnabled));
+
             });
         }
 
@@ -97,6 +99,7 @@ namespace SimulationPlatform.Pages
                 OnPropertyChanged(nameof(m_deployButtonEnabled));
                 OnPropertyChanged(nameof(m_undeployButtonEnabled));
                 OnPropertyChanged(nameof(m_selectOptionTextVisibility));
+                OnPropertyChanged(nameof(m_selectionEnabled));
             });
         }
 
@@ -185,7 +188,7 @@ namespace SimulationPlatform.Pages
                 OnPropertyChanged(nameof(m_selectOptionTextVisibility));
             }
         }
-        private void ColourComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) // TODO: Could just do this on deploy click really
+        private void ColourComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var selected = (ComboBoxItem)((ComboBox)sender).SelectedItem;
             switch (selected.Content.ToString())

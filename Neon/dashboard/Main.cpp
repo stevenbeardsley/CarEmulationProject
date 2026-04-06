@@ -125,7 +125,7 @@ int main()
         shared::can::Receiver canRx(running, 15000, inbox, inboxMutex, inboxCv);
 
         std::thread canRxThread([&]() {
-            canRx.Run();
+            canRx.run();
             });
 
         // === CAN Consumer Thread ===
@@ -250,7 +250,7 @@ int main()
 
         // === Shutdown ===
         LogFile::info("Shutting down...");
-        canRx.Stop(); // Ensure the receiver socket closes
+        canRx.stop(); // Ensure the receiver socket closes
         inboxCv.notify_all();
 
         if (commandThread.joinable()) commandThread.join();

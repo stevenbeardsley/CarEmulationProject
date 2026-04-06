@@ -19,8 +19,6 @@ namespace shared::can::message
         [[nodiscard]] MessageCategory getCategory() const;
         [[nodiscard]] headers::Control getType() const;
 
-        [[nodiscard]] const std::vector<std::uint8_t>& getRawBuffer() const { return m_buffer; }
-
     };
 
 }

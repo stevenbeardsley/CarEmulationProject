@@ -236,27 +236,30 @@ namespace ecm::engine
         return mps / 0.44704;
     }
 
-    double Engine::torqueAtRpmNm(double rpm) const
+    // Config-driven smooth curve:
+    // - peak around ~60% of (redline-idle) above idle
+    // - falls toward redline
+    // - minimum floor near idle
+    double Engine::torqueAtRpmNm(const double rpm) const
     {
-        // Config-driven smooth curve:
-        // - peak around ~60% of (redline-idle) above idle
-        // - falls toward redline
-        // - minimum floor near idle
-        const double maxT = std::max(1.0, m_engineCfg.max_torque_nm);
+        constexpr double kMinTorqueNm = 1.0;
+        constexpr double kPeakRpmFraction = 0.60;  // peak torque at 60% of the RPM range
+        constexpr double kSpreadFraction = 0.22;  // gaussian width as fraction of RPM range
+        constexpr double kMinTorqueFraction = 0.25;  // torque floor as fraction of peak
 
-        const double redline = static_cast<double>(m_engineCfg.max_rpm);
-        const double idle = static_cast<double>(m_engineCfg.idle_rpm);
+        const auto maxT = std::max(kMinTorqueNm, m_engineCfg.max_torque_nm);
+        const auto redline = m_engineCfg.max_rpm;
+        const auto idle = m_engineCfg.idle_rpm;
 
         if (redline <= idle + 1.0)
             return maxT;
 
-        const double peakRpm = idle + 0.60 * (redline - idle);
-        const double spread = 0.22 * (redline - idle);
-        const double x = (rpm - peakRpm) / std::max(1.0, spread);
+        const auto rpmRange = redline - idle;
+        const auto peakRpm = idle + kPeakRpmFraction * rpmRange;
+        const auto spread = std::max(1.0, kSpreadFraction * rpmRange);
+        const auto x = (rpm - peakRpm) / spread;
 
-        double t = maxT * std::exp(-0.5 * x * x);
-        t = std::max(t, 0.25 * maxT);
-        return t;
+        return std::max(maxT * std::exp(-0.5 * x * x), kMinTorqueFraction * maxT);
     }
 
     double Engine::computeRedlineSpeedCapMps() const
