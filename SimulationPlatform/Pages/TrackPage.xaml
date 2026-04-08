@@ -374,6 +374,12 @@
 
                     <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                         <Button Content="Refuel" Click="Refuel_Click" Width="100"/>
+                        <Button x:Name="OpenTelemetryBtn"
+                          Content="Live Graphs"
+                          Click="OpenTelemetry_Click"
+                          Style="{StaticResource AccentButtonStyle}"
+                          HorizontalAlignment="Right"
+                          Margin="8"/>
                     </StackPanel>
                 </Grid>
             </Border>

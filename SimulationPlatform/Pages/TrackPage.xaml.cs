@@ -22,6 +22,7 @@ namespace SimulationPlatform.Pages
         private int m_gear;
         private string m_rpms = string.Empty;
         private string m_engineTemp = string.Empty;
+        private TelemetryWindow? _telemetryWindow;
 
         private double _acceleration = 25;
         private double _speedValue;
@@ -586,6 +587,17 @@ namespace SimulationPlatform.Pages
         }
 
         private static double DegToRad(double deg) => (Math.PI / 180.0) * deg;
+        private void OpenTelemetry_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            // Re-activate the existing window rather than opening a duplicate.
+            if (_telemetryWindow != null && _telemetryWindow.IsOpen)
+            {
+                _telemetryWindow.Activate();
+                return;
+            }
 
+            _telemetryWindow = new TelemetryWindow();
+            _telemetryWindow.Activate();
+        }
     }
 }

@@ -13,9 +13,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Controls\TelemetryChartControl.xaml" />
     <None Remove="Pages\DeployPage.xaml" />
     <None Remove="Pages\LoggingPage.xaml" />
+    <None Remove="Pages\TelemetryPage.xaml" />
     <None Remove="Pages\TrackPage.xaml" />
+    <None Remove="TelemetryWindow.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -63,6 +66,17 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Controls\TelemetryChartControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Pages\TelemetryPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="TelemetryWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <!--
