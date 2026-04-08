@@ -25,7 +25,7 @@ struct UiData
     std::uint32_t m_engineTemp; 
     std::uint32_t m_fuel;
     std::vector<ErrorMessage> m_activeErrors;
-    bool m_status;
+    bool m_status = true;
 };
 
 }

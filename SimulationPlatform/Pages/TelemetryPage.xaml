@@ -6,63 +6,73 @@
     xmlns:controls="using:SimulationPlatform.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Background="#0D0D0D">
+    mc:Ignorable="d">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+	<!--  No Background set here — inherits the default WinUI 3 system grey
+          (ApplicationPageBackgroundThemeBrush) so the window looks native.  -->
 
-        <!-- ── Toolbar ───────────────────────────────────────────────────── -->
-        <Grid Grid.Row="0" Grid.ColumnSpan="2"
-              Background="#0A0A0A"
-              Padding="14,8">
+	<Grid Padding="8">
+		<Grid.RowDefinitions>
+			<!--  Toolbar  -->
+			<RowDefinition Height="Auto"/>
+			<!--  Top row of charts  -->
+			<RowDefinition Height="*"/>
+			<!--  Bottom row of charts  -->
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
 
-            <StackPanel Orientation="Horizontal"
-                        VerticalAlignment="Center"
-                        Spacing="6">
-                <Ellipse x:Name="StatusDot"
-                         Width="8" Height="8"
-                         Fill="#444444"/>
-                <TextBlock x:Name="StatusText"
-                           Text="Waiting for data…"
-                           Foreground="#666666"
+		<!-- ── Toolbar ───────────────────────────────────────────────────── -->
+		<Border Grid.Row="0" Grid.ColumnSpan="2"
+                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="14,8"
+                Margin="6,6,6,4">
+
+			<Grid>
+				<StackPanel Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Spacing="6">
+					<Ellipse x:Name="StatusDot"
+                             Width="9" Height="9"
+                             Fill="{ThemeResource SystemControlForegroundBaseMediumBrush}"/>
+					<TextBlock x:Name="StatusText"
+                               Text="Waiting for data…"
+                               Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
+                               FontSize="12"
+                               VerticalAlignment="Center"/>
+				</StackPanel>
+
+				<TextBlock Text="NEON Live Telemetry"
+                           Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
                            FontSize="11"
+                           FontWeight="SemiBold"
+                           CharacterSpacing="100"
+                           HorizontalAlignment="Center"
                            VerticalAlignment="Center"/>
-            </StackPanel>
 
-            <TextBlock Text="LIVE TELEMETRY"
-                       Foreground="#333333"
-                       FontSize="10"
-                       FontWeight="SemiBold"
-                       CharacterSpacing="120"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"/>
+				<TextBlock x:Name="PacketCountText"
+                           Foreground="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
+                           FontSize="11"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center"/>
+			</Grid>
+		</Border>
 
-            <TextBlock x:Name="PacketCountText"
-                       Foreground="#333333"
-                       FontSize="10"
-                       HorizontalAlignment="Right"
-                       VerticalAlignment="Center"/>
-        </Grid>
-
-        <!-- ── Row 1: Speed | RPM ────────────────────────────────────────── -->
-        <controls:TelemetryChartControl x:Name="SpeedChart"
+		<!-- ── Row 1: Speed | RPM ────────────────────────────────────────── -->
+		<controls:TelemetryChartControl x:Name="SpeedChart"
                                         Grid.Row="1" Grid.Column="0"/>
-        <controls:TelemetryChartControl x:Name="RpmChart"
+		<controls:TelemetryChartControl x:Name="RpmChart"
                                         Grid.Row="1" Grid.Column="1"/>
 
-        <!-- ── Row 2: Engine Temp | Fuel ─────────────────────────────────── -->
-        <controls:TelemetryChartControl x:Name="TempChart"
+		<!-- ── Row 2: Engine Temp | Fuel ─────────────────────────────────── -->
+		<controls:TelemetryChartControl x:Name="TempChart"
                                         Grid.Row="2" Grid.Column="0"/>
-        <controls:TelemetryChartControl x:Name="FuelChart"
+		<controls:TelemetryChartControl x:Name="FuelChart"
                                         Grid.Row="2" Grid.Column="1"/>
-    </Grid>
+	</Grid>
 </Page>

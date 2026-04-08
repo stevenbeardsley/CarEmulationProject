@@ -34,8 +34,20 @@ namespace ecm::engine::models
                 std::max(1.0, redlineRpm - idleRpm),
                 0.0, 1.0);
 
-        const auto heatInput =
-            m_heatRate * rpmLoad * throttle;
+        // 1. FIXED: Introduced independent Friction Heat.
+        // We take 30% of your base heat rate and apply it purely based on RPM.
+        // Squaring the rpmLoad (rpmLoad * rpmLoad) means heat spikes dramatically 
+        // as the engine approaches redline, even if the throttle is completely closed.
+        const auto frictionHeat = (m_heatRate * 0.30) * (rpmLoad * rpmLoad);
+
+        // 2. FIXED: Isolated Combustion Heat.
+        // The remaining 70% of your heat rate behaves like your old model, 
+        // requiring both an open throttle and engine speed to generate heat.
+        const auto combustionHeat = (m_heatRate * 0.70) * rpmLoad * throttle;
+
+        // 3. FIXED: Combine the heat sources.
+        // At max RPM and max throttle, this still equals exactly 100% of your original m_heatRate.
+        const auto heatInput = frictionHeat + combustionHeat;
 
         m_tempC += heatInput * dtSeconds;
 

@@ -1,24 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Shapes;
 using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI;
 
 namespace SimulationPlatform.Controls
 {
     public sealed partial class TelemetryChartControl : UserControl
     {
-        // ── Configuration ────────────────────────────────────────────────────
-        private const int MaxPoints = 120;
+        // ── ↓ TUNE THESE TO CONTROL THE GRAPH TIME WINDOW ───────────────────
+        //
+        // MaxPoints — total number of telemetry samples kept in the rolling
+        //             buffer. Each sample = one WebSocket packet.
+        //             More points = longer history visible on the X axis.
+        //             e.g. if packets arrive ~10×/sec:
+        //               300 points ≈ 30 seconds of history
+        //               600 points ≈ 60 seconds of history
+        private const int MaxPoints = 450;
+        //
+        // ── ↑ ────────────────────────────────────────────────────────────────
+
         private const double PadTop = 10;
         private const double PadBot = 10;
-        private const int GridRows = 4;
+        private const int GridRows = 4;   // number of horizontal grid divisions
 
         // ── Persistent canvas children (never removed during redraw) ─────────
         private readonly Polyline _line = new();
@@ -28,6 +37,16 @@ namespace SimulationPlatform.Controls
         private readonly Queue<double> _data = new();
         private string _unit = string.Empty;
 
+        // ── Fixed scale ───────────────────────────────────────────────────────
+        private bool _fixedScale = false;
+        private double _fixedMin = 0;
+        private double _fixedMax = 100;
+
+        // ── Theme-aware colours for grid rules ───────────────────────────────
+        // Pulled once in the constructor; light enough to work on grey.
+        private readonly Color _gridRuleColour = Color.FromArgb(40, 0, 0, 0);
+        private readonly Color _gridLabelColour = Color.FromArgb(100, 0, 0, 0);
+
         public TelemetryChartControl()
         {
             InitializeComponent();
@@ -35,31 +54,53 @@ namespace SimulationPlatform.Controls
             _fill.StrokeThickness = 0;
             ChartCanvas.Children.Add(_fill);
 
-            _line.StrokeThickness = 1.8;
+            _line.StrokeThickness = 2.0;
             _line.StrokeLineJoin = PenLineJoin.Round;
             _line.StrokeStartLineCap = PenLineCap.Round;
             _line.StrokeEndLineCap = PenLineCap.Round;
             ChartCanvas.Children.Add(_line);
         }
 
-        // ── Public API ───────────────────────────────────────────────────────
+        // ── Public API ────────────────────────────────────────────────────────
 
-        public void Configure(string title, Color color, string unit = "")
+        /// <summary>
+        /// Call once after construction to configure appearance and Y-axis range.
+        /// Pass fixedMin/fixedMax to lock the Y axis; omit them for auto-scaling.
+        /// </summary>
+        public void Configure(
+            string title,
+            Color color,
+            string unit = "",
+            double fixedMin = 0,
+            double fixedMax = 0)
         {
             _unit = unit;
 
-            TitleText.Text = title.ToUpperInvariant();
-            UnitText.Text = unit;
+            TitleText.Text = title;          // already uppercase in XAML if preferred,
+            UnitText.Text = unit;           // but left as-is so casing is caller's choice.
 
             var brush = new SolidColorBrush(color);
             ValueText.Foreground = brush;
             _line.Stroke = brush;
-            _fill.Fill = new SolidColorBrush(Color.FromArgb(38, color.R, color.G, color.B));
+
+            // Fill: same hue at ~12% opacity — subtle on a light background.
+            _fill.Fill = new SolidColorBrush(Color.FromArgb(30, color.R, color.G, color.B));
+
+            if (fixedMax > fixedMin)
+            {
+                _fixedScale = true;
+                _fixedMin = fixedMin;
+                _fixedMax = fixedMax;
+
+                // Write static axis labels immediately (visible before first packet)
+                MinText.Text = $"{_fixedMin:0.#} {_unit}";
+                MaxText.Text = $"{_fixedMax:0.#} {_unit}";
+            }
         }
 
         /// <summary>
-        /// Push a new value. Must be called on the UI thread
-        /// (TelemetryWindow marshals via DispatcherQueue).
+        /// Push a new telemetry value. Must be called on the UI thread
+        /// (TelemetryPage marshals via DispatcherQueue).
         /// </summary>
         public void AddDataPoint(double value)
         {
@@ -71,7 +112,7 @@ namespace SimulationPlatform.Controls
             Redraw();
         }
 
-        // ── Drawing ──────────────────────────────────────────────────────────
+        // ── Drawing ───────────────────────────────────────────────────────────
 
         private void ChartCanvas_SizeChanged(object sender, SizeChangedEventArgs e) => Redraw();
 
@@ -80,33 +121,45 @@ namespace SimulationPlatform.Controls
             var w = ChartCanvas.ActualWidth;
             var h = ChartCanvas.ActualHeight;
 
-            if (w < 10 || h < 10 || _data.Count < 2) return;
+            if (w < 10 || h < 10) return;
 
-            var pts = _data.ToArray();
-            var minVal = pts.Min();
-            var maxVal = pts.Max();
+            // Y-axis bounds ───────────────────────────────────────────────────
+            double minVal, maxVal;
+
+            if (_fixedScale)
+            {
+                minVal = _fixedMin;
+                maxVal = _fixedMax;
+            }
+            else
+            {
+                if (_data.Count < 2) return;
+                var pts = _data.ToArray();
+                minVal = pts.Min();
+                maxVal = pts.Max();
+                if (maxVal - minVal < 1.0) { minVal -= 5; maxVal += 5; }
+
+                MinText.Text = $"{minVal:0.#} {_unit}";
+                MaxText.Text = $"{maxVal:0.#} {_unit}";
+            }
+
             var range = maxVal - minVal;
+            if (range <= 0) return;
 
-            if (range < 1.0) { minVal -= 5; maxVal += 5; range = maxVal - minVal; }
-
-            MinText.Text = $"{minVal:0.#} {_unit}";
-            MaxText.Text = $"{maxVal:0.#} {_unit}";
-
-            // ── Remove every dynamic child, keep only _fill and _line ────────
-            // Collect items to remove first to avoid modifying the collection
-            // while iterating.
+            // Remove dynamic children, keep _fill and _line ──────────────────
             var dynamic = ChartCanvas.Children
                 .Where(c => c != _fill && c != _line)
                 .ToList();
             foreach (var item in dynamic)
                 ChartCanvas.Children.Remove(item);
 
-            // ── Grid rules ───────────────────────────────────────────────────
+            // Horizontal grid rules ───────────────────────────────────────────
             var drawH = h - PadTop - PadBot;
             for (int i = 1; i < GridRows; i++)
             {
                 var ratio = i / (double)GridRows;
                 var y = PadTop + drawH * ratio;
+                var gridValue = maxVal - ratio * range;
 
                 var rule = new Line
                 {
@@ -114,25 +167,31 @@ namespace SimulationPlatform.Controls
                     Y1 = y,
                     X2 = w,
                     Y2 = y,
-                    Stroke = new SolidColorBrush(Color.FromArgb(30, 255, 255, 255)),
-                    StrokeThickness = 1
+                    Stroke = new SolidColorBrush(_gridRuleColour),
+                    StrokeThickness = 1,
+                    StrokeDashArray = new DoubleCollection { 4, 4 }  // dashed suits light bg
                 };
 
                 var label = new TextBlock
                 {
-                    Text = $"{maxVal - ratio * range:0.#}",
-                    Foreground = new SolidColorBrush(Color.FromArgb(60, 255, 255, 255)),
-                    FontSize = 8
+                    Text = $"{gridValue:0.#}",
+                    Foreground = new SolidColorBrush(_gridLabelColour),
+                    FontSize = 9
                 };
                 Canvas.SetLeft(label, 4);
-                Canvas.SetTop(label, y - 9);
+                Canvas.SetTop(label, y - 10);
 
-                // Insert behind _fill and _line (index 0)
                 ChartCanvas.Children.Insert(0, label);
                 ChartCanvas.Children.Insert(0, rule);
             }
 
-            // ── Polyline + fill ───────────────────────────────────────────────
+            // Polyline + fill ─────────────────────────────────────────────────
+            if (_data.Count < 2) return;
+
+            var dataArr = _data.ToArray();
+
+            // stepX is based on MaxPoints so the graph scrolls at a consistent
+            // speed regardless of how many samples are currently in the buffer.
             var stepX = w / (MaxPoints - 1.0);
 
             _line.Points.Clear();
@@ -140,20 +199,24 @@ namespace SimulationPlatform.Controls
 
             double firstX = 0, lastX = 0;
 
-            for (int i = 0; i < pts.Length; i++)
+            for (int i = 0; i < dataArr.Length; i++)
             {
-                var x = w - (pts.Length - 1 - i) * stepX;
-                var y = PadTop + drawH * (1.0 - (pts[i] - minVal) / range);
+                var clamped = Math.Clamp(dataArr[i], minVal, maxVal);
+
+                // Newest point always at the right edge; older points to the left.
+                var x = w - (dataArr.Length - 1 - i) * stepX;
+                var y = PadTop + drawH * (1.0 - (clamped - minVal) / range);
 
                 _line.Points.Add(new Point(x, y));
                 _fill.Points.Add(new Point(x, y));
 
                 if (i == 0) firstX = x;
-                if (i == pts.Length - 1) lastX = x;
+                if (i == dataArr.Length - 1) lastX = x;
             }
 
-            _fill.Points.Add(new Point((float)lastX, h - PadBot));
-            _fill.Points.Add(new Point((float)firstX, h - PadBot));
+            // Close the fill polygon along the bottom of the canvas.
+            _fill.Points.Add(new Point(lastX, h - PadBot));
+            _fill.Points.Add(new Point(firstX, h - PadBot));
         }
     }
 }

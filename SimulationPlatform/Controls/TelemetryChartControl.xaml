@@ -9,60 +9,78 @@
     d:DesignHeight="200"
     d:DesignWidth="400">
 
-    <Border Background="#111111" CornerRadius="6" Margin="5">
+    <!--  Outer border gives each chart a clear outline against the grey page  -->
+    <Border BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}"
+            BorderThickness="1"
+            CornerRadius="4"
+            Margin="6"
+            Background="{ThemeResource SystemControlBackgroundAltHighBrush}">
+
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="36"/>
+                <!--  Header: title + live value  -->
+                <RowDefinition Height="44"/>
+                <!--  Chart canvas  -->
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="20"/>
+                <!--  Footer: axis labels  -->
+                <RowDefinition Height="22"/>
             </Grid.RowDefinitions>
 
-            <!--  Header: title left, live value right  -->
-            <Grid Grid.Row="0" Padding="12,0">
-                <TextBlock x:Name="TitleText"
-                           Foreground="#888888"
-                           FontSize="10"
-                           FontWeight="SemiBold"
-                           CharacterSpacing="80"
-                           VerticalAlignment="Center"/>
+            <!--  Thin separator line under the header  -->
+            <Border Grid.Row="0"
+                    BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                    BorderThickness="0,0,0,1"
+                    Padding="12,0">
+                <Grid VerticalAlignment="Center">
 
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Center">
-                    <TextBlock x:Name="ValueText"
-                               FontSize="16"
-                               FontWeight="Bold"/>
-                    <TextBlock x:Name="UnitText"
-                               Foreground="#555555"
-                               FontSize="10"
-                               VerticalAlignment="Bottom"
-                               Margin="3,0,0,2"/>
-                </StackPanel>
-            </Grid>
+                    <!--  Title — larger, themed colour  -->
+                    <TextBlock x:Name="TitleText"
+                               Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"/>
 
-            <!--  Drawing surface  -->
+                    <!--  Live value + unit — right-aligned, coloured by chart  -->
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center">
+                        <TextBlock x:Name="ValueText"
+                                   FontSize="18"
+                                   FontWeight="Bold"/>
+                        <TextBlock x:Name="UnitText"
+                                   Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
+                                   FontSize="11"
+                                   VerticalAlignment="Bottom"
+                                   Margin="3,0,0,2"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!--  Drawing surface — inherits the card background  -->
             <Canvas x:Name="ChartCanvas"
                     Grid.Row="1"
-                    Background="#080808"
+                    Background="Transparent"
                     SizeChanged="ChartCanvas_SizeChanged"/>
 
-            <!--  Footer  -->
-            <Grid Grid.Row="2" Padding="10,0">
-                <TextBlock x:Name="MinText"
-                           Foreground="#333333"
-                           FontSize="8"
-                           VerticalAlignment="Center"/>
-                <TextBlock x:Name="MaxText"
-                           Foreground="#333333"
-                           FontSize="8"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
-                <TextBlock Text="TIME →"
-                           Foreground="#333333"
-                           FontSize="8"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center"/>
-            </Grid>
+            <!--  Footer: min / max / time label  -->
+            <Border Grid.Row="2"
+                    BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                    BorderThickness="0,1,0,0"
+                    Padding="10,0">
+                <Grid VerticalAlignment="Center">
+                    <TextBlock x:Name="MinText"
+                               Foreground="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
+                               FontSize="9"/>
+                    <TextBlock x:Name="MaxText"
+                               Foreground="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
+                               FontSize="9"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="TIME →"
+                               Foreground="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
+                               FontSize="9"
+                               HorizontalAlignment="Right"/>
+                </Grid>
+            </Border>
         </Grid>
     </Border>
 </UserControl>

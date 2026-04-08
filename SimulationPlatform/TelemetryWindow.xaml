@@ -10,6 +10,6 @@
 
 	<!--  The window is intentionally empty except for a Frame.
           All content and logic lives in TelemetryPage.  -->
-	<Frame x:Name="RootFrame" Background="#0D0D0D"/>
+	<Frame x:Name="RootFrame"/>
 
 </Window>

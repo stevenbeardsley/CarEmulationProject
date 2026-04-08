@@ -70,14 +70,6 @@ namespace dashboard
         m_data.m_activeErrors.clear();
     }
 
-    void DashboardDataSource::update(std::int32_t speed, std::int32_t gear, std::int32_t rpm, bool status)
-    {
-	    std::scoped_lock lk(m_mtx);
-        m_data.m_speed = speed;
-        m_data.m_gear = gear;
-        m_data.m_rpm = rpm;
-        m_data.m_status = status;
-    }
 
     UiData DashboardDataSource::snapshot() const
     {

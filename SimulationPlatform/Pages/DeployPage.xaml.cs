@@ -53,6 +53,7 @@ namespace SimulationPlatform.Pages
             !m_connected;
 
         public bool m_selectionEnabled =>
+            DeployingVisibility == Visibility.Collapsed &&
             !m_connected;
         public bool m_undeployButtonEnabled => m_connected;
 
@@ -168,6 +169,7 @@ namespace SimulationPlatform.Pages
             OnPropertyChanged(nameof(DeployingVisibility));
             OnPropertyChanged(nameof(m_deployButtonEnabled));
             OnPropertyChanged(nameof(m_selectOptionTextVisibility));
+            OnPropertyChanged(nameof(m_selectionEnabled));
             var (transmissionId, engineId) = getOptionIds(); 
             var output = await m_deploymentController.Deploy(scriptPath, transmissionId, engineId);
 

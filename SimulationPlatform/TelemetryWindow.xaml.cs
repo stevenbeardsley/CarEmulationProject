@@ -16,7 +16,7 @@ namespace SimulationPlatform
         {
             InitializeComponent();
 
-            Title = "Live Telemetry";
+            Title = "NEON Live Telemetry";
             AppWindow.Resize(new SizeInt32(960, 660));
 
             // Navigate the hosted Frame to the page that owns all the content
