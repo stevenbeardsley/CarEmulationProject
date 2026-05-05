@@ -70,7 +70,6 @@ namespace dashboard
         m_data.m_activeErrors.clear();
     }
 
-
     UiData DashboardDataSource::snapshot() const
     {
 	    std::scoped_lock lk(m_mtx);

@@ -26,6 +26,8 @@ target_link_libraries(
         shared
 )
 
+target_link_options(Ecm PRIVATE --coverage) 
+
 target_include_directories(Ecm PUBLIC
     ${PROJECT_SOURCE_DIR}
 )

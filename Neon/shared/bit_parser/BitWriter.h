@@ -62,8 +62,14 @@ namespace shared::bit_parser
                 const uint8_t mask = bitMaskInByte(bitIndexInByte, bitOrder_);
 
                 uint8_t& dstByte = out_->vec()[byteIndex];
-                if (bit) dstByte |= mask;
-                else     dstByte &= static_cast<uint8_t>(~mask);
+                if (bit)
+                {
+                    dstByte |= mask;
+                }
+                else
+                {
+                    dstByte &= static_cast<uint8_t>(~mask);
+                }
 
                 ++bitPos_;
             }
@@ -72,7 +78,11 @@ namespace shared::bit_parser
         void writeBool(bool b) { writeBits(b ? 1u : 0u, 1); }
 
         void alignToByte(uint8_t padBit = 0) {
-            if (!ok()) return;
+            if (!ok())
+            {
+                return;
+            }
+
             const std::size_t mod = bitPos_ % 8;
             if (mod == 0) return;
             const std::size_t pad = 8 - mod;

@@ -27,7 +27,7 @@ namespace ecm::engine::models
             std::clamp((rpm - idleRpm) / std::max(1.0, maxRpm - idleRpm), 0.0, 1.0);
 
         // Base idle consumption (L/sec)
-        auto burnRate = 0.015 * m_displacementL;   // idle baseline - 0.015 for non demo
+        auto burnRate = 0.015 * m_displacementL;   
         // Load component
         burnRate += 0.15 * m_displacementL * throttle01;
         // RPM influence

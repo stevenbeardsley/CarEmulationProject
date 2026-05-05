@@ -47,8 +47,6 @@ namespace shared::can
     void Receiver::handleDatagram(const uint8_t* data, std::size_t n, const udp::endpoint& sender) const
     {
         if (n == 0) return; // Ignore empty packets
-
-
         {
 			std::vector<std::uint8_t> rawData(data, data + n);
             std::lock_guard<std::mutex> lock(inboxMutex_);
@@ -81,7 +79,6 @@ namespace shared::can
                 ec
             );
 
-            // Check if we were told to stop while waiting for a packet
             if (!running_)
                 break;
 

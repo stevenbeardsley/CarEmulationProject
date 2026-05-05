@@ -15,8 +15,8 @@
 namespace shared::bit_parser
 {
     inline uint8_t bitMaskInByte(uint8_t bitIndex0to7, BitOrder bo) {
-        // For MsbFirst: bitIndex 0 -> mask 0x80, bitIndex 7 -> mask 0x01
-        // For LsbFirst: bitIndex 0 -> mask 0x01, bitIndex 7 -> mask 0x80
+        // MsbFirst: bitIndex 0 -> mask 0x80, bitIndex 7 -> mask 0x01
+        // LsbFirst: bitIndex 0 -> mask 0x01, bitIndex 7 -> mask 0x80
         return (bo == BitOrder::MsbFirst)
             ? static_cast<uint8_t>(0x80u >> bitIndex0to7)
             : static_cast<uint8_t>(0x01u << bitIndex0to7);

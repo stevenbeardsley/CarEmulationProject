@@ -20,6 +20,7 @@ target_link_libraries(
         shared
         Transmission
 )
+target_link_options(Tcm PRIVATE --coverage) 
 
 target_include_directories(Tcm PUBLIC
     ${PROJECT_SOURCE_DIR}

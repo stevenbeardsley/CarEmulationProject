@@ -14,6 +14,7 @@
 #include "ecm/engine/Engine.h"
 #include "shared/config/Config.h"
 
+#include <cmath>
 #include <atomic>
 #include <csignal>
 #include <thread>

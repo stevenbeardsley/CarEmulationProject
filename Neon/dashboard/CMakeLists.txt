@@ -23,6 +23,8 @@ target_include_directories(Dashboard PUBLIC
     ${PROJECT_SOURCE_DIR}
 )
 
+target_link_options(Dashboard PRIVATE --coverage) 
+
 target_link_libraries(
     Dashboard
     PUBLIC 

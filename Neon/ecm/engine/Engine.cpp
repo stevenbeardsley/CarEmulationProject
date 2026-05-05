@@ -36,13 +36,6 @@ namespace ecm::engine
             cfg.m_gears = static_cast<int>(cfg.m_gearRatios.size());
         }
 
-        // Defensive: remove non-positive ratios
-        for (double& r : cfg.m_gearRatios)
-        {
-            r = std::max(r, 0.01);
-        }
-
-        // reverse can be negative in many configs; we keep it as-is
         if (std::abs(cfg.m_reverseRatio) < 0.01)
             cfg.m_reverseRatio = -3.0;
 
@@ -169,8 +162,6 @@ namespace ecm::engine
         if (gear == -1)
         {
             m_gearRatio = m_transCfg.m_reverseRatio;
-            // For this model we still don't simulate negative vehicle speed;
-            // reverse ratio is mainly for displaying RPM linkage if you later add reverse motion.
             m_cv.notify_all();
             return;
         }
@@ -329,7 +320,6 @@ namespace ecm::engine
         const double idleRpm = static_cast<double>(m_engineCfg.idle_rpm);
         const double redlineRpm = static_cast<double>(m_engineCfg.max_rpm);
 
-        // --- STALL LOGIC: Mechanical Over-rev ---
         // If RPM exceeds redline by 10%, the engine blows/stalls
         const double overRevThreshold = redlineRpm * 1.10;
         if (m_rpm > overRevThreshold)
@@ -394,12 +384,16 @@ namespace ecm::engine
         }
         else
         {
-            // In-gear: rpm is linked to wheel speed
+
+            // In-gear: rpm is linked to wheel speed, but smoothed to avoid instant snap
             const double rpmFromSpeed = wheelRpm * m_gearRatio * m_finalDrive;
             const double floorRpm = canRun ? idleRpm : 0.0;
+            const double targetRpm = std::max(floorRpm, rpmFromSpeed);
 
-            // Allow RPM to physically exceed redline (which triggers the stall check above)
-            m_rpm = std::max(floorRpm, rpmFromSpeed);
+            // Tune kRpmSlewRate to taste (e.g. 800–1500 RPM/s feels natural)
+            constexpr double kRpmSlewRate = 1800.0;
+            const double maxDelta = kRpmSlewRate * dtSeconds;
+            m_rpm += clampd(targetRpm - m_rpm, -maxDelta, maxDelta);
 
             // Cap the RPM used for torque calculation so your curve doesn't break
             const double generatingRpm = std::min(m_rpm, redlineRpm);
@@ -417,14 +411,16 @@ namespace ecm::engine
 
                 netForce = std::min(netForce, 0.0);
             }
-            else if (m_effectiveThrottle < 0.05 && rpmFromSpeed > idleRpm)
+            else if (rpmFromSpeed > idleRpm && m_effectiveThrottle < 0.15)
             {
-                netForce -= (rpmFromSpeed * 0.1);
+                // Ramps from 0 (at 15% throttle) to full (at 0% throttle)
+                const double liftFraction = 1.0 - (m_effectiveThrottle / 0.15);
+                const double engineBrakeFactor = liftFraction * 0.03;
+                netForce -= (rpmFromSpeed * engineBrakeFactor);
             }
-
             // Severe mechanical drag if the engine is completely dead/blown
             if (!canRun) {
-                netForce -= 250.0; // Acts like a heavy mechanical brake
+                netForce -= 250.0; // Apply a force, emulating a heavy mechanical brake
             }
 
             m_accelMps2 = netForce / std::max(1.0, m_massKg);

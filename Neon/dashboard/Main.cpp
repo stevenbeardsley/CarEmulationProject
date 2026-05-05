@@ -92,13 +92,13 @@ int main()
 {
     try
     {
-        // === Logging & Signals ===
+        // Logging & Signals 
         LogFile::instance().setLogFile("dashboard.log");
         LogFile::instance().setLevel(LogLevel::DEBUG);
         std::signal(SIGINT, signalHandler);
         std::signal(SIGTERM, signalHandler);
 
-        // === Config ===
+        // Config 
         shared::config::Config config;
         config.LoadFromFile("config.json");
         const auto& engineConfig = config.getEngineConfig();
@@ -110,13 +110,10 @@ int main()
         dashboard::Process process;
         std::thread dashboardProcessThread([&process]() { process.run(); });
 
-        // === CAN Shared State ===
-        // These are passed by reference to the Receiver
         std::mutex inboxMutex;
         std::condition_variable inboxCv;
         std::queue<std::vector<std::uint8_t>> inbox;
 
-        // === CAN Bus & Receiver ===
         shared::can::Bus canBus(0, 15000);
         (void)canBus.addPeer("ecm", 15000);
         (void)canBus.addPeer("tcm", 15000);
@@ -128,7 +125,7 @@ int main()
             canRx.run();
             });
 
-        // === CAN Consumer Thread ===
+        // CAN Consumer Thread 
         std::thread canProcessThread([&]()
             {
                 while (running)
@@ -146,7 +143,6 @@ int main()
 
                     if (rawData.empty()) continue;
 
-                    // Peek metadata with BitReader
                     shared::bit_parser::BitReader r(
                         shared::bit_parser::Span<const std::uint8_t>(rawData.data(), rawData.size())
                     );
@@ -198,7 +194,7 @@ int main()
                 }
             });
 
-        // === Command & WebSocket Servers ===
+        // Command & WebSocket Servers 
         net::io_context cmdIoc; 
         dashboard::CommandHttpServer commandServer{ cmdIoc, running, 8081, canBus };
         std::thread commandThread([&]() { commandServer.run(); });
