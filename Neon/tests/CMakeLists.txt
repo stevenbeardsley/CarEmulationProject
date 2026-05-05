@@ -42,10 +42,12 @@ gtest_discover_tests(BitParserTests)
 # CAN TESTS 
 # ==========================================
 set(test_can_SOURCE
+    TestBus.cpp
     TestErrorMessage.cpp
     TestGearChangeMessage.cpp
     TestStatusMessage.cpp
     TestThrottleMessage.cpp
+    TestReceiver.cpp
 )
 
 add_executable(CanTests 

@@ -26,6 +26,10 @@ add_subdirectory(tcm/transmission)
 
 add_subdirectory(dashboard)
 
+if(ENABLE_COVERAGE)
+    add_compile_options(--coverage -O0 -g)
+    add_link_options(--coverage)
+endif()
 add_subdirectory(shared)
 add_subdirectory(shared/bit_parser)
 add_subdirectory(shared/can)
