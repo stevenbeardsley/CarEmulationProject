@@ -12,16 +12,10 @@
 
 #include "Receiver.h"
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Type aliases matching the production code
-// ─────────────────────────────────────────────────────────────────────────────
 
 using InboxQueue = std::queue<std::vector<std::uint8_t>>;
 using udp = boost::asio::ip::udp;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────────────────────────────────────
 
 /// Sends a UDP datagram to 127.0.0.1:port from an ephemeral source socket.
 static void sendTo(unsigned short port, const std::vector<uint8_t>& payload)
@@ -58,9 +52,6 @@ static bool joinWithTimeout(std::thread& t,
     return done.load();
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Fixture
-// ─────────────────────────────────────────────────────────────────────────────
 
 class ReceiverTest : public ::testing::Test
 {
@@ -92,9 +83,6 @@ protected:
     }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// stop
-// ─────────────────────────────────────────────────────────────────────────────
 
 TEST_F(ReceiverTest, Stop_DoesNotThrow)
 {
@@ -109,9 +97,6 @@ TEST_F(ReceiverTest, Stop_IsIdempotent)
     EXPECT_NO_THROW(receiver.stop());
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// run — happy-path delivery
-// ─────────────────────────────────────────────────────────────────────────────
 
 TEST_F(ReceiverTest, Run_ReceivesSingleDatagram)
 {
@@ -187,10 +172,6 @@ TEST_F(ReceiverTest, Run_SingleBytePayloadIsQueued)
     stopAndJoin(receiver, runThread);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// run — filtering behaviour
-// ─────────────────────────────────────────────────────────────────────────────
-
 TEST_F(ReceiverTest, Run_EmptyUdpPacketIsNotQueued)
 {
     constexpr uint16_t port = 46210;
@@ -230,9 +211,6 @@ TEST_F(ReceiverTest, Run_NotifiesConditionVariableForEachDatagram)
     stopAndJoin(receiver, runThread);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// run — lifecycle / shutdown
-// ─────────────────────────────────────────────────────────────────────────────
 
 TEST_F(ReceiverTest, Run_ExitsAfterStop)
 {

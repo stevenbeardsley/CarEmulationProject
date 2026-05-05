@@ -10,9 +10,6 @@
 
 #include "shared/can/Bus.h"
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────────────────────────────────────
 
 using udp = boost::asio::ip::udp;
 
@@ -60,16 +57,13 @@ timedReceive(udp::socket& sock,
             continue;
         }
 
-        break; // real error
+        break; 
     }
 
     sock.non_blocking(false);
     return {};
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Fixture
-// ─────────────────────────────────────────────────────────────────────────────
 
 class BusTest : public ::testing::Test
 {
@@ -81,9 +75,6 @@ protected:
     boost::asio::io_context receiverIoc_;
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Constructor / getLocalPort
-// ─────────────────────────────────────────────────────────────────────────────
 
 TEST_F(BusTest, ConstructorBindsToRequestedPort)
 {
@@ -111,9 +102,6 @@ TEST_F(BusTest, TwoBusesOnDifferentPortsBothBind)
     EXPECT_EQ(bus2.getLocalPort(), 45202u);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// addPeer
-// ─────────────────────────────────────────────────────────────────────────────
 
 TEST_F(BusTest, AddPeerLocalhostReturnsTrue)
 {
@@ -140,10 +128,6 @@ TEST_F(BusTest, AddPeerOneArgOverloadUsesDefaultPort)
 
 TEST_F(BusTest, AddPeerDeduplicatesSameEndpoint)
 {
-    // We cannot directly inspect the private peers_ vector, so we verify the
-    // observable behaviour: send() should reach the peer exactly once even if
-    // addPeer was called twice with the same host:port.
-
     auto [recvSock, recvPort] = makeReceiverSocket(receiverIoc_);
 
     shared::can::Bus bus(45213, kDefaultPeerPort);
@@ -170,10 +154,6 @@ TEST_F(BusTest, AddPeerWithUnresolvableHostReturnsFalse)
     // This hostname is guaranteed not to resolve per RFC 2606.
     EXPECT_FALSE(bus.addPeer("this.host.does.not.exist.invalid", 9999));
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// send
-// ─────────────────────────────────────────────────────────────────────────────
 
 TEST_F(BusTest, SendDeliversDatgramToSinglePeer)
 {
@@ -266,10 +246,6 @@ TEST_F(BusTest, SendIsIdempotentAcrossMultipleCalls)
     EXPECT_EQ(recv1, payload);
     EXPECT_EQ(recv2, payload);
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Thread safety — send and addPeer called concurrently must not crash
-// ─────────────────────────────────────────────────────────────────────────────
 
 TEST_F(BusTest, ConcurrentSendAndAddPeerDoNotRaceOrCrash)
 {
