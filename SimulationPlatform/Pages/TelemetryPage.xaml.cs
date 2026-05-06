@@ -10,7 +10,6 @@ namespace SimulationPlatform.Pages
 {
     public sealed partial class TelemetryPage : Page
     {
-        // ── Palette ───────────────────────────────────────────────────────────
         private static readonly Color ColourSpeed = Color.FromArgb(255, 0, 200, 255); // #00C8FF
         private static readonly Color ColourRpm = Color.FromArgb(255, 255, 107, 53);  // #FF6B35
         private static readonly Color ColourTemp = Color.FromArgb(255, 68, 214, 44);  // #44D62C
@@ -31,7 +30,6 @@ namespace SimulationPlatform.Pages
             FuelChart.Configure("Fuel", ColourFuel, "%", 0, 100);
         }
 
-        // ── Page lifecycle ────────────────────────────────────────────────────
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
@@ -45,8 +43,6 @@ namespace SimulationPlatform.Pages
             base.OnNavigatedFrom(e);
             _model.m_webSocketController.CarDataReceived -= OnCarDataReceived;
         }
-
-        // ── Data handler ──────────────────────────────────────────────────────
 
         private void OnCarDataReceived(CarData data)
         {

@@ -8,8 +8,6 @@
     mc:Ignorable="d"
     Title="Live Telemetry">
 
-	<!--  The window is intentionally empty except for a Frame.
-          All content and logic lives in TelemetryPage.  -->
 	<Frame x:Name="RootFrame"/>
 
 </Window>

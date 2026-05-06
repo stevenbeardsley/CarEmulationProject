@@ -6,15 +6,11 @@
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
-            <!-- Header -->
             <RowDefinition Height="Auto"/>
-            <!-- Config area grows/shrinks -->
             <RowDefinition Height="*"/>
-            <!-- Deploy/status -->
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- HEADER -->
         <StackPanel Grid.Row="0" Margin="20,16,20,0" Spacing="4">
             <TextBlock Text="Deploy Page"
                        HorizontalAlignment="Left"
@@ -25,7 +21,6 @@
                        Foreground="DarkGray"/>
         </StackPanel>
 
-        <!-- MAIN CONTENT: scrolls if window is small -->
         <ScrollViewer Grid.Row="1"
                       Margin="20,12,20,0"
                       HorizontalScrollBarVisibility="Disabled"

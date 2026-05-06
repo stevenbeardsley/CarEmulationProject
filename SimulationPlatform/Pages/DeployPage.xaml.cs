@@ -153,9 +153,6 @@ namespace SimulationPlatform.Pages
         {
             var scriptPath = "/mnt/c/Users/swbea/source/repos/CarEmulationProject/Neon/clean_docker.sh";
             var output = await m_deploymentController.Undeploy(scriptPath);
-            // Depending on how your model is architected, undeploying here should 
-            // trigger the m_model.Disconnected event automatically. If it doesn't, 
-            // you might need to manually tell the model to disconnect its websocket.
             if (output.ExitCode == 0)
             {
                 await m_model.m_webSocketController.DisconnectAsync();

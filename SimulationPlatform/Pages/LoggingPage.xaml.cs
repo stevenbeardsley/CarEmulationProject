@@ -180,7 +180,6 @@ namespace SimulationPlatform.Pages
         {
             DispatcherQueue.TryEnqueue(() =>
             {
-                // 1. Update standard telemetry
                 Speed = carData.Speed.ToString();
                 Status = carData.Status.ToString();
                 Rpm = carData.Rpms.ToString();
@@ -189,13 +188,10 @@ namespace SimulationPlatform.Pages
                 Fuel = carData.Fuel.ToString();
                 Gear = carData.Gear.ToString();
 
-                // 2. Get snapshot of current errors (Dictionary<int, string>)
                 var latestErrors = carData.Errors;
 
-                // 3. REMOVE: Remove errors that are no longer present
                 for (var i = ActiveErrors.Count - 1; i >= 0; i--)
                 {
-                    // Parse the code back to int to compare with dictionary keys
                     if (int.TryParse(ActiveErrors[i].Code, out var existingCode))
                     {
                         if (!latestErrors.ContainsKey(existingCode))
@@ -205,7 +201,6 @@ namespace SimulationPlatform.Pages
                     }
                 }
 
-                // 4. ADD/UPDATE: Add new or update existing
                 foreach (var kvp in latestErrors)
                 {
                     var stringCode = kvp.Key.ToString();
@@ -215,13 +210,10 @@ namespace SimulationPlatform.Pages
                     {
                         if (existing == null)
                         {
-                            // 1. Create the Model (The data container)
                             var model = new ErrorMessage(kvp.Key, kvp.Value);
 
-                            // 2. Create the ViewModel (The UI wrapper)
                             var vm = new ErrorViewModel(model);
 
-                            // 3. Add to the collection
                             ActiveErrors.Add(vm);
                         }
                     }

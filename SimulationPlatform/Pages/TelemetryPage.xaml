@@ -8,16 +8,11 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-	<!--  No Background set here — inherits the default WinUI 3 system grey
-          (ApplicationPageBackgroundThemeBrush) so the window looks native.  -->
 
 	<Grid Padding="8">
 		<Grid.RowDefinitions>
-			<!--  Toolbar  -->
 			<RowDefinition Height="Auto"/>
-			<!--  Top row of charts  -->
 			<RowDefinition Height="*"/>
-			<!--  Bottom row of charts  -->
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
 		<Grid.ColumnDefinitions>
@@ -25,7 +20,6 @@
 			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
 
-		<!-- ── Toolbar ───────────────────────────────────────────────────── -->
 		<Border Grid.Row="0" Grid.ColumnSpan="2"
                 BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
                 BorderThickness="1"
@@ -63,13 +57,11 @@
 			</Grid>
 		</Border>
 
-		<!-- ── Row 1: Speed | RPM ────────────────────────────────────────── -->
 		<controls:TelemetryChartControl x:Name="SpeedChart"
                                         Grid.Row="1" Grid.Column="0"/>
 		<controls:TelemetryChartControl x:Name="RpmChart"
                                         Grid.Row="1" Grid.Column="1"/>
 
-		<!-- ── Row 2: Engine Temp | Fuel ─────────────────────────────────── -->
 		<controls:TelemetryChartControl x:Name="TempChart"
                                         Grid.Row="2" Grid.Column="0"/>
 		<controls:TelemetryChartControl x:Name="FuelChart"

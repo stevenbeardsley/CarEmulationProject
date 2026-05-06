@@ -216,7 +216,6 @@ namespace SimulationPlatform.Pages
                 StartLaneScrollIfNeeded();     // begins storyboard controllably once
                 UpdateRoadScrollSpeed();       // applies correct ratio/pause/resume
 
-                // Draw RPM dial once XAML is ready (uses current model value)
                 UpdateRpmGauge(App.m_model.m_carData.Rpms);
                 UpdateErrorList(App.m_model.m_carData.Errors);
             };
@@ -269,17 +268,6 @@ namespace SimulationPlatform.Pages
                 System.Diagnostics.Debug.WriteLine(ex.Message);
             }
         }
-
-        private void Redeploy_Click(object sender, RoutedEventArgs e)
-        {
-            // TODO: Run clean script then run deploy script
-        }
-
-        private void Ignition_Click(object sender, RoutedEventArgs e)
-        {
-            // TODO: Maybe implement, could just make this an undeploy 
-        }
-
 
         private void UpdateCarData(CarData carData)
         {
@@ -372,8 +360,6 @@ namespace SimulationPlatform.Pages
         private void BrakeSlider_PointerCaptureLost(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
             => BrakeSelected();
 
-        // Assuming you'll add a method like this to handle the final selection, 
-        // similar to your accelerationSelected() method:
         private async void BrakeSelected()
         {
             try
@@ -459,7 +445,6 @@ namespace SimulationPlatform.Pages
         {
             if (LaneScrollStoryboard == null) return;
 
-            // ensure started once (in case speed arrives after load)
             StartLaneScrollIfNeeded();
 
             if (!_laneScrollStarted) return;
@@ -479,7 +464,6 @@ namespace SimulationPlatform.Pages
 
         // =========================
         // RPM DIAL helpers
-        // (expects these XAML names exist: RpmTrackPath, RpmRedlinePath, RpmValuePath, RpmNeedleRotate)
         // =========================
         private void UpdateRpmGauge(double rpmValue)
         {

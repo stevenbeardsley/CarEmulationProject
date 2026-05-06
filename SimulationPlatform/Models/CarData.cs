@@ -47,24 +47,20 @@ namespace SimulationPlatform.Models
 
             lock (_lock)
             {
-                // 1. Get incoming codes as a HashSet for O(1) lookup
                 var incomingCodes = incomingErrors.Select(e => e.Code).ToHashSet();
 
-                // 2. Remove errors that are no longer present in the JSON
                 var codesToRemove = _errors.Keys.Where(code => !incomingCodes.Contains(code)).ToList();
                 foreach (var code in codesToRemove)
                 {
                     _errors.Remove(code);
                 }
 
-                // 3. Add only the new errors that don't exist in our dictionary yet
                 foreach (var incoming in incomingErrors)
                 {
                     if (!_errors.ContainsKey(incoming.Code))
                     {
                         _errors.Add(incoming.Code, incoming.Text);
                     }
-                    // Optional: Update text if the message changed but code remained same
                     else if (_errors[incoming.Code] != incoming.Text)
                     {
                         _errors[incoming.Code] = incoming.Text;

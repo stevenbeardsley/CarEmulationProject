@@ -13,37 +13,22 @@ namespace SimulationPlatform.Controls
 {
     public sealed partial class TelemetryChartControl : UserControl
     {
-        // ── ↓ TUNE THESE TO CONTROL THE GRAPH TIME WINDOW ───────────────────
-        //
-        // MaxPoints — total number of telemetry samples kept in the rolling
-        //             buffer. Each sample = one WebSocket packet.
-        //             More points = longer history visible on the X axis.
-        //             e.g. if packets arrive ~10×/sec:
-        //               300 points ≈ 30 seconds of history
-        //               600 points ≈ 60 seconds of history
         private const int MaxPoints = 450;
-        //
-        // ── ↑ ────────────────────────────────────────────────────────────────
-
+        
         private const double PadTop = 10;
         private const double PadBot = 10;
         private const int GridRows = 4;   // number of horizontal grid divisions
 
-        // ── Persistent canvas children (never removed during redraw) ─────────
         private readonly Polyline _line = new();
         private readonly Polygon _fill = new();
 
-        // ── Data ─────────────────────────────────────────────────────────────
         private readonly Queue<double> _data = new();
         private string _unit = string.Empty;
-
-        // ── Fixed scale ───────────────────────────────────────────────────────
+        
         private bool _fixedScale = false;
         private double _fixedMin = 0;
         private double _fixedMax = 100;
 
-        // ── Theme-aware colours for grid rules ───────────────────────────────
-        // Pulled once in the constructor; light enough to work on grey.
         private readonly Color _gridRuleColour = Color.FromArgb(40, 0, 0, 0);
         private readonly Color _gridLabelColour = Color.FromArgb(100, 0, 0, 0);
 
@@ -61,8 +46,6 @@ namespace SimulationPlatform.Controls
             ChartCanvas.Children.Add(_line);
         }
 
-        // ── Public API ────────────────────────────────────────────────────────
-
         /// <summary>
         /// Call once after construction to configure appearance and Y-axis range.
         /// Pass fixedMin/fixedMax to lock the Y axis; omit them for auto-scaling.
@@ -76,14 +59,13 @@ namespace SimulationPlatform.Controls
         {
             _unit = unit;
 
-            TitleText.Text = title;          // already uppercase in XAML if preferred,
-            UnitText.Text = unit;           // but left as-is so casing is caller's choice.
+            TitleText.Text = title;          
+            UnitText.Text = unit;           
 
             var brush = new SolidColorBrush(color);
             ValueText.Foreground = brush;
             _line.Stroke = brush;
 
-            // Fill: same hue at ~12% opacity — subtle on a light background.
             _fill.Fill = new SolidColorBrush(Color.FromArgb(30, color.R, color.G, color.B));
 
             if (fixedMax > fixedMin)
@@ -112,7 +94,6 @@ namespace SimulationPlatform.Controls
             Redraw();
         }
 
-        // ── Drawing ───────────────────────────────────────────────────────────
 
         private void ChartCanvas_SizeChanged(object sender, SizeChangedEventArgs e) => Redraw();
 
@@ -123,7 +104,6 @@ namespace SimulationPlatform.Controls
 
             if (w < 10 || h < 10) return;
 
-            // Y-axis bounds ───────────────────────────────────────────────────
             double minVal, maxVal;
 
             if (_fixedScale)
@@ -146,14 +126,12 @@ namespace SimulationPlatform.Controls
             var range = maxVal - minVal;
             if (range <= 0) return;
 
-            // Remove dynamic children, keep _fill and _line ──────────────────
             var dynamic = ChartCanvas.Children
                 .Where(c => c != _fill && c != _line)
                 .ToList();
             foreach (var item in dynamic)
                 ChartCanvas.Children.Remove(item);
 
-            // Horizontal grid rules ───────────────────────────────────────────
             var drawH = h - PadTop - PadBot;
             for (int i = 1; i < GridRows; i++)
             {
@@ -185,7 +163,6 @@ namespace SimulationPlatform.Controls
                 ChartCanvas.Children.Insert(0, rule);
             }
 
-            // Polyline + fill ─────────────────────────────────────────────────
             if (_data.Count < 2) return;
 
             var dataArr = _data.ToArray();

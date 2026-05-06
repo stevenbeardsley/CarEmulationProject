@@ -78,11 +78,6 @@ namespace SimulationPlatform.Models
 
         public CarData ToCarData()
         {
-            //var errors = new List<ErrorMessage>();
-            //foreach (var msg in Errors)
-            //{
-            //    errors.Add(new ErrorMessage(msg.Code, msg.Text));
-            //}
             return new CarData(Speed, Gear, Rpms, MaxRpms, EngineTemp, Fuel, Status, Errors);
         }
     }
