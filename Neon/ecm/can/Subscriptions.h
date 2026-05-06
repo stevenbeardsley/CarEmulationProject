@@ -6,7 +6,6 @@
 
 namespace ecm::can
 {
-// TODO: remove this(?)
 
 constexpr std::array<::shared::can::MessageType, 3> subscriptions = {
     ::shared::can::MessageType::CurrentGear,
@@ -14,6 +13,5 @@ constexpr std::array<::shared::can::MessageType, 3> subscriptions = {
     ::shared::can::MessageType::RPM
 };
 
-// TODO: implement isSubscribed function 
 }
 #endif 

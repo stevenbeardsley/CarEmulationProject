@@ -47,7 +47,7 @@ namespace ecm::engine
 
         // Fuel system 
         [[nodiscard]] double getFuelPercentage() const;
-        [[nodiscard]] bool isOutOfFuel() const; // TODO: Use 
+        [[nodiscard]] bool isOutOfFuel() const; 
 
     private:
         void runLoop();

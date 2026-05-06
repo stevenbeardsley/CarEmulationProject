@@ -11,9 +11,6 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 include(GoogleTest)
 
-# ==========================================
-# BIT PARSER TESTS 
-# ==========================================
 set(test_bit_parser_SOURCE
     TestBitParser.cpp
 )
@@ -38,9 +35,6 @@ set_target_properties(BitParserTests PROPERTIES FOLDER "tests")
 gtest_discover_tests(BitParserTests)
 
 
-# ==========================================
-# CAN TESTS 
-# ==========================================
 set(test_can_SOURCE
     TestBus.cpp
     TestErrorMessage.cpp
@@ -70,9 +64,6 @@ set_target_properties(CanTests PROPERTIES FOLDER "tests")
 gtest_discover_tests(CanTests)
 
 
-# ==========================================
-# CONFIG TESTS
-# ==========================================
 set(test_config_SOURCE
     TestConfig.cpp
 )
@@ -97,9 +88,7 @@ set_target_properties(ConfigTests PROPERTIES FOLDER "tests")
 gtest_discover_tests(ConfigTests)
 
 
-# ==========================================
 # GCOV COVERAGE FLAGS
-# ==========================================
 # If coverage is enabled, apply the necessary compiler and linker flags 
 # to all test targets so they can properly interact with gcov.
 if(ENABLE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")

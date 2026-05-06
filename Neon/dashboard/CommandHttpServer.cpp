@@ -55,14 +55,12 @@ void CommandHttpServer::handleSession(tcp::socket socket) const
     {
         beast::flat_buffer buffer;
 
-        // Read exactly one HTTP request then respond (keep it simple)
         http::request<http::string_body> req;
         http::read(socket, buffer, req);
 
         auto res = makeResponse(req);
         http::write(socket, res);
 
-        // Close socket politely (since we’re not doing keep-alive)
         beast::error_code ec;
         socket.shutdown(tcp::socket::shutdown_send, ec);
     }
@@ -184,7 +182,6 @@ http::response<http::string_body> CommandHttpServer::makeResponse(const http::re
 std::pair<Command, int> CommandHttpServer::parseSingleCommandJson(const std::string& json)
 {
     // Expected format: {"key": value}
-
     const std::size_t keyBegin = json.find('"') + 1;
     const std::size_t keyEnd = json.find('"', keyBegin);
 

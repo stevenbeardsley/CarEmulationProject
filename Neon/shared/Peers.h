@@ -12,5 +12,5 @@ const std::array<std::string, 3> peers
         "dashboard"
     };
 
-} // TODO: Remove (?)
+} 
 #endif 

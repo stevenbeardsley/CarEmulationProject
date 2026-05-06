@@ -395,7 +395,7 @@ namespace ecm::engine
             const double maxDelta = kRpmSlewRate * dtSeconds;
             m_rpm += clampd(targetRpm - m_rpm, -maxDelta, maxDelta);
 
-            // Cap the RPM used for torque calculation so your curve doesn't break
+            // Cap the RPM used for torque calculation 
             const double generatingRpm = std::min(m_rpm, redlineRpm);
             const double engTorque = torqueAtRpmNm(generatingRpm) * m_effectiveThrottle;
             const double wheelTorque = engTorque * m_gearRatio * m_finalDrive * m_drivetrainEff;

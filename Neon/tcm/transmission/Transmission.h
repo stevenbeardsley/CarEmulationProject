@@ -21,7 +21,6 @@ public:
 	
 	[[nodiscard]]
 	std::uint32_t getGear() const;
-	// TODO: Implement more tricky physics in this class as the actual transmission "box"
 private:
 	mutable std::mutex m_lock;
 	std::uint32_t m_gear{ 0 };

@@ -90,10 +90,10 @@ namespace dashboard
             << "\"fuel\":" << d.m_fuel << ","
             << "\"errors\": [";
         for (size_t i = 0; i < d.m_activeErrors.size(); ++i) {
-            oss << "{" // Start the error object
+            oss << "{" 
                 << "\"code\":" << static_cast<std::int32_t>(d.m_activeErrors[i].m_code) << ","
                 << "\"msg\":\"" << d.m_activeErrors[i].m_message << "\""
-                << "}"; // End the error object
+                << "}"; 
 
             if (i < d.m_activeErrors.size() - 1)
             {

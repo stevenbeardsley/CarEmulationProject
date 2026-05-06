@@ -43,8 +43,6 @@ void LogFile::log(const LogLevel level, const std::string& message) const
 
     std::scoped_lock lock(mutex_);
 
-    // 1) Docker logs path (stdout/stderr)
-    // Use stderr for errors, stdout otherwise.
     if (level >= LogLevel::ERROR)
     {
         std::cerr << line;

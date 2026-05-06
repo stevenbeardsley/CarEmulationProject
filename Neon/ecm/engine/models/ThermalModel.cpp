@@ -4,7 +4,7 @@
 
 namespace ecm::engine::models
 {
-    // Initialize the engine at ambient temperature, not overheating
+    // Initialize the engine at ambient temperature
     ThermalModel::ThermalModel(const double ambientC, const double heatRate, const double coolRate, double overheatC)
         : m_ambientC(ambientC),
         m_heatRate(heatRate),

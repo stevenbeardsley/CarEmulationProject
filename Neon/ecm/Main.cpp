@@ -55,7 +55,7 @@ int main() {
     shared::can::Receiver canRx(running, 15000, inbox, m, cv);
 
     shared::can::Bus canTx(0, 15000);
-    (void)canTx.addPeer("dashboard", 15000); // TODO: Use the return value
+    (void)canTx.addPeer("dashboard", 15000); 
     (void)canTx.addPeer("tcm", 15000);
 
     shared::config::Config config;
