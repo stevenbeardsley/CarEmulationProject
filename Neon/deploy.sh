@@ -5,7 +5,7 @@ set -euo pipefail
 OS_TYPE="$(uname -s)"
 case "$OS_TYPE" in
   Linux*)   PLATFORM="linux"; EXEC_EXT="";;
-  Darwin*)  PLATFORM="mac";   EXEC_EXT="";;   # if you ever run on macOS
+  Darwin*)  PLATFORM="mac";   EXEC_EXT="";;   
   MINGW*|MSYS*|CYGWIN*) PLATFORM="win"; EXEC_EXT=".exe";;
   *)        PLATFORM="unknown"; EXEC_EXT="";;
 esac

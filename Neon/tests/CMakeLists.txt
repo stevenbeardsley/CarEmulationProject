@@ -5,7 +5,6 @@ FetchContent_Declare(
   URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
 )
 
-# Windows: avoid CRT mismatch issues
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(googletest)
@@ -88,11 +87,7 @@ set_target_properties(ConfigTests PROPERTIES FOLDER "tests")
 gtest_discover_tests(ConfigTests)
 
 
-# GCOV COVERAGE FLAGS
-# If coverage is enabled, apply the necessary compiler and linker flags 
-# to all test targets so they can properly interact with gcov.
 if(ENABLE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    # A list of all your test executables
     set(ALL_TEST_TARGETS BitParserTests CanTests ConfigTests)
     
     foreach(TEST_TARGET IN LISTS ALL_TEST_TARGETS)

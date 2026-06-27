@@ -197,7 +197,6 @@ TEST(ConfigTests, LoadFromFile_ThrowsOnGearRatiosCountMismatch)
 
     shared::config::Config cfg;
 
-    // your code explicitly throws std::runtime_error for this mismatch
     EXPECT_THROW(cfg.LoadFromFile(p.string()), std::runtime_error);
 
     std::error_code ec;

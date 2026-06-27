@@ -70,7 +70,6 @@ def main():
 
         "--filter", ".*shared.*",
 
-        # Excludes ensure nothing outside shared/ sneaks in
         "--exclude", ".*/tests/.*",
         "--exclude", ".*\\\\tests\\\\.*",   # catches backslash variant
         "--exclude", ".*/tcm/.*",
